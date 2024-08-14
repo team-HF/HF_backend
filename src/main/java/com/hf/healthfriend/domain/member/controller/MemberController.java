@@ -6,6 +6,7 @@ import com.hf.healthfriend.global.spec.ApiBasicResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +20,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
 
     private final MemberService memberService;
+
+    @GetMapping("/reissue")
+    public ResponseEntity<ApiBasicResponse> reissue(
+            @CookieValue(value = "Authorization-refresh") String refreshToken){
+        ResponseEntity<ApiBasicResponse> response = memberService.reissue(refreshToken);
+
+        return response;
+    }
 
     @GetMapping("/check-duplicate")
     public ResponseEntity<ApiBasicResponse> checkDuplicate(
@@ -37,6 +46,8 @@ public class MemberController {
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
+
+
 
 
 }

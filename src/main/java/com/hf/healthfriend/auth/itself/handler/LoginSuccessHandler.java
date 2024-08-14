@@ -47,6 +47,8 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
                 .build());
 
         // JSON 형식의 응답을 설정하고 전송
+        response.setHeader("Authorization", accessToken);
+        response.addCookie(jwtService.createCookie("Authorization-refresh", refreshToken));
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(jsonResponse);
