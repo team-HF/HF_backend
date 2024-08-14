@@ -1,7 +1,8 @@
 package com.hf.healthfriend.domain.profile.entity;
 
 import com.hf.healthfriend.domain.member.entity.Member;
-import jakarta.persistence.CascadeType;
+import com.hf.healthfriend.domain.profile.dto.request.FitnessProfileDto;
+import com.hf.healthfriend.domain.profile.dto.request.NicknameDto;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -13,7 +14,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -43,6 +43,8 @@ public class Profile {
 
     private String nickName;
 
+    private Long nicknameChangeCount;
+
     private String profileImageUrl;
 
     private double latitude;
@@ -52,13 +54,28 @@ public class Profile {
     @OneToOne(mappedBy = "profile", orphanRemoval = true, fetch = FetchType.LAZY)
     private Member member;
 
+
     @Builder
-    public Profile(FitnessLevel fitnessLevel, List<FitnessStyle> fitnessStyleList, String nickName, String profileImageUrl, double latitude, double longitude) {
+    public Profile(FitnessLevel fitnessLevel, List<FitnessStyle> fitnessStyleList, String nickName, Long nicknameChangeCount, String profileImageUrl, double latitude, double longitude) {
         this.fitnessLevel = fitnessLevel;
         this.fitnessStyleList = fitnessStyleList;
         this.nickName = nickName;
+        this.nicknameChangeCount = nicknameChangeCount;
         this.profileImageUrl = profileImageUrl;
         this.latitude = latitude;
         this.longitude = longitude;
+    }
+
+    public void updateFitnessLevel(FitnessProfileDto fitnessProfileDto){
+        this.fitnessLevel = fitnessProfileDto.getFitnessLevel();
+    }
+
+    public void updateFitnessStyle(FitnessProfileDto fitnessProfileDto){
+        this.fitnessStyleList = fitnessProfileDto.getFitnessStyleList();
+    }
+
+    public void updateNickName(NicknameDto nicknameDto){
+        this.nickName = nicknameDto.getNewNickname();
+        this.nicknameChangeCount++;
     }
 }

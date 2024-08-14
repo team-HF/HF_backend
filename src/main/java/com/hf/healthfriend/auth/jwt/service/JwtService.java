@@ -30,7 +30,7 @@ public class JwtService {
 
     @Value("${spring.jwt.secret}")
     private String secret;
-    private final Long ACCESS_TOKEN_EXPIRATION = 1000L * 60 * 60;
+    private final Long ACCESS_TOKEN_EXPIRATION = 1000L * 60 * 30;
     private final Long REFRESH_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24 * 14L;
 
     private final MemberRepository memberRepository;
@@ -102,7 +102,7 @@ public class JwtService {
 
     public Cookie createCookie(String key, String value) {
         Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(60 * 60 * 60);
+        cookie.setMaxAge(60 * 60 * 24 * 14);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
 
