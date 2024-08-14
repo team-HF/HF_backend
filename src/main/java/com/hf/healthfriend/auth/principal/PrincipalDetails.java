@@ -82,7 +82,7 @@ public class PrincipalDetails implements OAuth2User, UserDetails {
     // OAuth2User //
     @Override
     public String getName() {
-        return member.getNickName();
+        return member.getProfile().getNickName();
     }
     @Override
     public Map<String, Object> getAttributes() {

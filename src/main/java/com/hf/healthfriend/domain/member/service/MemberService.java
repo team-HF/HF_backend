@@ -4,9 +4,10 @@ import com.hf.healthfriend.auth.itself.dto.request.SignUpRequestDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.entity.Role;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
+import com.hf.healthfriend.domain.profile.entity.Profile;
+import com.hf.healthfriend.domain.profile.repository.ProfileRepository;
 import com.hf.healthfriend.global.exception.custom.MemberException;
 import com.hf.healthfriend.global.exception.errorcode.CommonErrorCode;
-import com.hf.healthfriend.global.exception.errorcode.ErrorCode;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final ProfileRepository profileRepository;
     private final PasswordEncoder passwordEncoder;
 
     public Member saveOrUpdate(Member member){
@@ -66,15 +68,20 @@ public class MemberService {
             throw new MemberException(CommonErrorCode.CONFLICT_EMAIL_MEMBER_EXCEPTION);
         }
 
-        Member member = Member.builder()
-                .role(Role.ROLE_USER)
+        Profile profile = Profile.builder()
                 .nickName(signUpRequestDto.getNickName())
-                .email(signUpRequestDto.getEmail())
-                .password(passwordEncoder.encode(signUpRequestDto.getPassword()))
-                .latitude(signUpRequestDto.getLatitude())
                 .longitude(signUpRequestDto.getLongitude())
+                .latitude(signUpRequestDto.getLatitude())
                 .build();
 
+        Member member = Member.builder()
+                .role(Role.ROLE_USER)
+                .email(signUpRequestDto.getEmail())
+                .password(passwordEncoder.encode(signUpRequestDto.getPassword()))
+                .profile(profile)
+                .build();
+
+        profileRepository.save(profile);
         memberRepository.save(member);
 
         return ApiBasicResponse.builder()
