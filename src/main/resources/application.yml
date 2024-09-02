@@ -1,4 +1,7 @@
 spring:
+  profiles:
+    active:
+      - secret
   security:
     oauth2:
       client:
@@ -48,12 +51,17 @@ spring:
 logging:
   level:
     org:
+      springframework:
+        security: trace
     hibernate:
       SQL: DEBUG
     type:
       descriptor:
         sql:
           BasicBinder: TRACE
+    com:
+      hf:
+        healthfriend: trace
 
 springdoc:
   packages-to-scan: com.hf.healthfriend
