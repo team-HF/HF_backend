@@ -39,7 +39,6 @@ public class MemberService {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new MemberException(CommonErrorCode.NO_EXIST_EMAIL_MEMBER_EXCEPTION));
 
-        member.updateRefreshToken(refreshToken);
         memberRepository.save(member);
     }
 
@@ -70,51 +69,52 @@ public class MemberService {
     }
 
     public ApiBasicResponse signUp(SignUpRequestDto signUpRequestDto) {
-        if(memberRepository.existsByEmail(signUpRequestDto.getEmail())){
-            throw new MemberException(CommonErrorCode.CONFLICT_EMAIL_MEMBER_EXCEPTION);
-        }
-
-        Profile profile = Profile.builder()
-                .nickName(signUpRequestDto.getNickName())
-                .longitude(signUpRequestDto.getLongitude())
-                .latitude(signUpRequestDto.getLatitude())
-                .nicknameChangeCount(0L)
-                .build();
-
-        Member member = Member.builder()
-                .role(Role.ROLE_USER)
-                .email(signUpRequestDto.getEmail())
-                .password(passwordEncoder.encode(signUpRequestDto.getPassword()))
-                .profile(profile)
-                .build();
-
-        profileRepository.save(profile);
-        memberRepository.save(member);
-
-        return ApiBasicResponse.builder()
-                .status(true)
-                .code(HttpStatus.OK.value())
-                .message("회원가입 성공!")
-                .build();
+//        if(memberRepository.existsByEmail(signUpRequestDto.getEmail())){
+//            throw new MemberException(CommonErrorCode.CONFLICT_EMAIL_MEMBER_EXCEPTION);
+//        }
+//
+//        Profile profile = Profile.builder()
+//                .nickName(signUpRequestDto.getNickName())
+//                .longitude(signUpRequestDto.getLongitude())
+//                .latitude(signUpRequestDto.getLatitude())
+//                .nicknameChangeCount(0L)
+//                .build();
+//
+//        Member member = Member.builder()
+//                .role(Role.ROLE_USER)
+//                .email(signUpRequestDto.getEmail())
+//                .password(passwordEncoder.encode(signUpRequestDto.getPassword()))
+//                .build();
+//
+//        profileRepository.save(profile);
+//        memberRepository.save(member);
+//
+//        return ApiBasicResponse.builder()
+//                .status(true)
+//                .code(HttpStatus.OK.value())
+//                .message("회원가입 성공!")
+//                .build();
+        throw new UnsupportedOperationException();
     }
 
     public ResponseEntity<ApiBasicResponse> reissue(String refreshToken){
-        if(refreshToken == null){
-            throw new MemberException(CommonErrorCode.NO_EXIST_REFRESH_TOKEN_COOKIE_EXCEPTION);
-        }
-
-        jwtService.validateToken(refreshToken);
-        Member member = memberRepository.findByRefreshToken(refreshToken)
-                .orElseThrow(() -> new MemberException(CommonErrorCode.REFRESH_TOKEN_MISMATCH_EXCEPTION));
-
-        String accessToken = jwtService.createAccessToken(member.getEmail(), Role.ROLE_USER.name());
-
-        return ResponseEntity.ok()
-                .header("Authorization", accessToken)
-                .body(ApiBasicResponse.builder()
-                        .status(true)
-                        .code(200)
-                        .message("Access Token 발급 성공! Authorization 헤더를 확인하세요")
-                        .build());
+//        if(refreshToken == null){
+//            throw new MemberException(CommonErrorCode.NO_EXIST_REFRESH_TOKEN_COOKIE_EXCEPTION);
+//        }
+//
+//        jwtService.validateToken(refreshToken);
+//        Member member = memberRepository.findByRefreshToken(refreshToken)
+//                .orElseThrow(() -> new MemberException(CommonErrorCode.REFRESH_TOKEN_MISMATCH_EXCEPTION));
+//
+//        String accessToken = jwtService.createAccessToken(member.getEmail(), Role.ROLE_USER.name());
+//
+//        return ResponseEntity.ok()
+//                .header("Authorization", accessToken)
+//                .body(ApiBasicResponse.builder()
+//                        .status(true)
+//                        .code(200)
+//                        .message("Access Token 발급 성공! Authorization 헤더를 확인하세요")
+//                        .build());
+        throw new UnsupportedOperationException();
     }
 }

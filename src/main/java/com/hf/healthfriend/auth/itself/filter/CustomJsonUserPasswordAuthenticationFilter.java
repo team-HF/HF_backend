@@ -17,6 +17,7 @@ import org.springframework.util.StreamUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+@Deprecated
 public class CustomJsonUserPasswordAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
     private final ObjectMapper objectMapper;

@@ -5,6 +5,7 @@ import lombok.Getter;
 
 import java.util.Map;
 
+@Deprecated
 @Getter
 public class GoogleUserDetails implements Oauth2UserInfo {
 

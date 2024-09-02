@@ -1,5 +1,7 @@
 package com.hf.healthfriend.global.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hf.healthfriend.global.util.HttpCookieUtils;
 import com.hf.healthfriend.global.util.NoSecurityHttpCookieUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -19,5 +21,12 @@ public class BeanConfig {
     @ConditionalOnMissingBean(HttpCookieUtils.class)
     public HttpCookieUtils noSecurityHttpCookieUtils() {
         return new NoSecurityHttpCookieUtils();
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        return objectMapper;
     }
 }

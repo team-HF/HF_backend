@@ -10,6 +10,10 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+/**
+ * TODO: 이 코드는 나중에 분석 후 @Deprecated 딱지를 떼거나 아님 걍 참고만 하거나 할 예정
+ */
+@Deprecated
 @Component
 @Slf4j
 public class LoginFailureHandler extends SimpleUrlAuthenticationFailureHandler {

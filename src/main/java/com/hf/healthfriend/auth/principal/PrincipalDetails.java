@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+@Deprecated
 @Getter
 public class PrincipalDetails implements OAuth2User, UserDetails {
 
@@ -82,7 +83,7 @@ public class PrincipalDetails implements OAuth2User, UserDetails {
     // OAuth2User //
     @Override
     public String getName() {
-        return member.getProfile().getNickName();
+        return member.getUsername();
     }
     @Override
     public Map<String, Object> getAttributes() {
@@ -93,7 +94,7 @@ public class PrincipalDetails implements OAuth2User, UserDetails {
         return member.getEmail();
     }
 
-    public Long getId(){
+    public String getId(){
         return member.getId();
     }
 }

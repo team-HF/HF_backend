@@ -22,6 +22,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+@Deprecated
 @Service
 @Slf4j
 @RequiredArgsConstructor

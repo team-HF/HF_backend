@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 
+@Deprecated
 @Getter
 public class SignUpRequestDto {
     @NotEmpty(message = "NickName은 null일 수 없습니다")
