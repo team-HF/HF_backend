@@ -10,19 +10,19 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity(name = "members")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 @Getter
+@ToString
 public class Member {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     @Column(name = "member_id")
-    private Long id;
+    private String id;
 
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -30,23 +30,4 @@ public class Member {
     private String email;
 
     private String password;
-
-    private String refreshToken;
-
-    @OneToOne
-    @JoinColumn(name = "profile_id")
-    private Profile profile;
-
-    @Builder
-    public Member(Role role, String email, String password, String refreshToken, Profile profile) {
-        this.role = role;
-        this.email = email;
-        this.password = password;
-        this.refreshToken = refreshToken;
-        this.profile = profile;
-    }
-
-    public void updateRefreshToken(String refreshToken){
-        this.refreshToken = refreshToken;
-    }
 }

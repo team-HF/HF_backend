@@ -33,6 +33,17 @@ import java.util.Arrays;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+    private static final String[] WHITE_LIST = {
+            "/error",
+            "/oauth/code/*",
+            "/swagger-ui/**",
+
+            // TODO: 해당 endpoint 확인 후 삭제할 수 있음
+            "/login",
+            "/api/member/**",
+            "/api/jwt/reissue",
+            "/v3/**"
+    };
 
     private final PasswordEncoder passwordEncoder;
     private final ObjectMapper objectMapper;
@@ -53,12 +64,7 @@ public class SecurityConfig {
                         .formLogin(AbstractHttpConfigurer::disable)
                         .httpBasic(AbstractHttpConfigurer::disable)
                         .authorizeHttpRequests((auth) -> auth
-                                .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
-                                .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
-                                .requestMatchers(new AntPathRequestMatcher("/api/member/**")).permitAll()
-                                .requestMatchers(new AntPathRequestMatcher("/api/jwt/reissue")).permitAll()
-                                .requestMatchers(new AntPathRequestMatcher("/v3/**")).permitAll()
-                                .requestMatchers(new AntPathRequestMatcher("/swagger-ui/**")).permitAll()
+                                .requestMatchers(WHITE_LIST).permitAll()
                                 .anyRequest().authenticated()
                         )
                         .oauth2Login((oauth2) -> oauth2
