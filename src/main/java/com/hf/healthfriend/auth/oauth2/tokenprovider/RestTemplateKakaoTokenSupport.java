@@ -2,6 +2,7 @@ package com.hf.healthfriend.auth.oauth2.tokenprovider;
 
 import com.hf.healthfriend.auth.oauth2.constants.AuthServer;
 import com.hf.healthfriend.auth.oauth2.dto.response.GrantedTokenInfo;
+import com.hf.healthfriend.auth.oauth2.dto.response.TokenValidationInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -25,6 +27,7 @@ import java.time.temporal.ChronoUnit;
 public class RestTemplateKakaoTokenSupport implements OAuth2TokenSupport {
     private static final String KAKAO_TOKEN_REQUEST_URL = "https://kauth.kakao.com/oauth/token";
     private static final String KAKAO_INFO_REQUEST_URL = "https://kapi.kakao.com/v2/user/me";
+    private static final String KAKAO_ACCESS_TOKEN_INFO_URL = "https://kapi.kakao.com/v1/user/access_token_info";
     private static final String TOKEN_REQUEST_HEADER_KEY_GRANT_TYPE = "grant_type";
     private static final String TOKEN_REQUEST_HEADER_VALUE_GRANT_TYPE = "authorization_code";
     private static final String TOKEN_REQUEST_HEADER_KEY_CLIENT_ID = "client_id";
@@ -53,7 +56,8 @@ public class RestTemplateKakaoTokenSupport implements OAuth2TokenSupport {
                 accessToken,
                 responseBody.getString("refresh_token"),
                 recordNow.plus(responseBody.getInt("expires_in"), ChronoUnit.SECONDS),
-                requestEmail(accessToken)
+                requestEmail(accessToken),
+                AuthServer.KAKAO
         );
     }
 
@@ -77,6 +81,30 @@ public class RestTemplateKakaoTokenSupport implements OAuth2TokenSupport {
         ResponseEntity<String> responseEntity = this.restTemplate.exchange(requestEntity, String.class);
         JSONObject jsonObject = new JSONObject(responseEntity.getBody());
         return jsonObject.getJSONObject("kakao_account").getString("email");
+    }
+
+    @Override
+    public TokenValidationInfo validateToken(String token) throws RuntimeException {
+        Instant instantNow = Instant.now();
+        return new TokenValidationInfo(
+                requestEmail(token),
+                instantNow.minusSeconds(60),
+                requestForExpr(token)
+        );
+    }
+
+    private Instant requestForExpr(String token) {
+        Instant now = Instant.now();
+        RequestEntity<Void> requestEntity = RequestEntity.get(KAKAO_ACCESS_TOKEN_INFO_URL)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .build();
+        JSONObject responseBody = new JSONObject(this.restTemplate.exchange(requestEntity, String.class).getBody());
+
+        if (log.isTraceEnabled()) {
+            log.trace("Response Content");
+            System.out.println(responseBody);
+        }
+        return now.plus(responseBody.getInt("expires_in"), ChronoUnit.SECONDS);
     }
 
     @Override

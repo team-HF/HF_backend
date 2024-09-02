@@ -20,6 +20,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -55,6 +56,8 @@ public class SecurityConfig {
     private final JwtAuthorizationFilter jwtAuthorizationFilter;
     private final JwtExceptionHandlerFilter jwtExceptionHandlerFilter;
 
+    private final OpaqueTokenIntrospector opaqueTokenIntrospector;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return
@@ -67,6 +70,9 @@ public class SecurityConfig {
                                 .requestMatchers(WHITE_LIST).permitAll()
                                 .anyRequest().authenticated()
                         )
+                        .oauth2ResourceServer((oauth) ->
+                                oauth.opaqueToken((opaqueToken) ->
+                                        opaqueToken.introspector(this.opaqueTokenIntrospector)))
                         .oauth2Login((oauth2) -> oauth2
                                 .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig.userService(customOauth2UserService))
                                 .successHandler(customOauth2SuccessHandler))

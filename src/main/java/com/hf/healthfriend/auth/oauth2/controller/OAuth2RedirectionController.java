@@ -1,17 +1,14 @@
 package com.hf.healthfriend.auth.oauth2.controller;
 
 import com.hf.healthfriend.auth.oauth2.constants.AuthServer;
+import com.hf.healthfriend.auth.oauth2.dto.propertyeditor.AuthServerEditor;
 import com.hf.healthfriend.auth.oauth2.dto.response.GrantedTokenInfo;
 import com.hf.healthfriend.auth.oauth2.tokenprovider.OAuth2TokenSupport;
+import com.hf.healthfriend.global.util.HttpCookieUtils;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,8 +18,10 @@ import java.util.Map;
 @RequestMapping("/oauth2/code")
 public class OAuth2RedirectionController {
     private final Map<AuthServer, OAuth2TokenSupport> tokenSupportByName;
+    private final HttpCookieUtils cookieUtils;
 
-    public OAuth2RedirectionController(List<OAuth2TokenSupport> oAuth2TokenSupports) {
+    public OAuth2RedirectionController(List<OAuth2TokenSupport> oAuth2TokenSupports,
+                                       HttpCookieUtils cookieUtils) {
         this.tokenSupportByName = new HashMap<>();
         for (OAuth2TokenSupport tokenSupport : oAuth2TokenSupports) {
             for (AuthServer authServer : AuthServer.values()) {
@@ -31,6 +30,13 @@ public class OAuth2RedirectionController {
                 }
             }
         }
+
+        this.cookieUtils = cookieUtils;
+    }
+
+    @InitBinder
+    public void registerBinder(WebDataBinder binder) {
+        binder.registerCustomEditor(AuthServer.class, AuthServerEditor.getInstance());
     }
 
     @GetMapping("/kakao")

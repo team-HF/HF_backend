@@ -2,6 +2,7 @@ package com.hf.healthfriend.auth.oauth2.tokenprovider;
 
 import com.hf.healthfriend.auth.oauth2.constants.AuthServer;
 import com.hf.healthfriend.auth.oauth2.dto.response.GrantedTokenInfo;
+import com.hf.healthfriend.auth.oauth2.dto.response.TokenValidationInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,8 +61,15 @@ public class RestTemplateGoogleTokenSupport implements OAuth2TokenSupport {
                 accessToken,
                 refreshToken,
                 recordNow.plus(expiresIn, ChronoUnit.SECONDS), // TODO: 시간 단위가 뭔지 알아내야 함
-                email
+                email,
+                AuthServer.GOOGLE
         );
+    }
+
+    @Override
+    public TokenValidationInfo validateToken(String token) throws RuntimeException {
+        // TODO
+        throw new UnsupportedOperationException();
     }
 
     private RequestEntity<String> buildRequestEntityForToken(String code, String redirectUri) {

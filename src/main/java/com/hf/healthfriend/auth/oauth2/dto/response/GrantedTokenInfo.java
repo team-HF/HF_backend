@@ -1,5 +1,6 @@
 package com.hf.healthfriend.auth.oauth2.dto.response;
 
+import com.hf.healthfriend.auth.oauth2.constants.AuthServer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
@@ -14,4 +15,5 @@ public class GrantedTokenInfo {
     private final String refreshToken;
     private final LocalDateTime expirationTime;
     private final String email;
+    private final AuthServer authServer;
 }

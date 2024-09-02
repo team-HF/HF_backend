@@ -11,6 +11,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
 
 @Entity(name = "members")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -18,7 +24,7 @@ import lombok.*;
 @Builder
 @Getter
 @ToString
-public class Member {
+public class Member implements UserDetails {
 
     @Id
     @Column(name = "member_id")
@@ -30,4 +36,18 @@ public class Member {
     private String email;
 
     private String password;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(this.role.name()));
+    }
+
+    public GrantedAuthority getAuthority() {
+        return new SimpleGrantedAuthority(this.role.name());
+    }
+
+    @Override
+    public String getUsername() {
+        return this.id;
+    }
 }
