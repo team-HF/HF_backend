@@ -24,17 +24,21 @@ public class Member implements UserDetails {
     private String id;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    @Column(name = "role")
+    private Role role = Role.ROLE_USER;
 
+    @Column(name = "email")
     private String email;
-    private String password;
+
+    @Column(name = "password")
+    private String password = null;
 
     @Column(name = "creation_time")
     @Temporal(TemporalType.TIMESTAMP)
-    private LocalDateTime creationTime;
+    private LocalDateTime creationTime = LocalDateTime.now();
 
     @OneToOne(mappedBy = "member", fetch = FetchType.LAZY)
-    private Profile profile;
+    private Profile profile = null;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
