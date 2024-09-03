@@ -1,20 +1,13 @@
 package com.hf.healthfriend.domain.member.entity;
 
-import com.hf.healthfriend.domain.profile.entity.Profile;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import com.hf.healthfriend.domain.member.constant.Role;
+import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -34,8 +27,14 @@ public class Member implements UserDetails {
     private Role role;
 
     private String email;
-
     private String password;
+
+    @Column(name = "creation_time")
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime creationTime;
+
+    @OneToOne(mappedBy = "member", fetch = FetchType.LAZY)
+    private Profile profile;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

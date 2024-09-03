@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.profile.entity;
 
+@Deprecated
 public enum FitnessStyle {
     /**
      * 차후 추가 및 영문명으로 변경

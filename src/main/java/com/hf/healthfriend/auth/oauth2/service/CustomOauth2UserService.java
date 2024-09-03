@@ -5,7 +5,7 @@ import com.hf.healthfriend.auth.oauth2.dto.response.KakaoUserDetails;
 import com.hf.healthfriend.auth.oauth2.dto.response.Oauth2UserInfo;
 import com.hf.healthfriend.auth.principal.PrincipalDetails;
 import com.hf.healthfriend.domain.member.entity.Member;
-import com.hf.healthfriend.domain.member.entity.Role;
+import com.hf.healthfriend.domain.member.constant.Role;
 import com.hf.healthfriend.domain.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
