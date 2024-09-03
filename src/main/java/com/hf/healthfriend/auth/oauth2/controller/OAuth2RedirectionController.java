@@ -10,6 +10,7 @@ import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.service.MemberService;
 import com.hf.healthfriend.global.util.HttpCookieUtils;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -18,8 +19,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestController
-@RequestMapping("/oauth2/code")
+@RequestMapping("/oauth/code")
 public class OAuth2RedirectionController {
     private final Map<AuthServer, OAuth2TokenSupport> tokenSupportByName;
     private final HttpCookieUtils cookieUtils;
@@ -48,12 +50,14 @@ public class OAuth2RedirectionController {
 
     @GetMapping("/kakao")
     public ResponseEntity<OAuth2LoginResponseDto> get(@RequestParam("code") String code, HttpServletRequest request) {
-        return doTheSameThing(AuthServer.KAKAO, code, request.getRequestURI());
+        log.info("Kakao Login has been requested");
+        return doTheSameThing(AuthServer.KAKAO, code, request.getRequestURL().toString());
     }
 
     @GetMapping("/google")
     public ResponseEntity<OAuth2LoginResponseDto> getGoogle(@RequestParam("code") String code, HttpServletRequest request) {
-        return doTheSameThing(AuthServer.GOOGLE, code, request.getRequestURI());
+        log.info("Google Login has been requested");
+        return doTheSameThing(AuthServer.GOOGLE, code, request.getRequestURL().toString());
     }
 
     private ResponseEntity<OAuth2LoginResponseDto> doTheSameThing(AuthServer authServer, String code, String redirectUri) {
@@ -61,7 +65,7 @@ public class OAuth2RedirectionController {
 
         // 너무 간단한 로직이므로 Service 객체를 따로 정의하지 않고 여기서 했다.
         GrantedTokenInfo grantedTokenInfo = tokenSupport.grantToken(code, redirectUri);
-        MemberCreationResponseDto memberCreationResponseDto = this.memberService.createMemberIfNotExists(
+        MemberCreationResponseDto memberCreationResponseDto = this.memberService.createMember(
                 new MemberCreationRequestDto(grantedTokenInfo.getEmail(), grantedTokenInfo.getEmail(), null));
 
         // TODO: 302 Redirection Status를 set 해야 할 듯

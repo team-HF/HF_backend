@@ -14,16 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
     private final MemberRepository memberRepository;
 
-    public MemberCreationResponseDto createMemberIfNotExists(MemberCreationRequestDto dto) {
+    // TODO: Specification (JavaDoc) 작성해야 함 - 이미 있는 사용자를 생성하려고 할 경우 어떻게 되는지도 고려해야 함
+    public MemberCreationResponseDto createMember(MemberCreationRequestDto dto) {
         if (this.memberRepository.existsById(dto.getId())) {
             return MemberCreationResponseDto.notCreated(dto.getId());
         }
 
-        Member newMember = Member.builder()
-                .id(dto.getId())
-                .email(dto.getEmail())
-                .password(dto.getPassword())
-                .build();
+        Member newMember = new Member(dto.getId(), dto.getEmail(), dto.getPassword());
         Member saved = this.memberRepository.save(newMember);
         return MemberCreationResponseDto.of(saved);
     }

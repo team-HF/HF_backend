@@ -4,6 +4,7 @@ import com.hf.healthfriend.auth.oauth2.constant.AuthServer;
 import com.hf.healthfriend.auth.oauth2.dto.response.GrantedTokenInfo;
 import com.hf.healthfriend.auth.oauth2.dto.response.TokenValidationInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -44,17 +45,24 @@ public class RestTemplateGoogleTokenSupport implements GoogleOAuth2TokenSupport 
 
         JSONObject responseBody =
                 new JSONObject(this.restTemplate.exchange(buildRequestEntityForToken(code, redirectUri), String.class).getBody());
+
+        log.trace("Full Response Body\n{}", responseBody);
+
         String accessToken = responseBody.getString("access_token");
-        // TODO: refresh token이 없을 수 있으므로 JSONException을 처리하는 try ~ catch문 추가 (혹은 throws)
-        String refreshToken = responseBody.getString("refresh_token");
+
+        String refreshToken = null;
+        try {
+            refreshToken = responseBody.getString("refresh_token");
+            log.trace("refreshToken={}", refreshToken);
+        } catch (JSONException e) {
+            // TODO: JSONException이 발생하는 이유가 여러가지 있을 수 있으므로 여러 Exception에 대응
+            log.warn("Refresh Token 파싱 중 문제 발생", e);
+        }
         int expiresIn = responseBody.getInt("expires_in");
         String email = requestEmail(accessToken);
 
         if (log.isTraceEnabled()) {
-            log.trace("Full response body");
-            System.out.println(responseBody);
             log.trace("accessToken={}", accessToken);
-            log.trace("refreshToken={}", refreshToken);
             log.trace("expiresIn={}", expiresIn);
             log.trace("email={}", email);
         }

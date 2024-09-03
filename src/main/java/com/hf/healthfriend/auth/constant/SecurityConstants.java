@@ -5,8 +5,7 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 public enum SecurityConstants {
-    AUTH_SERVER_COOKIE_KEY("token_auth_server"),
-    REQUEST_BEARER_TOKEN_DELIMITER(":");
+    AUTH_SERVER_COOKIE_KEY("token_auth_server");
 
     private final String value;
 

@@ -45,6 +45,7 @@ public class RestTemplateKakaoTokenSupport implements KakaoOAuth2TokenSupport {
 
     @Override
     public GrantedTokenInfo grantToken(String code, String redirectUri) throws RuntimeException {
+        log.debug("redirectUri={}", redirectUri);
         LocalDateTime recordNow = LocalDateTime.now();
 
         JSONObject responseBody =

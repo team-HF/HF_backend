@@ -13,8 +13,6 @@ import java.util.List;
 
 @Entity(name = "members")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Builder
 @Getter
 @ToString
 public class Member implements UserDetails {
@@ -39,6 +37,12 @@ public class Member implements UserDetails {
 
     @OneToOne(mappedBy = "member", fetch = FetchType.LAZY)
     private Profile profile = null;
+
+    public Member(String id, String email, String password) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
