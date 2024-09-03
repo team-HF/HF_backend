@@ -20,9 +20,11 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private static final String[] WHITE_LIST = {
+            "/",
             "/error",
             "/oauth/code/*",
             "/swagger-ui/**",
+            "/actuator/**",
 
             // TODO: 해당 endpoint 확인 후 삭제할 수 있음
             "/login",
