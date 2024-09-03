@@ -24,7 +24,7 @@ import java.time.temporal.ChronoUnit;
  */
 @Slf4j
 @Component
-public class RestTemplateKakaoTokenSupport implements OAuth2TokenSupport {
+public class RestTemplateKakaoTokenSupport implements KakaoOAuth2TokenSupport {
     private static final String KAKAO_TOKEN_REQUEST_URL = "https://kauth.kakao.com/oauth/token";
     private static final String KAKAO_INFO_REQUEST_URL = "https://kapi.kakao.com/v2/user/me";
     private static final String KAKAO_ACCESS_TOKEN_INFO_URL = "https://kapi.kakao.com/v1/user/access_token_info";

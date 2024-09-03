@@ -11,7 +11,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -20,7 +22,7 @@ import java.time.temporal.ChronoUnit;
  */
 @Slf4j
 @Component
-public class RestTemplateGoogleTokenSupport implements OAuth2TokenSupport {
+public class RestTemplateGoogleTokenSupport implements GoogleOAuth2TokenSupport {
     private static final String GOOGLE_TOKEN_REQUEST_URL = "https://oauth2.googleapis.com/token";
 
     private final RestTemplate restTemplate;
@@ -66,12 +68,6 @@ public class RestTemplateGoogleTokenSupport implements OAuth2TokenSupport {
         );
     }
 
-    @Override
-    public TokenValidationInfo validateToken(String token) throws RuntimeException {
-        // TODO
-        throw new UnsupportedOperationException();
-    }
-
     private RequestEntity<String> buildRequestEntityForToken(String code, String redirectUri) {
         return RequestEntity.post(GOOGLE_TOKEN_REQUEST_URL)
                 .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
@@ -100,6 +96,26 @@ public class RestTemplateGoogleTokenSupport implements OAuth2TokenSupport {
         }
 
         return responseBody.getString("email");
+    }
+
+    private static final String GOOGLE_TOKEN_VALIDATION_URL = "https://www.googleapis.com/oauth2/v1/tokeninfo";
+
+    @Override
+    public TokenValidationInfo validateToken(String token) throws RuntimeException {
+        String builtUrl = UriComponentsBuilder.fromHttpUrl(GOOGLE_TOKEN_VALIDATION_URL)
+                .queryParam("access_token", token)
+                .encode()
+                .toUriString();
+        RequestEntity<Void> requestEntity = RequestEntity.get(builtUrl).build();
+
+        Instant now = Instant.now();
+        // TODO: 유효하지 않은 토큰일 경우 400 Error가 발생한다. 이 400 Error를 AuthenticationException으로 처리해야 하며 유효하지 않은 토큰이라는 메시지를 포함해야 한다.
+        JSONObject responseBody = new JSONObject(this.restTemplate.exchange(requestEntity, String.class).getBody());
+        return new TokenValidationInfo(
+                responseBody.getString("email"),
+                now.minusSeconds(60),
+                now.plusSeconds(responseBody.getInt("expires_in"))
+        );
     }
 
     @Override
