@@ -1,52 +1,60 @@
 package com.hf.healthfriend.domain.member.entity;
 
-import com.hf.healthfriend.domain.profile.entity.Profile;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.hf.healthfriend.domain.member.constant.Role;
+import jakarta.persistence.*;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 
 @Entity(name = "members")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Member {
+@ToString
+public class Member implements UserDetails {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     @Column(name = "member_id")
-    private Long id;
+    private String id;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    @Column(name = "role")
+    private Role role = Role.ROLE_USER;
 
+    @Column(name = "email")
     private String email;
 
-    private String password;
+    @Column(name = "password")
+    private String password = null;
 
-    private String refreshToken;
+    @Column(name = "creation_time")
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime creationTime = LocalDateTime.now();
 
-    @OneToOne
-    @JoinColumn(name = "profile_id")
-    private Profile profile;
+    @OneToOne(mappedBy = "member", fetch = FetchType.LAZY)
+    private Profile profile = null;
 
-    @Builder
-    public Member(Role role, String email, String password, String refreshToken, Profile profile) {
-        this.role = role;
+    public Member(String id, String email, String password) {
+        this.id = id;
         this.email = email;
         this.password = password;
-        this.refreshToken = refreshToken;
-        this.profile = profile;
     }
 
-    public void updateRefreshToken(String refreshToken){
-        this.refreshToken = refreshToken;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(this.role.name()));
+    }
+
+    public GrantedAuthority getAuthority() {
+        return new SimpleGrantedAuthority(this.role.name());
+    }
+
+    @Override
+    public String getUsername() {
+        return this.id;
     }
 }
