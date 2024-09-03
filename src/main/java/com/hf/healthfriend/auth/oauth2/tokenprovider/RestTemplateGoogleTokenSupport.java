@@ -1,6 +1,6 @@
 package com.hf.healthfriend.auth.oauth2.tokenprovider;
 
-import com.hf.healthfriend.auth.oauth2.constants.AuthServer;
+import com.hf.healthfriend.auth.oauth2.constant.AuthServer;
 import com.hf.healthfriend.auth.oauth2.dto.response.GrantedTokenInfo;
 import com.hf.healthfriend.auth.oauth2.dto.response.TokenValidationInfo;
 import lombok.extern.slf4j.Slf4j;

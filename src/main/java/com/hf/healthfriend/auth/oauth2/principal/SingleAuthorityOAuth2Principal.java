@@ -1,4 +1,4 @@
-package com.hf.healthfriend.auth.principal;
+package com.hf.healthfriend.auth.oauth2.principal;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

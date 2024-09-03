@@ -1,6 +1,6 @@
 package com.hf.healthfriend.auth.oauth2.introspect.delegator;
 
-import com.hf.healthfriend.auth.oauth2.constants.AuthServer;
+import com.hf.healthfriend.auth.oauth2.constant.AuthServer;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 
 public class GoogleOpaqueTokenIntrospectorDelegator implements OpaqueTokenIntrospectorDelegator {

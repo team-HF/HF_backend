@@ -1,6 +1,6 @@
 package com.hf.healthfriend.auth.oauth2.dto.propertyeditor;
 
-import com.hf.healthfriend.auth.oauth2.constants.AuthServer;
+import com.hf.healthfriend.auth.oauth2.constant.AuthServer;
 
 import java.beans.PropertyEditorSupport;
 

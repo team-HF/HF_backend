@@ -1,7 +1,7 @@
 package com.hf.healthfriend.auth.oauth2.introspect;
 
 import com.hf.healthfriend.auth.constant.SecurityConstants;
-import com.hf.healthfriend.auth.oauth2.constants.AuthServer;
+import com.hf.healthfriend.auth.oauth2.constant.AuthServer;
 import com.hf.healthfriend.auth.oauth2.introspect.delegator.OpaqueTokenIntrospectorDelegator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;

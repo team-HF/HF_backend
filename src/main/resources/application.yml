@@ -2,34 +2,6 @@ spring:
   profiles:
     active:
       - secret
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
-            redirect-uri: http://localhost:8080/login/oauth2/code/google
-            scope: profile, email
-
-          kakao:
-            client-id: ${KAKAO_CLIENT_ID}
-            client-secret: ${KAKAO_CLIENT_SECRET}
-            scope:
-              - account_email
-              - profile_nickname
-            authorization-grant-type: authorization_code
-            redirect-uri: http://localhost:8080/login/oauth2/code/kakao
-            client-name: Kakao
-            client-authentication-method: client_secret_post
-
-        provider:
-          kakao:
-            authorization-uri: https://kauth.kakao.com/oauth/authorize
-            token-uri: https://kauth.kakao.com/oauth/token
-            user-info-uri: https://kapi.kakao.com/v2/user/me
-            user-name-attribute: id
-
   jpa:
     hibernate:
       ddl-auto: create
@@ -42,23 +14,25 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/healthfriend?autoReconnect=true&useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: root
-    password: ${LOCAL_DB_PASSWORD}
-
-  jwt:
-    secret: ${JWT_SECRET}
+    # username과 password는 Local 개발 환경이므로 편의상 공개해 놓음
+    # 배포 환경에서는 application-secret.yml 파일에 저장
+    username: scott
+    password: tiger
 
 logging:
   level:
     org:
       springframework:
         security: trace
-    hibernate:
-      SQL: DEBUG
-    type:
-      descriptor:
-        sql:
-          BasicBinder: TRACE
+      hibernate:
+        SQL: debug
+        orm:
+          jdbc:
+            bind: trace
+        type:
+          descriptor:
+            sql:
+              BasicBinder: trace
     com:
       hf:
         healthfriend: trace
