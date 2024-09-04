@@ -1,4 +1,4 @@
-package com.hf.healthfriend.auth.oauth2.tokenprovider;
+package com.hf.healthfriend.auth.oauth2.tokensupport;
 
 import com.hf.healthfriend.auth.oauth2.constant.AuthServer;
 import com.hf.healthfriend.auth.oauth2.dto.response.GrantedTokenInfo;
@@ -11,6 +11,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -124,6 +126,29 @@ public class RestTemplateGoogleTokenSupport implements GoogleOAuth2TokenSupport 
                 now.minusSeconds(60),
                 now.plusSeconds(responseBody.getInt("expires_in"))
         );
+    }
+
+    @Override
+    public String refreshToken(String refreshToken) throws RuntimeException {
+        // 유효하지 않은 리프레시 토큰일 경우 400 에러 발생
+
+        MultiValueMap<String, String> bodyParams = new LinkedMultiValueMap<>();
+        bodyParams.add("refresh_token", refreshToken);
+        bodyParams.add("grant_type", "refresh_token");
+        bodyParams.add("client_id", this.clientId);
+        bodyParams.add("client_secret", this.clientSecret);
+
+        RequestEntity<MultiValueMap<String, String>> requestEntity = RequestEntity.post(GOOGLE_TOKEN_REQUEST_URL)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .body(bodyParams);
+
+        JSONObject responseBody = new JSONObject(this.restTemplate.exchange(requestEntity, String.class).getBody());
+
+        if (log.isTraceEnabled()) {
+            log.trace("Response Body:\n {}", responseBody);
+        }
+
+        return responseBody.getString("access_token");
     }
 
     @Override

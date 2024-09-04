@@ -3,13 +3,11 @@ package com.hf.healthfriend.auth.oauth2.introspect.delegator;
 import com.hf.healthfriend.auth.oauth2.constant.AuthServer;
 import com.hf.healthfriend.auth.oauth2.dto.response.TokenValidationInfo;
 import com.hf.healthfriend.auth.oauth2.principal.SingleAuthorityOAuth2Principal;
-import com.hf.healthfriend.auth.oauth2.tokenprovider.KakaoOAuth2TokenSupport;
+import com.hf.healthfriend.auth.oauth2.tokensupport.KakaoOAuth2TokenSupport;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2TokenIntrospectionClaimNames;
 import org.springframework.stereotype.Component;
 
