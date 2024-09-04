@@ -4,7 +4,7 @@ import com.hf.healthfriend.auth.oauth2.constant.AuthServer;
 import com.hf.healthfriend.auth.oauth2.dto.propertyeditor.AuthServerEditor;
 import com.hf.healthfriend.auth.oauth2.dto.response.GrantedTokenInfo;
 import com.hf.healthfriend.auth.oauth2.dto.response.OAuth2LoginResponseDto;
-import com.hf.healthfriend.auth.oauth2.tokenprovider.OAuth2TokenSupport;
+import com.hf.healthfriend.auth.oauth2.tokensupport.OAuth2TokenSupport;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.service.MemberService;

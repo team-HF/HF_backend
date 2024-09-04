@@ -1,4 +1,4 @@
-package com.hf.healthfriend.auth.oauth2.tokenprovider;
+package com.hf.healthfriend.auth.oauth2.tokensupport;
 
 import com.hf.healthfriend.auth.oauth2.constant.AuthServer;
 import com.hf.healthfriend.auth.oauth2.dto.response.GrantedTokenInfo;
@@ -14,6 +14,9 @@ public interface OAuth2TokenSupport {
 
     // TODO: 유효하지 않은 토큰일 경우 구체적인 예외 사용
     TokenValidationInfo validateToken(String token) throws RuntimeException;
+
+    // TODO: 유효하지 않은 토큰일 경우 구체적인 예외 사용
+    String refreshToken(String refreshToken) throws RuntimeException;
 
     boolean supports(AuthServer authServer);
 }

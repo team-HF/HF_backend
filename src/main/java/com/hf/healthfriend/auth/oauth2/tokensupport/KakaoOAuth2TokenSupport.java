@@ -1,4 +1,4 @@
-package com.hf.healthfriend.auth.oauth2.tokenprovider;
+package com.hf.healthfriend.auth.oauth2.tokensupport;
 
 public interface KakaoOAuth2TokenSupport extends OAuth2TokenSupport {
 }

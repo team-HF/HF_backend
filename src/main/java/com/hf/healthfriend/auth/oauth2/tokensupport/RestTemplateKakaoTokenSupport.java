@@ -1,4 +1,4 @@
-package com.hf.healthfriend.auth.oauth2.tokenprovider;
+package com.hf.healthfriend.auth.oauth2.tokensupport;
 
 import com.hf.healthfriend.auth.oauth2.constant.AuthServer;
 import com.hf.healthfriend.auth.oauth2.dto.response.GrantedTokenInfo;
@@ -106,6 +106,26 @@ public class RestTemplateKakaoTokenSupport implements KakaoOAuth2TokenSupport {
             System.out.println(responseBody);
         }
         return now.plus(responseBody.getInt("expires_in"), ChronoUnit.SECONDS);
+    }
+
+    @Override
+    public String refreshToken(String refreshToken) throws RuntimeException {
+        MultiValueMap<String, String> bodyParams = new LinkedMultiValueMap<>();
+        bodyParams.add("grant_type", "refresh_token");
+        bodyParams.add("client_id", this.kakaoClientId);
+        bodyParams.add("refresh_token", refreshToken);
+
+        RequestEntity<MultiValueMap<String, String>> requestEntity = RequestEntity.post(KAKAO_TOKEN_REQUEST_URL)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .body(bodyParams);
+
+        JSONObject responseBody = new JSONObject(this.restTemplate.exchange(requestEntity, String.class).getBody());
+
+        if (log.isTraceEnabled()) {
+            log.trace("Response Body:\n{}", responseBody);
+        }
+
+        return responseBody.getString("access_token");
     }
 
     @Override
