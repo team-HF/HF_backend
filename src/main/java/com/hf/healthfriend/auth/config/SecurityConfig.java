@@ -28,7 +28,7 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/actuator/**",
             "/favicon.ico",
-            "/oauth/token/refresh",
+            "/oauth/token/**",
 
             // TODO: 해당 endpoint 확인 후 삭제할 수 있음
             "/login",
