@@ -8,7 +8,6 @@ import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
-import org.springframework.security.oauth2.core.OAuth2TokenIntrospectionClaimNames;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -27,10 +26,7 @@ public class GoogleOpaqueTokenIntrospectorDelegator implements OpaqueTokenIntros
                 .orElseThrow(NoSuchElementException::new);
         return new SingleAuthorityOAuth2Principal(
                 findMember.getId(),
-                Map.of(
-                        OAuth2TokenIntrospectionClaimNames.IAT, tokenValidationInfo.getIssuedAt(),
-                        OAuth2TokenIntrospectionClaimNames.EXP, tokenValidationInfo.getExpiredAt()
-                ),
+                Map.of(),
                 findMember.getAuthority()
         );
     }

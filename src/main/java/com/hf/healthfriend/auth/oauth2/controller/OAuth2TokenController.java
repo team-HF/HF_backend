@@ -1,6 +1,5 @@
 package com.hf.healthfriend.auth.oauth2.controller;
 
-import com.hf.healthfriend.auth.constant.SecurityConstants;
 import com.hf.healthfriend.auth.oauth2.dto.response.TokenRefreshResponseDto;
 import com.hf.healthfriend.auth.oauth2.tokensupport.OAuth2TokenSupport;
 import lombok.RequiredArgsConstructor;

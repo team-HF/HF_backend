@@ -9,6 +9,7 @@ import com.hf.healthfriend.auth.oauth2.dto.response.TokenValidationInfo;
  */
 public interface OAuth2TokenSupport {
 
+    @Deprecated
     // TODO: 인증 실패 시 구체적인 예외 사용
     GrantedTokenInfo grantToken(String code, String redirectUri) throws RuntimeException;
 

@@ -14,9 +14,7 @@ public class SingleAuthorityOAuth2Principal implements OAuth2AuthenticatedPrinci
     private final List<GrantedAuthority> authority;
 
     public SingleAuthorityOAuth2Principal(String name, Map<String, Object> attributes, String authority) {
-        this.name = name;
-        this.attributes = attributes;
-        this.authority = List.of(new SimpleGrantedAuthority(authority));
+        this(name, attributes, new SimpleGrantedAuthority(authority));
     }
 
     public SingleAuthorityOAuth2Principal(String name, Map<String, Object> attributes, GrantedAuthority authority) {
