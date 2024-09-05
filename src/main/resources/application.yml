@@ -13,7 +13,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/hf?autoReconnect=true&useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    url: jdbc:mysql://localhost:3306/hf
     # username과 password는 Local 개발 환경이므로 편의상 공개해 놓음
     # 배포 환경에서는 application-secret.yml 파일에 저장
     username: scott
