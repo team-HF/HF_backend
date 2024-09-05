@@ -2,6 +2,7 @@ spring:
   profiles:
     active:
       - secret
+      - constants
 
 logging:
   level:
