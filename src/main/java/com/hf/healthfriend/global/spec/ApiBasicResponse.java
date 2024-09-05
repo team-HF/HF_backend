@@ -1,10 +1,14 @@
 package com.hf.healthfriend.global.spec;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@Getter
+@ToString
 public class ApiBasicResponse<D> {
     private final int statusCode;
     private final int statusCodeSeries;
