@@ -26,7 +26,7 @@ public class Member implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
-    private Role role = Role.ROLE_USER;
+    private Role role = Role.ROLE_MEMBER;
 
     @Column(name = "email")
     private String email;
