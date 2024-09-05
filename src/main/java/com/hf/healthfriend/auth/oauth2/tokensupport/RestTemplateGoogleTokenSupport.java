@@ -94,7 +94,8 @@ public class RestTemplateGoogleTokenSupport implements GoogleOAuth2TokenSupport 
 
     private static final String GOOGLE_USER_INFO_URL = "https://www.googleapis.com/userinfo/v2/me";
 
-    private String requestEmail(String accessToken) {
+    @Override
+    public String requestEmail(String accessToken) {
         RequestEntity<Void> requestEntity = RequestEntity.get(GOOGLE_USER_INFO_URL)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                 .build();

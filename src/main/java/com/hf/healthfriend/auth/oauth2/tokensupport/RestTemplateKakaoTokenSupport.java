@@ -74,7 +74,8 @@ public class RestTemplateKakaoTokenSupport implements KakaoOAuth2TokenSupport {
                 .body(params);
     }
 
-    private String requestEmail(String accessToken) {
+    @Override
+    public String requestEmail(String accessToken) {
         RequestEntity<String> requestEntity = RequestEntity.post(KAKAO_INFO_REQUEST_URL)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)

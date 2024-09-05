@@ -17,6 +17,9 @@ public interface OAuth2TokenSupport {
     TokenValidationInfo validateToken(String token) throws RuntimeException;
 
     // TODO: 유효하지 않은 토큰일 경우 구체적인 예외 사용
+    String requestEmail(String accessToekn) throws RuntimeException;
+
+    // TODO: 유효하지 않은 토큰일 경우 구체적인 예외 사용
     String refreshToken(String refreshToken) throws RuntimeException;
 
     boolean supports(AuthServer authServer);
