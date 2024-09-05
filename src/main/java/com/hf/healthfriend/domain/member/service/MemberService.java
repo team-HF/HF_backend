@@ -1,8 +1,10 @@
 package com.hf.healthfriend.domain.member.service;
 
+import com.hf.healthfriend.domain.member.dto.MemberDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.entity.Member;
+import com.hf.healthfriend.domain.member.exception.NoSuchMemberException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,5 +25,10 @@ public class MemberService {
         Member newMember = new Member(dto.getId(), dto.getEmail(), dto.getPassword());
         Member saved = this.memberRepository.save(newMember);
         return MemberCreationResponseDto.of(saved);
+    }
+
+    public MemberDto findMember(String memberId) throws NoSuchMemberException {
+        return MemberDto.of(this.memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchMemberException(memberId)));
     }
 }

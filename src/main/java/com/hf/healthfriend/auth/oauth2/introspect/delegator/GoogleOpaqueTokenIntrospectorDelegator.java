@@ -4,34 +4,27 @@ import com.hf.healthfriend.auth.oauth2.constant.AuthServer;
 import com.hf.healthfriend.auth.oauth2.dto.response.TokenValidationInfo;
 import com.hf.healthfriend.auth.oauth2.principal.SingleAuthorityOAuth2Principal;
 import com.hf.healthfriend.auth.oauth2.tokensupport.GoogleOAuth2TokenSupport;
-import com.hf.healthfriend.domain.member.entity.Member;
-import com.hf.healthfriend.domain.member.repository.MemberRepository;
+import com.hf.healthfriend.domain.member.dto.MemberDto;
+import com.hf.healthfriend.domain.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
-import org.springframework.security.oauth2.core.OAuth2TokenIntrospectionClaimNames;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 @Component
 @RequiredArgsConstructor
 public class GoogleOpaqueTokenIntrospectorDelegator implements OpaqueTokenIntrospectorDelegator {
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
     private final GoogleOAuth2TokenSupport tokenSupport;
 
     @Override
     public OAuth2AuthenticatedPrincipal introspect(String token) {
         TokenValidationInfo tokenValidationInfo = this.tokenSupport.validateToken(token);
-        Member findMember = this.memberRepository.findById(tokenValidationInfo.getEmail())
-                .orElseThrow(NoSuchElementException::new);
+        MemberDto memberDto = this.memberService.findMember(tokenValidationInfo.getEmail());
         return new SingleAuthorityOAuth2Principal(
-                findMember.getId(),
-                Map.of(
-                        OAuth2TokenIntrospectionClaimNames.IAT, tokenValidationInfo.getIssuedAt(),
-                        OAuth2TokenIntrospectionClaimNames.EXP, tokenValidationInfo.getExpiredAt()
-                ),
-                findMember.getAuthority()
+                memberDto.getMemberId(),
+                memberDto.getRole()
         );
     }
 

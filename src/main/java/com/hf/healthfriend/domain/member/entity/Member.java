@@ -2,7 +2,10 @@ package com.hf.healthfriend.domain.member.entity;
 
 import com.hf.healthfriend.domain.member.constant.Role;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,7 +26,7 @@ public class Member implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
-    private Role role = Role.ROLE_USER;
+    private Role role = Role.ROLE_MEMBER;
 
     @Column(name = "email")
     private String email;

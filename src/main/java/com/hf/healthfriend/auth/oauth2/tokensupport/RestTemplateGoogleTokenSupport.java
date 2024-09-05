@@ -16,7 +16,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -40,6 +39,7 @@ public class RestTemplateGoogleTokenSupport implements GoogleOAuth2TokenSupport 
         this.clientSecret = clientSecret;
     }
 
+    @Deprecated
     @Override
     public GrantedTokenInfo grantToken(String code, String redirectUri) {
 
@@ -94,7 +94,8 @@ public class RestTemplateGoogleTokenSupport implements GoogleOAuth2TokenSupport 
 
     private static final String GOOGLE_USER_INFO_URL = "https://www.googleapis.com/userinfo/v2/me";
 
-    private String requestEmail(String accessToken) {
+    @Override
+    public String requestEmail(String accessToken) {
         RequestEntity<Void> requestEntity = RequestEntity.get(GOOGLE_USER_INFO_URL)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                 .build();
@@ -118,13 +119,10 @@ public class RestTemplateGoogleTokenSupport implements GoogleOAuth2TokenSupport 
                 .toUriString();
         RequestEntity<Void> requestEntity = RequestEntity.get(builtUrl).build();
 
-        Instant now = Instant.now();
         // TODO: 유효하지 않은 토큰일 경우 400 Error가 발생한다. 이 400 Error를 AuthenticationException으로 처리해야 하며 유효하지 않은 토큰이라는 메시지를 포함해야 한다.
         JSONObject responseBody = new JSONObject(this.restTemplate.exchange(requestEntity, String.class).getBody());
         return new TokenValidationInfo(
-                responseBody.getString("email"),
-                now.minusSeconds(60),
-                now.plusSeconds(responseBody.getInt("expires_in"))
+                responseBody.getString("email")
         );
     }
 

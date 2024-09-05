@@ -1,8 +1,10 @@
 package com.hf.healthfriend.auth.config;
 
+import com.hf.healthfriend.domain.member.constant.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -26,7 +28,7 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/actuator/**",
             "/favicon.ico",
-            "/oauth/token/refresh",
+            "/oauth/token/**",
 
             // TODO: 해당 endpoint 확인 후 삭제할 수 있음
             "/login",
@@ -47,7 +49,8 @@ public class SecurityConfig {
                         .httpBasic(AbstractHttpConfigurer::disable)
                         .authorizeHttpRequests((auth) -> auth
                                 .requestMatchers(WHITE_LIST).permitAll()
-                                .anyRequest().authenticated()
+                                .requestMatchers(HttpMethod.POST, "/members").hasRole(Role.ROLE_NON_MEMBER.roleName())
+                                .anyRequest().hasAnyRole(Role.ROLE_ADMIN.roleName(), Role.ROLE_MEMBER.roleName())
                         )
                         .oauth2ResourceServer((oauth) ->
                                 oauth.opaqueToken((opaqueToken) ->

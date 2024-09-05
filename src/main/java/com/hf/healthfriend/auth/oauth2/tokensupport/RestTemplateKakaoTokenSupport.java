@@ -15,7 +15,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -43,6 +42,7 @@ public class RestTemplateKakaoTokenSupport implements KakaoOAuth2TokenSupport {
         this.kakaoClientId = kakaoClientId;
     }
 
+    @Deprecated
     @Override
     public GrantedTokenInfo grantToken(String code, String redirectUri) throws RuntimeException {
         log.debug("redirectUri={}", redirectUri);
@@ -74,7 +74,8 @@ public class RestTemplateKakaoTokenSupport implements KakaoOAuth2TokenSupport {
                 .body(params);
     }
 
-    private String requestEmail(String accessToken) {
+    @Override
+    public String requestEmail(String accessToken) {
         RequestEntity<String> requestEntity = RequestEntity.post(KAKAO_INFO_REQUEST_URL)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
@@ -86,26 +87,9 @@ public class RestTemplateKakaoTokenSupport implements KakaoOAuth2TokenSupport {
 
     @Override
     public TokenValidationInfo validateToken(String token) throws RuntimeException {
-        Instant instantNow = Instant.now();
         return new TokenValidationInfo(
-                requestEmail(token),
-                instantNow.minusSeconds(60),
-                requestForExpr(token)
+                requestEmail(token)
         );
-    }
-
-    private Instant requestForExpr(String token) {
-        Instant now = Instant.now();
-        RequestEntity<Void> requestEntity = RequestEntity.get(KAKAO_ACCESS_TOKEN_INFO_URL)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-                .build();
-        JSONObject responseBody = new JSONObject(this.restTemplate.exchange(requestEntity, String.class).getBody());
-
-        if (log.isTraceEnabled()) {
-            log.trace("Response Content");
-            System.out.println(responseBody);
-        }
-        return now.plus(responseBody.getInt("expires_in"), ChronoUnit.SECONDS);
     }
 
     @Override
