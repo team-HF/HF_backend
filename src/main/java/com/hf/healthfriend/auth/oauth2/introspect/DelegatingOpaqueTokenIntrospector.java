@@ -1,6 +1,9 @@
 package com.hf.healthfriend.auth.oauth2.introspect;
 
 import com.hf.healthfriend.auth.oauth2.introspect.delegator.OpaqueTokenIntrospectorDelegator;
+import com.hf.healthfriend.auth.oauth2.principal.SingleAuthorityOAuth2Principal;
+import com.hf.healthfriend.domain.member.constant.Role;
+import com.hf.healthfriend.domain.member.exception.NoSuchMemberException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
@@ -28,10 +31,10 @@ public class DelegatingOpaqueTokenIntrospector implements OpaqueTokenIntrospecto
             log.debug("Auth Server: {}", delegator.getSupportingAuthServer());
             try {
                 return delegator.introspect(token);
-            } catch (NoSuchElementException e) {
+            } catch (NoSuchMemberException e) {
                 // Token의 Owner가 우리 서비스에 등록되지 않을 경우 (DB에 없을 경우) 발생
-                // TODO: 나중에 NoSuchElementException이 아닌 다른 Exception을 사용할 수 있다.
-                log.warn("등록되지 않은 사용자");
+                log.warn("등록되지 않은 사용자: {}", e.getMemberId());
+                return new SingleAuthorityOAuth2Principal(e.getMemberId(), Role.ROLE_NON_MEMBER);
             } catch (Exception e) { // TODO: 더 세밀한 예외 처리 필요 (아마?)
                 log.warn("{}는 지원하지 않음", delegator.getSupportingAuthServer(), e);
             }

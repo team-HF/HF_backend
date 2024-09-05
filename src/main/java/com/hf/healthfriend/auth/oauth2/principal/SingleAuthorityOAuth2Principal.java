@@ -1,5 +1,6 @@
 package com.hf.healthfriend.auth.oauth2.principal;
 
+import com.hf.healthfriend.domain.member.constant.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
@@ -12,6 +13,22 @@ public class SingleAuthorityOAuth2Principal implements OAuth2AuthenticatedPrinci
     private final String name;
     private final Map<String, Object> attributes;
     private final List<GrantedAuthority> authority;
+
+    public SingleAuthorityOAuth2Principal(String name, String authority) {
+        this(name, new SimpleGrantedAuthority(authority));
+    }
+
+    public SingleAuthorityOAuth2Principal(String name, Role role) {
+        this(name, role.name());
+    }
+
+    public SingleAuthorityOAuth2Principal(String name, GrantedAuthority authority) {
+        this(name, Map.of(), authority);
+    }
+
+    public SingleAuthorityOAuth2Principal(String name, Map<String, Object> attributes, Role role) {
+        this(name, attributes, role.name());
+    }
 
     public SingleAuthorityOAuth2Principal(String name, Map<String, Object> attributes, String authority) {
         this(name, attributes, new SimpleGrantedAuthority(authority));
