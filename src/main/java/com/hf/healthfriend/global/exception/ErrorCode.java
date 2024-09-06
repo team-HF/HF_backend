@@ -2,7 +2,6 @@ package com.hf.healthfriend.global.exception;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 /**
  * <p>Error Code를 모아 놓은 enum 클래스. Error Code에 대해서는 <a href="https://github.com/team-HF/HF_backend/wiki/Error-Code">GitHub Wiki</a>
@@ -16,10 +15,17 @@ import lombok.Getter;
  */
 
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
-@Getter
 public enum ErrorCode {
     MEMBER_OF_THE_MEMBER_ID_NOT_FOUND(100, "memberId에 해당하는 회원이 없습니다");
 
     private final int code;
     private final String message;
+
+    public int code() {
+        return this.code;
+    }
+
+    public String message() {
+        return this.message;
+    }
 }

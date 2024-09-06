@@ -11,25 +11,25 @@ import lombok.ToString;
  */
 @Getter
 @ToString
-public class NoSuchMemberException extends RuntimeException {
+public class MemberNotFoundException extends RuntimeException {
     private final String memberId;
 
-    public NoSuchMemberException(String memberId) {
+    public MemberNotFoundException(String memberId) {
         super();
         this.memberId = memberId;
     }
 
-    public NoSuchMemberException(String memberId, String message) {
+    public MemberNotFoundException(String memberId, String message) {
         super(message);
         this.memberId = memberId;
     }
 
-    public NoSuchMemberException(String memberId, Throwable cause) {
+    public MemberNotFoundException(String memberId, Throwable cause) {
         super(cause);
         this.memberId = memberId;
     }
 
-    public NoSuchMemberException(String memberId, String message, Throwable cause) {
+    public MemberNotFoundException(String memberId, String message, Throwable cause) {
         super(message, cause);
         this.memberId = memberId;
     }

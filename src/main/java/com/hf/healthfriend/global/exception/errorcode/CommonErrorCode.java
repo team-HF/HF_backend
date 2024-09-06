@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @RequiredArgsConstructor
-public enum CommonErrorCode implements ErrorCode{
+public enum CommonErrorCode{
 
     // Member
     NO_EXIST_EMAIL_MEMBER_EXCEPTION(HttpStatus.NOT_FOUND, "email에 해당하는 member가 없습니다"),
@@ -30,7 +30,6 @@ public enum CommonErrorCode implements ErrorCode{
     private final HttpStatus httpStatus;
     private final String message;
 
-    @Override
     public int getCode() {
         return httpStatus.value();
     }

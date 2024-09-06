@@ -4,7 +4,7 @@ import com.hf.healthfriend.domain.member.dto.MemberDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.entity.Member;
-import com.hf.healthfriend.domain.member.exception.NoSuchMemberException;
+import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,8 +27,8 @@ public class MemberService {
         return MemberCreationResponseDto.of(saved);
     }
 
-    public MemberDto findMember(String memberId) throws NoSuchMemberException {
+    public MemberDto findMember(String memberId) throws MemberNotFoundException {
         return MemberDto.of(this.memberRepository.findById(memberId)
-                .orElseThrow(() -> new NoSuchMemberException(memberId)));
+                .orElseThrow(() -> new MemberNotFoundException(memberId)));
     }
 }

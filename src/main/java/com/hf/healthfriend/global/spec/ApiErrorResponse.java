@@ -1,18 +1,14 @@
 package com.hf.healthfriend.global.spec;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
-@Data
+@RequiredArgsConstructor
+@Builder
 public class ApiErrorResponse {
-    private boolean status;
-    private int code;
-    private String message;
-
-    @Builder
-    public ApiErrorResponse(boolean status, int code, String message) {
-        this.status = status;
-        this.code = code;
-        this.message = message;
-    }
+    private final int statusCode;
+    private final int statusCodeSeries;
+    private final int errorCode;
+    private final String errorName;
+    private final String message;
 }
