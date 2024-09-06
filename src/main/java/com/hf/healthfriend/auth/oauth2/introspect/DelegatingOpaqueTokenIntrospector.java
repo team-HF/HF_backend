@@ -1,5 +1,6 @@
 package com.hf.healthfriend.auth.oauth2.introspect;
 
+import com.hf.healthfriend.auth.exception.CustomBearerTokenAuthenticationException;
 import com.hf.healthfriend.auth.oauth2.introspect.delegator.OpaqueTokenIntrospectorDelegator;
 import com.hf.healthfriend.auth.oauth2.principal.SingleAuthorityOAuth2Principal;
 import com.hf.healthfriend.domain.member.constant.Role;
@@ -7,8 +8,6 @@ import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +37,7 @@ public class DelegatingOpaqueTokenIntrospector implements OpaqueTokenIntrospecto
                 log.warn("{}는 지원하지 않음", delegator.getSupportingAuthServer(), e);
             }
         }
-        OAuth2Error oAuth2Error = new OAuth2Error("-1"); // TODO: Error Code 정의해야 함
-        throw new OAuth2AuthenticationException(oAuth2Error, "Invalid Token: " + token);
+
+        throw new CustomBearerTokenAuthenticationException("유효하지 않은 Access Token");
     }
 }

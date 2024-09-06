@@ -16,7 +16,9 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 public enum ErrorCode {
-    MEMBER_OF_THE_MEMBER_ID_NOT_FOUND(100, "memberId에 해당하는 회원이 없습니다");
+    UNAUTHENTICATED(100, "인증되지 않은 사용자입니다"),
+
+    MEMBER_OF_THE_MEMBER_ID_NOT_FOUND(200, "memberId에 해당하는 회원이 없습니다");
 
     private final int code;
     private final String message;

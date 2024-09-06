@@ -6,10 +6,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.springframework.http.HttpStatus;
 
+import java.io.Serializable;
+
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @ToString
-public class ApiBasicResponse<D> {
+public class ApiBasicResponse<D> implements Serializable {
     private final int statusCode;
     private final int statusCodeSeries;
     private final String message;
