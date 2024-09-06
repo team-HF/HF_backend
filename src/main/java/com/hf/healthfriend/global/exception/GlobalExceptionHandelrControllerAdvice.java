@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 @Slf4j
-public class ExControllerAdvice {
+public class GlobalExceptionHandelrControllerAdvice {
 
 
     @ExceptionHandler(MemberException.class)
