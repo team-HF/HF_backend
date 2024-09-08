@@ -3,7 +3,6 @@ package com.hf.healthfriend.domain.member.dto;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.entity.Member;
 import lombok.*;
-import org.springframework.beans.BeanUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

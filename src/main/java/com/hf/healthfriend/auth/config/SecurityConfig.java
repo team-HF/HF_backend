@@ -1,5 +1,6 @@
 package com.hf.healthfriend.auth.config;
 
+import com.hf.healthfriend.auth.filter.AccessControlFilter;
 import com.hf.healthfriend.auth.filter.AccessDeniedExceptionResolverFilter;
 import com.hf.healthfriend.auth.filter.AuthExceptionHandlerFilter;
 import com.hf.healthfriend.domain.member.constant.Role;
@@ -44,6 +45,7 @@ public class SecurityConfig {
     private final OpaqueTokenIntrospector opaqueTokenIntrospector;
     private final AuthExceptionHandlerFilter exceptionHandlerFilter;
     private final AccessDeniedExceptionResolverFilter accessDeniedExceptionResolverFilter;
+    private final AccessControlFilter accessControlFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -66,6 +68,7 @@ public class SecurityConfig {
                         .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                         .addFilterBefore(this.exceptionHandlerFilter, BearerTokenAuthenticationFilter.class)
                         .addFilterBefore(this.accessDeniedExceptionResolverFilter, AuthorizationFilter.class)
+                        .addFilterAfter(this.accessControlFilter, AuthorizationFilter.class)
                         .build();
     }
 

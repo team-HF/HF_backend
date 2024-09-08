@@ -42,7 +42,7 @@ public class MemberController {
                     content = @Content(schema = @Schema(implementation = MemberCreationResponseSchema.class))
             ),
             @ApiResponse(
-                    description = "회원 중복 등록 에러",
+                    description = "회원 중복 등록 에러 / Error Code: 201",
                     responseCode = "400",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             )
@@ -63,7 +63,7 @@ public class MemberController {
                     content = @Content(schema = @Schema(implementation = MemberResponseSchema.class))
             ),
             @ApiResponse(
-                    description = "없는 회원 검색",
+                    description = "없는 회원 검색 / Error Code: 200",
                     responseCode = "404",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             )
