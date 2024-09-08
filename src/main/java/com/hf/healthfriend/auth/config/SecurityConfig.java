@@ -55,7 +55,9 @@ public class SecurityConfig {
                         .httpBasic(AbstractHttpConfigurer::disable)
                         .authorizeHttpRequests((auth) -> auth
                                 .requestMatchers(WHITE_LIST).permitAll()
-                                .requestMatchers(HttpMethod.POST, "/members").hasRole(Role.ROLE_NON_MEMBER.roleName())
+                                .requestMatchers(HttpMethod.POST, "/members").hasAnyRole(
+                                        Role.ROLE_NON_MEMBER.roleName(), Role.ROLE_MEMBER.roleName()
+                                )
                                 .anyRequest().hasAnyRole(Role.ROLE_ADMIN.roleName(), Role.ROLE_MEMBER.roleName())
                         )
                         .oauth2ResourceServer((oauth) ->
