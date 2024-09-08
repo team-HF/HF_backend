@@ -5,15 +5,10 @@ import com.hf.healthfriend.auth.oauth2.dto.response.TokenValidationInfo;
 import com.hf.healthfriend.auth.oauth2.principal.SingleAuthorityOAuth2Principal;
 import com.hf.healthfriend.auth.oauth2.tokensupport.KakaoOAuth2TokenSupport;
 import com.hf.healthfriend.domain.member.dto.MemberDto;
-import com.hf.healthfriend.domain.member.entity.Member;
-import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
-import java.util.NoSuchElementException;
 
 @Component
 @RequiredArgsConstructor
