@@ -1,6 +1,7 @@
 package com.hf.healthfriend.domain.member.service;
 
 import com.hf.healthfriend.domain.member.dto.MemberDto;
+import com.hf.healthfriend.domain.member.dto.MemberUpdateDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.entity.Member;
@@ -45,5 +46,10 @@ public class MemberService {
     public MemberDto findMember(String memberId) throws MemberNotFoundException {
         return MemberDto.of(this.memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId)));
+    }
+
+    public MemberDto updateMember(String memberId, MemberUpdateDto updateDto) throws MemberNotFoundException {
+        Member updatedMember = this.memberRepository.update(memberId, updateDto);
+        return MemberDto.of(updatedMember);
     }
 }

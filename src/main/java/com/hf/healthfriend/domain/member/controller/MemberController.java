@@ -1,6 +1,7 @@
 package com.hf.healthfriend.domain.member.controller;
 
 import com.hf.healthfriend.domain.member.dto.MemberDto;
+import com.hf.healthfriend.domain.member.dto.MemberUpdateDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.service.MemberService;
@@ -31,6 +32,7 @@ public class MemberController {
 
     private final MemberService memberService;
 
+    @PostMapping(consumes = "application/json", produces = "application/json")
     @Operation(
             summary = "회원 생성"
     )
@@ -47,7 +49,6 @@ public class MemberController {
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             )
     })
-    @PostMapping(consumes = "application/json", produces = "application/json")
     public ResponseEntity<ApiBasicResponse<MemberCreationResponseDto>> createMember(@RequestBody MemberCreationRequestDto requestBody) throws URISyntaxException {
         log.info("Request Body:\n{}", requestBody);
         MemberCreationResponseDto result = this.memberService.createMember(requestBody);
@@ -55,6 +56,7 @@ public class MemberController {
                 .body(ApiBasicResponse.of(result, HttpStatus.CREATED));
     }
 
+    @GetMapping(value = "/{memberId}", consumes = "application/json", produces = "application/json")
     @Operation(summary = "회원 찾기")
     @ApiResponses({
             @ApiResponse(
@@ -68,9 +70,28 @@ public class MemberController {
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             )
     })
-    @GetMapping("/{memberId}")
     public ResponseEntity<ApiBasicResponse<MemberDto>> findMember(@PathVariable String memberId) {
         log.info("Find member of id={}", memberId);
         return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.findMember(memberId), HttpStatus.OK));
+    }
+
+    @PatchMapping(value = "/{memberId}", consumes = "application/json", produces = "application/json")
+    @Operation(summary = "회원 업데이트")
+    @ApiResponses({
+            @ApiResponse(
+                    description = "회원 업데이트 성공",
+                    responseCode = "200",
+                    content = @Content(schema = @Schema(implementation = MemberResponseSchema.class))
+            ),
+            @ApiResponse(
+                    description = "없는 회원 검색 / Error Code: 200",
+                    responseCode = "404",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    public ResponseEntity<ApiBasicResponse<MemberDto>> updateMember(@PathVariable String memberId,
+                                                                    @RequestBody MemberUpdateDto dto) {
+        MemberDto resultDto = this.memberService.updateMember(memberId, dto);
+        return ResponseEntity.ok(ApiBasicResponse.of(resultDto, HttpStatus.OK));
     }
 }

@@ -4,7 +4,7 @@ import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.entity.Member;
-import com.hf.healthfriend.domain.member.repository.MemberRepository;
+import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ class TestMemberService {
     private MemberService memberService;
 
     @Autowired
-    private MemberRepository memberRepository;
+    private MemberJpaRepository memberJpaRepository;
 
     @DisplayName("createMember - 빠진 데이터 없이 모두 입력")
     @Test
@@ -67,7 +67,7 @@ class TestMemberService {
         assertThat(responseDto.getFitnessObjective()).isEqualTo(FitnessObjective.RUNNING);
         assertThat(responseDto.getFitnessKind()).isEqualTo(FitnessKind.FUNCTIONAL);
 
-        Member member = this.memberRepository.findById("sample@gmail.com").orElseThrow();
+        Member member = this.memberJpaRepository.findById("sample@gmail.com").orElseThrow();
 
         log.info("Member from repository={}", member);
 

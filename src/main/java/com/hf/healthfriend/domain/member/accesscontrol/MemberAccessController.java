@@ -3,7 +3,7 @@ package com.hf.healthfriend.domain.member.accesscontrol;
 import com.hf.healthfriend.auth.accesscontrol.AccessControlTrigger;
 import com.hf.healthfriend.auth.accesscontrol.AccessController;
 import com.hf.healthfriend.domain.member.constant.Role;
-import com.hf.healthfriend.domain.member.repository.MemberRepository;
+import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,7 @@ import java.util.List;
 @AccessController
 @RequiredArgsConstructor
 public class MemberAccessController {
-    private final MemberRepository memberRepository;
+    private final MemberJpaRepository memberJpaRepository;
 
     @AccessControlTrigger(path = "/members/{memberId}", method = "GET")
     public boolean controlAccessToMemberInfo(BearerTokenAuthentication authentication, HttpServletRequest request) {
@@ -32,7 +32,7 @@ public class MemberAccessController {
         String path = request.getRequestURI();
         String resourceMemberId = path.substring(path.lastIndexOf('/') + 1);
 
-        if (!memberRepository.existsById(resourceMemberId)) {
+        if (!memberJpaRepository.existsById(resourceMemberId)) {
             return true;
         }
 

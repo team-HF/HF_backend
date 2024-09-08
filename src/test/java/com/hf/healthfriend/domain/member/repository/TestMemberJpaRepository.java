@@ -15,16 +15,16 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 
 @Slf4j
 @SpringBootTest
-public class TestMemberRepository {
+public class TestMemberJpaRepository {
 
     @Autowired
-    MemberRepository memberRepository;
+    MemberJpaRepository memberJpaRepository;
 
     @DisplayName("save - 기본값만 가지고 제대로 Save 되는지 확인")
     @Test
     void save() {
         Member member = new Member("sample-member", "sample@gmail.com", null);
-        assertThatNoException().isThrownBy(() -> this.memberRepository.save(member));
+        assertThatNoException().isThrownBy(() -> this.memberJpaRepository.save(member));
     }
 
     @DisplayName("findById - 성공 예상")
@@ -33,9 +33,9 @@ public class TestMemberRepository {
         String memberId = "sample-member";
 
         Member member = new Member(memberId, "sample@gmail.com", null);
-        this.memberRepository.save(member);
+        this.memberJpaRepository.save(member);
 
-        Member findMember = this.memberRepository.findById(memberId).orElseThrow(NoSuchElementException::new);
+        Member findMember = this.memberJpaRepository.findById(memberId).orElseThrow(NoSuchElementException::new);
 
         log.info("findMember={}", findMember);
 
@@ -50,9 +50,9 @@ public class TestMemberRepository {
         String memberId = "sample-member";
 
         Member member = new Member(memberId, "sample@gmail.com", null);
-        this.memberRepository.save(member);
+        this.memberJpaRepository.save(member);
 
-        Optional<Member> findMemberOp = this.memberRepository.findById(memberId + "SUFFIX");
+        Optional<Member> findMemberOp = this.memberJpaRepository.findById(memberId + "SUFFIX");
 
         assertThat(findMemberOp).isEmpty();
     }
