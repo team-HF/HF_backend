@@ -19,7 +19,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -37,7 +36,6 @@ import java.util.Set;
  * @see com.hf.healthfriend.auth.accesscontrol.requestpath.RequestPathNode
  */
 @Slf4j
-@Component
 public class AccessControlFilter extends OncePerRequestFilter {
     private final ApplicationContext context;
     private final RequestPathTree<BeanAndMethod> accessControls;

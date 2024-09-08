@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @Builder
 @Getter
 @ToString
+@EqualsAndHashCode
 public class MemberCreationRequestDto {
     private String id;
     private String nickname;

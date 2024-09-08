@@ -56,7 +56,7 @@ public class MemberController {
                 .body(ApiBasicResponse.of(result, HttpStatus.CREATED));
     }
 
-    @GetMapping(value = "/{memberId}", consumes = "application/json", produces = "application/json")
+    @GetMapping(value = "/{memberId}", produces = "application/json")
     @Operation(summary = "회원 찾기")
     @ApiResponses({
             @ApiResponse(

@@ -13,7 +13,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.BufferedWriter;
@@ -29,7 +28,6 @@ import java.io.IOException;
  * @see org.springframework.security.access.AccessDeniedException
  */
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public class AccessDeniedExceptionResolverFilter extends OncePerRequestFilter {
     private final ObjectMapper objectMapper;

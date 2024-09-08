@@ -1,6 +1,8 @@
 package com.hf.healthfriend.global.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hf.healthfriend.global.util.HttpCookieUtils;
 import com.hf.healthfriend.global.util.SecuredHttpCookieUtils;
@@ -20,7 +22,7 @@ public class BeanConfig {
 
     @Bean
     @ConditionalOnMissingBean(HttpCookieUtils.class)
-    public HttpCookieUtils noSecurityHttpCookieUtils(@Value("${client.domain}") String clientDomain) {
+    public HttpCookieUtils securedHttpCookieUtils(@Value("${client.domain}") String clientDomain) {
         return new SecuredHttpCookieUtils(clientDomain);
     }
 
@@ -28,6 +30,8 @@ public class BeanConfig {
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        objectMapper.setDateFormat(new StdDateFormat().withColonInTimeZone(true));
         return objectMapper;
     }
 }
