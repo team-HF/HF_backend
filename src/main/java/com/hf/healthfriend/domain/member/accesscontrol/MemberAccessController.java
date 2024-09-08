@@ -20,6 +20,15 @@ public class MemberAccessController {
 
     @AccessControlTrigger(path = "/members/{memberId}", method = "GET")
     public boolean controlAccessToMemberInfo(BearerTokenAuthentication authentication, HttpServletRequest request) {
+        return accessControl(authentication, request);
+    }
+
+    @AccessControlTrigger(path = "/members/{memberId}", method = "PATCH")
+    public boolean accessControlForUpdateMember(BearerTokenAuthentication authentication, HttpServletRequest request) {
+        return accessControl(authentication, request);
+    }
+
+    private boolean accessControl(BearerTokenAuthentication authentication, HttpServletRequest request) {
         List<String> authorities = authentication.getAuthorities().stream()
                 .map((GrantedAuthority::getAuthority))
                 .toList();
