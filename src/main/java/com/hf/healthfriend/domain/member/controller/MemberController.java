@@ -12,6 +12,7 @@ import com.hf.healthfriend.global.spec.schema.MemberResponseSchema;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -46,7 +47,19 @@ public class MemberController {
             @ApiResponse(
                     description = "회원 중복 등록 에러 / Error Code: 201",
                     responseCode = "400",
-                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+                    content = @Content(
+                            schema = @Schema(implementation = ApiErrorResponse.class),
+                            examples = @ExampleObject("""
+                                    {
+                                        "statusCode": 400,
+                                        "statusCodeSeries": 4,
+                                        "errorCode": 201,
+                                        "errorName": "MEMBER_ALREADY_EXISTS",
+                                        "message": "이미 존재하는 회원입니다"
+                                    }
+                                    """
+                            )
+                    )
             )
     })
     public ResponseEntity<ApiBasicResponse<MemberCreationResponseDto>> createMember(@RequestBody MemberCreationRequestDto requestBody) throws URISyntaxException {
@@ -67,7 +80,18 @@ public class MemberController {
             @ApiResponse(
                     description = "없는 회원 검색 / Error Code: 200",
                     responseCode = "404",
-                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+                    content = @Content(
+                            schema = @Schema(implementation = ApiErrorResponse.class),
+                            examples = @ExampleObject("""
+                                    {
+                                        "statusCode": 404,
+                                        "statusCodeSeries": 4,
+                                        "errorCode": 200,
+                                        "errorName": "MEMBER_OF_THE_MEMBER_ID_NOT_FOUND",
+                                        "message": "memberId에 해당하는 회원이 없습니다"
+                                    }
+                                    """)
+                    )
             )
     })
     public ResponseEntity<ApiBasicResponse<MemberDto>> findMember(@PathVariable String memberId) {
@@ -86,7 +110,18 @@ public class MemberController {
             @ApiResponse(
                     description = "없는 회원 검색 / Error Code: 200",
                     responseCode = "404",
-                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+                    content = @Content(
+                            schema = @Schema(implementation = ApiErrorResponse.class),
+                            examples = @ExampleObject("""
+                                    {
+                                        "statusCode": 404,
+                                        "statusCodeSeries": 4,
+                                        "errorCode": 200,
+                                        "errorName": "MEMBER_OF_THE_MEMBER_ID_NOT_FOUND",
+                                        "message": "memberId에 해당하는 회원이 없습니다"
+                                    }
+                                    """)
+                    )
             )
     })
     public ResponseEntity<ApiBasicResponse<MemberDto>> updateMember(@PathVariable String memberId,
