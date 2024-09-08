@@ -75,7 +75,9 @@ public class OAuth2RedirectionController {
         // 너무 간단한 로직이므로 Service 객체를 따로 정의하지 않고 여기서 했다.
         GrantedTokenInfo grantedTokenInfo = tokenSupport.grantToken(code, redirectUri);
         MemberCreationResponseDto memberCreationResponseDto = this.memberService.createMember(
-                new MemberCreationRequestDto(grantedTokenInfo.getEmail(), grantedTokenInfo.getEmail(), null));
+                MemberCreationRequestDto.builder()
+                        .id(grantedTokenInfo.getEmail())
+                        .build());
 
         // TODO: 302 Redirection Status를 set 해야 할 듯
         return ResponseEntity.ok()
