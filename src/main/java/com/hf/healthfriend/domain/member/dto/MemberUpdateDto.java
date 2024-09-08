@@ -1,14 +1,13 @@
 package com.hf.healthfriend.domain.member.dto;
 
 import com.hf.healthfriend.domain.member.constant.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 @Getter
 @ToString
 public class MemberUpdateDto {

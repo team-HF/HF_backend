@@ -1,12 +1,17 @@
 package com.hf.healthfriend.auth.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hf.healthfriend.auth.exceptionhandling.AuthenticationExceptionHandler;
 import com.hf.healthfriend.auth.filter.AccessControlFilter;
 import com.hf.healthfriend.auth.filter.AccessDeniedExceptionResolverFilter;
 import com.hf.healthfriend.auth.filter.AuthExceptionHandlerFilter;
 import com.hf.healthfriend.domain.member.constant.Role;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -21,6 +26,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -43,12 +49,31 @@ public class SecurityConfig {
     };
 
     private final OpaqueTokenIntrospector opaqueTokenIntrospector;
-    private final AuthExceptionHandlerFilter exceptionHandlerFilter;
-    private final AccessDeniedExceptionResolverFilter accessDeniedExceptionResolverFilter;
-    private final AccessControlFilter accessControlFilter;
+    private final ObjectMapper objectMapper;
+    private final List<AuthenticationExceptionHandler> exceptionHandlers;
+    private final ApplicationContext context;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    @Profile("oauth")
+    public AccessControlFilter accessControlFilter() {
+        return new AccessControlFilter(this.context);
+    }
+
+    @Bean
+    @Profile("oauth")
+    public AccessDeniedExceptionResolverFilter accessDeniedExceptionResolverFilter() {
+        return new AccessDeniedExceptionResolverFilter(this.objectMapper);
+    }
+
+    @Bean
+    @Profile("oauth")
+    public AuthExceptionHandlerFilter authExceptionHandlerFilter() {
+        return new AuthExceptionHandlerFilter(this.objectMapper, this.exceptionHandlers);
+    }
+
+    @Bean
+    @Profile("oauth")
+    public SecurityFilterChain domainSecurityFilterChain(HttpSecurity http) throws Exception {
         return
                 http
                         .cors(corsCustomizer ->corsCustomizer.configurationSource(corsConfigurationSource()))
@@ -66,10 +91,22 @@ public class SecurityConfig {
                                 oauth.opaqueToken((opaqueToken) ->
                                         opaqueToken.introspector(this.opaqueTokenIntrospector)))
                         .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                        .addFilterBefore(this.exceptionHandlerFilter, BearerTokenAuthenticationFilter.class)
-                        .addFilterBefore(this.accessDeniedExceptionResolverFilter, AuthorizationFilter.class)
-                        .addFilterAfter(this.accessControlFilter, AuthorizationFilter.class)
+                        .addFilterBefore(authExceptionHandlerFilter(), BearerTokenAuthenticationFilter.class)
+                        .addFilterBefore(accessDeniedExceptionResolverFilter(), AuthorizationFilter.class)
+                        .addFilterAfter(accessControlFilter(), AuthorizationFilter.class)
                         .build();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "domainSecurityFilterChain")
+    public SecurityFilterChain noAuthCheckSecurityFilterChain(HttpSecurity http) throws Exception {
+        return http.cors(corsCustomizer ->corsCustomizer.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests((request) -> request.anyRequest().permitAll())
+                .build();
     }
 
     @Bean

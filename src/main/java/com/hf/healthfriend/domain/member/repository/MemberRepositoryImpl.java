@@ -46,6 +46,9 @@ public class MemberRepositoryImpl implements MemberRepository{
         if (updateDto.getRole() != null) {
             member.setRole(updateDto.getRole());
         }
+        if (updateDto.getNickname() != null) {
+            member.setNickname(updateDto.getNickname());
+        }
         if (updateDto.getBirthDate() != null) {
             member.setBirthDate(updateDto.getBirthDate());
         }
