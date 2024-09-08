@@ -1,5 +1,6 @@
 package com.hf.healthfriend.auth.config;
 
+import com.hf.healthfriend.auth.filter.AccessDeniedExceptionResolverFilter;
 import com.hf.healthfriend.auth.filter.AuthExceptionHandlerFilter;
 import com.hf.healthfriend.domain.member.constant.Role;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -41,6 +43,7 @@ public class SecurityConfig {
 
     private final OpaqueTokenIntrospector opaqueTokenIntrospector;
     private final AuthExceptionHandlerFilter exceptionHandlerFilter;
+    private final AccessDeniedExceptionResolverFilter accessDeniedExceptionResolverFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -60,6 +63,7 @@ public class SecurityConfig {
                                         opaqueToken.introspector(this.opaqueTokenIntrospector)))
                         .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                         .addFilterBefore(this.exceptionHandlerFilter, BearerTokenAuthenticationFilter.class)
+                        .addFilterBefore(this.accessDeniedExceptionResolverFilter, AuthorizationFilter.class)
                         .build();
     }
 
