@@ -1,5 +1,7 @@
 package com.hf.healthfriend.auth.config;
 
+import com.hf.healthfriend.auth.filter.AccessControlFilter;
+import com.hf.healthfriend.auth.filter.AccessDeniedExceptionResolverFilter;
 import com.hf.healthfriend.auth.filter.AuthExceptionHandlerFilter;
 import com.hf.healthfriend.domain.member.constant.Role;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -41,6 +44,8 @@ public class SecurityConfig {
 
     private final OpaqueTokenIntrospector opaqueTokenIntrospector;
     private final AuthExceptionHandlerFilter exceptionHandlerFilter;
+    private final AccessDeniedExceptionResolverFilter accessDeniedExceptionResolverFilter;
+    private final AccessControlFilter accessControlFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -52,7 +57,9 @@ public class SecurityConfig {
                         .httpBasic(AbstractHttpConfigurer::disable)
                         .authorizeHttpRequests((auth) -> auth
                                 .requestMatchers(WHITE_LIST).permitAll()
-                                .requestMatchers(HttpMethod.POST, "/members").hasRole(Role.ROLE_NON_MEMBER.roleName())
+                                .requestMatchers(HttpMethod.POST, "/members").hasAnyRole(
+                                        Role.ROLE_NON_MEMBER.roleName(), Role.ROLE_MEMBER.roleName()
+                                )
                                 .anyRequest().hasAnyRole(Role.ROLE_ADMIN.roleName(), Role.ROLE_MEMBER.roleName())
                         )
                         .oauth2ResourceServer((oauth) ->
@@ -60,6 +67,8 @@ public class SecurityConfig {
                                         opaqueToken.introspector(this.opaqueTokenIntrospector)))
                         .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                         .addFilterBefore(this.exceptionHandlerFilter, BearerTokenAuthenticationFilter.class)
+                        .addFilterBefore(this.accessDeniedExceptionResolverFilter, AuthorizationFilter.class)
+                        .addFilterAfter(this.accessControlFilter, AuthorizationFilter.class)
                         .build();
     }
 

@@ -1,21 +1,19 @@
 package com.hf.healthfriend.global.spec;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.http.HttpStatus;
 
 import java.io.Serializable;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @ToString
 public class ApiBasicResponse<D> implements Serializable {
-    private final int statusCode;
-    private final int statusCodeSeries;
-    private final String message;
-    private final D content;
+    private int statusCode;
+    private int statusCodeSeries;
+    private String message;
+    private D content;
 
     public static <D> ApiBasicResponse<D> of(HttpStatus httpStatus) {
         return of(null, httpStatus, null);
