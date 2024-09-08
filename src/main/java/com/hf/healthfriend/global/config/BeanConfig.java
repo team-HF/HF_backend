@@ -3,7 +3,7 @@ package com.hf.healthfriend.global.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hf.healthfriend.global.util.HttpCookieUtils;
-import com.hf.healthfriend.global.util.NoSecurityHttpCookieUtils;
+import com.hf.healthfriend.global.util.SecuredHttpCookieUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +21,7 @@ public class BeanConfig {
     @Bean
     @ConditionalOnMissingBean(HttpCookieUtils.class)
     public HttpCookieUtils noSecurityHttpCookieUtils(@Value("${client.domain}") String clientDomain) {
-        return new NoSecurityHttpCookieUtils(clientDomain);
+        return new SecuredHttpCookieUtils(clientDomain);
     }
 
     @Bean
