@@ -134,6 +134,54 @@ class TestMemberService {
                 .isThrownBy(() -> this.memberService.createMember(testcase));
     }
 
+    @DisplayName("isMemberExists - exists member")
+    @Test
+    void isMemberExists_returnTrue() {
+        MemberCreationRequestDto requestDto = MemberCreationRequestDto.builder()
+                .id("sample@gmail.com")
+                .nickname("샘플닉네임")
+                .birthDate(LocalDate.now())
+                .gender(Gender.MALE)
+                .introduction("안녕하세요. 뚱입니다.")
+                .fitnessLevel(FitnessLevel.ADVANCED)
+                .companionStyle(CompanionStyle.GROUP)
+                .fitnessEagerness(FitnessEagerness.LAZY)
+                .fitnessObjective(FitnessObjective.RUNNING)
+                .fitnessKind(FitnessKind.FUNCTIONAL)
+                .build();
+
+        log.info("requestDto={}", requestDto);
+
+        this.memberService.createMember(requestDto);
+
+        boolean memberExists = this.memberService.isMemberExists("sample@gmail.com");
+        assertThat(memberExists).isTrue();
+    }
+
+    @DisplayName("isMemberExists - not exists member")
+    @Test
+    void isMemberExists_returnFalse() {
+        MemberCreationRequestDto requestDto = MemberCreationRequestDto.builder()
+                .id("sample@gmail.com")
+                .nickname("샘플닉네임")
+                .birthDate(LocalDate.now())
+                .gender(Gender.MALE)
+                .introduction("안녕하세요. 뚱입니다.")
+                .fitnessLevel(FitnessLevel.ADVANCED)
+                .companionStyle(CompanionStyle.GROUP)
+                .fitnessEagerness(FitnessEagerness.LAZY)
+                .fitnessObjective(FitnessObjective.RUNNING)
+                .fitnessKind(FitnessKind.FUNCTIONAL)
+                .build();
+
+        log.info("requestDto={}", requestDto);
+
+        this.memberService.createMember(requestDto);
+
+        boolean memberExists = this.memberService.isMemberExists("no@such.member");
+        assertThat(memberExists).isFalse();
+    }
+
     @DisplayName("findMember - Member 제대로 찾음")
     @Test
     void findMember_success() {
