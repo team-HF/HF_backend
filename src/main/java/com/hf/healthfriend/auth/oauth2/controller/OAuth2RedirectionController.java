@@ -8,7 +8,15 @@ import com.hf.healthfriend.auth.oauth2.dto.response.OAuth2LoginResponseDto;
 import com.hf.healthfriend.auth.oauth2.tokensupport.OAuth2TokenSupport;
 import com.hf.healthfriend.domain.member.service.MemberService;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
+import com.hf.healthfriend.global.spec.ApiErrorResponse;
+import com.hf.healthfriend.global.spec.schema.OAuth2LoginResponseSchema;
 import com.hf.healthfriend.global.util.HttpCookieUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -58,12 +66,72 @@ public class OAuth2RedirectionController {
         binder.registerCustomEditor(AuthServer.class, AuthServerEditor.getInstance());
     }
 
+    @Operation(summary = "카카오 로그인 Redirect URI")
+    @ApiResponses({
+            @ApiResponse(
+                    description = "카카오 로그인 성공 및 Access Token, Refresh Token, email 반환",
+                    responseCode = "200",
+                    headers = @Header(
+                            name = "Set-Cookie",
+                            description = "Refresh Token을 담은 HTTP-only, Secure, Same-site: None 쿠키"
+                    ),
+                    content = @Content(schema = @Schema(implementation = OAuth2LoginResponseSchema.class))
+            ),
+            @ApiResponse(
+                    description = "유효하지 않은 인가코드로 인한 카카오 로그인 실패",
+                    responseCode = "401",
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = ApiErrorResponse.class,
+                                    example = """
+                                            {
+                                                "statusCode": 401,
+                                                "statusCodeSeries": 4,
+                                                "errorCode": 102,
+                                                "errorName": "INVALID_CODE",
+                                                "message": "유효하지 않은 인가코드입니다"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     @GetMapping("/kakao")
     public ResponseEntity<ApiBasicResponse<OAuth2LoginResponseDto>> get(@RequestParam("code") String code, HttpServletRequest request) {
         log.info("Kakao Login has been requested");
         return doTheSameThing(AuthServer.KAKAO, code, request.getRequestURL().toString());
     }
 
+    @Operation(summary = "구글 로그인 Redirect URI")
+    @ApiResponses({
+            @ApiResponse(
+                    description = "구글 로그인 성공 및 Access Token, Refresh Token, email 반환",
+                    responseCode = "200",
+                    headers = @Header(
+                            name = "Set-Cookie",
+                            description = "Refresh Token을 담은 HTTP-only, Secure, Same-site: None 쿠키"
+                    ),
+                    content = @Content(schema = @Schema(implementation = OAuth2LoginResponseSchema.class))
+            ),
+            @ApiResponse(
+                    description = "유효하지 않은 인가코드로 인한 구글 로그인 실패",
+                    responseCode = "401",
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = ApiErrorResponse.class,
+                                    example = """
+                                            {
+                                                "statusCode": 401,
+                                                "statusCodeSeries": 4,
+                                                "errorCode": 102,
+                                                "errorName": "INVALID_CODE",
+                                                "message": "유효하지 않은 인가코드입니다"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     @GetMapping("/google")
     public ResponseEntity<ApiBasicResponse<OAuth2LoginResponseDto>> getGoogle(@RequestParam("code") String code, HttpServletRequest request) {
         log.info("Google Login has been requested");
