@@ -14,6 +14,7 @@ import com.hf.healthfriend.global.util.HttpCookieUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -81,17 +82,16 @@ public class OAuth2RedirectionController {
                     description = "유효하지 않은 인가코드로 인한 카카오 로그인 실패",
                     responseCode = "401",
                     content = @Content(
-                            schema = @Schema(
-                                    implementation = ApiErrorResponse.class,
-                                    example = """
-                                            {
-                                                "statusCode": 401,
-                                                "statusCodeSeries": 4,
-                                                "errorCode": 102,
-                                                "errorName": "INVALID_CODE",
-                                                "message": "유효하지 않은 인가코드입니다"
-                                            }
-                                            """
+                            schema = @Schema(implementation = ApiErrorResponse.class),
+                            examples = @ExampleObject("""
+                                    {
+                                        "statusCode": 401,
+                                        "statusCodeSeries": 4,
+                                        "errorCode": 102,
+                                        "errorName": "INVALID_CODE",
+                                        "message": "유효하지 않은 인가코드입니다"
+                                    }
+                                    """
                             )
                     )
             )
@@ -117,17 +117,16 @@ public class OAuth2RedirectionController {
                     description = "유효하지 않은 인가코드로 인한 구글 로그인 실패",
                     responseCode = "401",
                     content = @Content(
-                            schema = @Schema(
-                                    implementation = ApiErrorResponse.class,
-                                    example = """
-                                            {
-                                                "statusCode": 401,
-                                                "statusCodeSeries": 4,
-                                                "errorCode": 102,
-                                                "errorName": "INVALID_CODE",
-                                                "message": "유효하지 않은 인가코드입니다"
-                                            }
-                                            """
+                            schema = @Schema(implementation = ApiErrorResponse.class),
+                            examples = @ExampleObject("""
+                                    {
+                                        "statusCode": 401,
+                                        "statusCodeSeries": 4,
+                                        "errorCode": 102,
+                                        "errorName": "INVALID_CODE",
+                                        "message": "유효하지 않은 인가코드입니다"
+                                    }
+                                    """
                             )
                     )
             )

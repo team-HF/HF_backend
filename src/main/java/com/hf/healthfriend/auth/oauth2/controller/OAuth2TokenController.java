@@ -11,6 +11,7 @@ import com.hf.healthfriend.global.spec.schema.TokenRefreshResponseSchema;
 import com.hf.healthfriend.global.util.HttpCookieUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -51,36 +52,36 @@ public class OAuth2TokenController {
                     description = "Access Token 재발급 성공",
                     responseCode = "200",
                     content = @Content(
-                            schema = @Schema(
-                                    implementation = TokenRefreshResponseSchema.class,
-                                    example = """
+                            schema = @Schema(implementation = TokenRefreshResponseSchema.class),
+                            examples = {
+                                    @ExampleObject("""
                                             {
                                                 "statusCode": 200,
-                                                "statusCodeSeries: 2,
+                                                "statusCodeSeries": 2,
                                                 "message": null,
                                                 "content": {
                                                     "accessToken": "fawoigh42ihsioahoidasasodifh..."
                                                 }
                                             }
                                             """
-                            )
+                                    )
+                            }
                     )
             ),
             @ApiResponse(
-                    description = "유효하지 않은 Refresh Token으로 인한 Acces Token 재발급 실패",
+                    description = "유효하지 않은 Refresh Token으로 인한 Access Token 재발급 실패",
                     responseCode = "401",
                     content = @Content(
-                            schema = @Schema(
-                                    implementation = ApiErrorResponse.class,
-                                    example = """
-                                            {
-                                                "statusCode": 401,
-                                                "statusCodeSeries" 4,
-                                                "errorCode": 103,
-                                                "errorName": "INVALID_REFRESH_TOKEN",
-                                                "message": "유효하지 않은 Refresh Token입니다"
-                                            }
-                                            """
+                            schema = @Schema(implementation = ApiErrorResponse.class),
+                            examples = @ExampleObject("""
+                                    {
+                                        "statusCode": 401,
+                                        "statusCodeSeries": 4,
+                                        "errorCode": 103,
+                                        "errorName": "INVALID_REFRESH_TOKEN",
+                                        "message": "유효하지 않은 Refresh Token입니다"
+                                    }
+                                    """
                             )
                     )
             )

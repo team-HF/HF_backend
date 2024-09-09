@@ -48,8 +48,16 @@ public class RestTemplateKakaoTokenSupport implements KakaoOAuth2TokenSupport {
         log.debug("redirectUri={}", redirectUri);
         LocalDateTime recordNow = LocalDateTime.now();
 
+        ResponseEntity<String> responseEntity;
+        try {
+            responseEntity =
+                    this.restTemplate.exchange(buildTokenRequestEntity(code, redirectUri), String.class);
+        } catch (Exception e) {
+            throw new InvalidCodeException("유효하지 않은 인가 코드: " + code, e);
+        }
+
         JSONObject responseBody =
-                new JSONObject(this.restTemplate.exchange(buildTokenRequestEntity(code, redirectUri), String.class).getBody());
+                new JSONObject(responseEntity.getBody());
 
         String accessToken = responseBody.getString("access_token");
 
