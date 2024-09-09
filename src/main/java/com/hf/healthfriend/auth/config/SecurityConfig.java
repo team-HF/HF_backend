@@ -7,7 +7,6 @@ import com.hf.healthfriend.auth.filter.AccessDeniedExceptionResolverFilter;
 import com.hf.healthfriend.auth.filter.AuthExceptionHandlerFilter;
 import com.hf.healthfriend.domain.member.constant.Role;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -112,11 +111,11 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        config.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:8081"));
         // config.addAllowedOriginPattern("http://localhost:3000/reissue");
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowCredentials(true);
-        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
+        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "Cookie"));
         config.setExposedHeaders(Arrays.asList("Authorization"));
         config.setMaxAge(3600L); // 1시간
 

@@ -1,18 +1,19 @@
 package com.hf.healthfriend.auth.oauth2.controller;
 
+import com.hf.healthfriend.auth.constant.CookieConstants;
 import com.hf.healthfriend.auth.oauth2.constant.AuthServer;
 import com.hf.healthfriend.auth.oauth2.dto.propertyeditor.AuthServerEditor;
 import com.hf.healthfriend.auth.oauth2.dto.response.GrantedTokenInfo;
 import com.hf.healthfriend.auth.oauth2.dto.response.OAuth2LoginResponseDto;
 import com.hf.healthfriend.auth.oauth2.tokensupport.OAuth2TokenSupport;
-import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
-import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.service.MemberService;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
 import com.hf.healthfriend.global.util.HttpCookieUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -77,8 +78,13 @@ public class OAuth2RedirectionController {
 
         boolean memberExists = this.memberService.isMemberExists(grantedTokenInfo.getEmail());
 
+        ResponseCookie refreshTokenCookie =
+                this.cookieUtils.buildResponseCookie(CookieConstants.REFRESH_TOKEN_COOKIE_KEY.getString(),
+                        grantedTokenInfo.getRefreshToken());
+
         // TODO: 302 Redirection Status를 set 해야 할 듯
         return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
                 .body(ApiBasicResponse.of(new OAuth2LoginResponseDto(!memberExists, grantedTokenInfo), HttpStatus.OK));
     }
 }

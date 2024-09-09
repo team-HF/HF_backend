@@ -18,6 +18,7 @@ import lombok.AllArgsConstructor;
 public enum ErrorCode {
     UNAUTHENTICATED(100, "인증되지 않은 사용자입니다"),
     UNAUTHORIZED(101, "허용되지 않은 접근입니다"),
+    INVALID_CODE(102, "유효하지 않은 인가코드입니다"),
 
     MEMBER_OF_THE_MEMBER_ID_NOT_FOUND(200, "memberId에 해당하는 회원이 없습니다"),
     MEMBER_ALREADY_EXISTS(201, "이미 존재하는 회원입니다");

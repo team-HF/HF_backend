@@ -1,5 +1,6 @@
 package com.hf.healthfriend.auth.oauth2.tokensupport;
 
+import com.hf.healthfriend.auth.exception.InvalidCodeException;
 import com.hf.healthfriend.auth.oauth2.constant.AuthServer;
 import com.hf.healthfriend.auth.oauth2.dto.response.GrantedTokenInfo;
 import com.hf.healthfriend.auth.oauth2.dto.response.TokenValidationInfo;
@@ -43,7 +44,7 @@ public class RestTemplateKakaoTokenSupport implements KakaoOAuth2TokenSupport {
     }
 
     @Override
-    public GrantedTokenInfo grantToken(String code, String redirectUri) throws RuntimeException {
+    public GrantedTokenInfo grantToken(String code, String redirectUri) throws InvalidCodeException {
         log.debug("redirectUri={}", redirectUri);
         LocalDateTime recordNow = LocalDateTime.now();
 

@@ -1,6 +1,6 @@
 package com.hf.healthfriend.auth.oauth2.controller;
 
-import com.hf.healthfriend.auth.constant.SecurityConstants;
+import com.hf.healthfriend.auth.constant.CookieConstants;
 import com.hf.healthfriend.auth.oauth2.dto.request.WrappingRefreshTokenWithCookieRequestDto;
 import com.hf.healthfriend.auth.oauth2.dto.response.TokenRefreshResponseDto;
 import com.hf.healthfriend.auth.oauth2.tokensupport.OAuth2TokenSupport;
@@ -27,14 +27,15 @@ public class OAuth2TokenController {
     public ResponseEntity<ApiBasicResponse<Void>> wrapWithCookie(@RequestBody WrappingRefreshTokenWithCookieRequestDto dto) {
         var refreshToken = dto.getRefreshToken();
         var responseCookie =
-                this.httpCookieUtils.buildResponseCookie(SecurityConstants.REFRESH_TOKEN_COOKIE_KEY.get(), refreshToken);
+                this.httpCookieUtils.buildResponseCookie(CookieConstants.REFRESH_TOKEN_COOKIE_KEY.getString(), refreshToken);
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
                 .body(ApiBasicResponse.of(HttpStatus.OK, "Refresh Token에 쿠키 저장 완료"));
     }
 
     @GetMapping("/refresh")
-    public TokenRefreshResponseDto refreshToken(@CookieValue("refresh_token") String refreshToken) {
+    public ResponseEntity<ApiBasicResponse<TokenRefreshResponseDto>> refreshToken(
+            @CookieValue("refresh_token") String refreshToken) {
         String regrantedAccessToken = null;
         for (OAuth2TokenSupport tokenSupport : tokenSupports) {
             try {
@@ -49,6 +50,6 @@ public class OAuth2TokenController {
             // TODO: 유효하지 않은 Refresh Token일 경우 401을 던질지 400을 던질지 고민해야 함
         }
 
-        return new TokenRefreshResponseDto(regrantedAccessToken);
+        return ResponseEntity.ok(ApiBasicResponse.of(new TokenRefreshResponseDto(regrantedAccessToken), HttpStatus.OK));
     }
 }
