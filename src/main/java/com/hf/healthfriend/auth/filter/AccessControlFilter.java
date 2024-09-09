@@ -27,7 +27,7 @@ import java.lang.reflect.Method;
 import java.util.Set;
 
 /**
- * {@link org.springframework.context.annotation.Profile}이 "accesscontrol"로 지정되어 있지 않으면
+ * {@link org.springframework.context.annotation.Profile}이 "oauth"로 지정되어 있지 않으면
  * 해당 필터는 적용되지 않는다.
  * @author PGD
  * @see AccessController
