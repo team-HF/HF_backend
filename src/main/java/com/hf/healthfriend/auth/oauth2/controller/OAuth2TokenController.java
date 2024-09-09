@@ -1,11 +1,19 @@
 package com.hf.healthfriend.auth.oauth2.controller;
 
 import com.hf.healthfriend.auth.constant.CookieConstants;
+import com.hf.healthfriend.auth.exception.InvalidRefreshTokenException;
 import com.hf.healthfriend.auth.oauth2.dto.request.WrappingRefreshTokenWithCookieRequestDto;
 import com.hf.healthfriend.auth.oauth2.dto.response.TokenRefreshResponseDto;
 import com.hf.healthfriend.auth.oauth2.tokensupport.OAuth2TokenSupport;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
+import com.hf.healthfriend.global.spec.ApiErrorResponse;
+import com.hf.healthfriend.global.spec.schema.TokenRefreshResponseSchema;
 import com.hf.healthfriend.global.util.HttpCookieUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -23,6 +31,7 @@ public class OAuth2TokenController {
     private final List<OAuth2TokenSupport> tokenSupports;
     private final HttpCookieUtils httpCookieUtils;
 
+    @Deprecated
     @PostMapping("/refresh-token/wrap-with-cookie")
     public ResponseEntity<ApiBasicResponse<Void>> wrapWithCookie(@RequestBody WrappingRefreshTokenWithCookieRequestDto dto) {
         var refreshToken = dto.getRefreshToken();
@@ -33,6 +42,49 @@ public class OAuth2TokenController {
                 .body(ApiBasicResponse.of(HttpStatus.OK, "Refresh Token에 쿠키 저장 완료"));
     }
 
+    @Operation(
+            summary = "Refresh Token을 통한 Access Token 재발급",
+            description = "HTTP-only Cookie에 담겨 있는 Refresh Token을 통해 Access Token을 재발급받는다."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    description = "Access Token 재발급 성공",
+                    responseCode = "200",
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = TokenRefreshResponseSchema.class,
+                                    example = """
+                                            {
+                                                "statusCode": 200,
+                                                "statusCodeSeries: 2,
+                                                "message": null,
+                                                "content": {
+                                                    "accessToken": "fawoigh42ihsioahoidasasodifh..."
+                                                }
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    description = "유효하지 않은 Refresh Token으로 인한 Acces Token 재발급 실패",
+                    responseCode = "401",
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = ApiErrorResponse.class,
+                                    example = """
+                                            {
+                                                "statusCode": 401,
+                                                "statusCodeSeries" 4,
+                                                "errorCode": 103,
+                                                "errorName": "INVALID_REFRESH_TOKEN",
+                                                "message": "유효하지 않은 Refresh Token입니다"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     @GetMapping("/refresh")
     public ResponseEntity<ApiBasicResponse<TokenRefreshResponseDto>> refreshToken(
             @CookieValue("refresh_token") String refreshToken) {
@@ -46,8 +98,7 @@ public class OAuth2TokenController {
         }
 
         if (regrantedAccessToken == null) {
-            throw new IllegalArgumentException(); // TODO: 임시 예외 / 저 정확한 예외를 던져야 함
-            // TODO: 유효하지 않은 Refresh Token일 경우 401을 던질지 400을 던질지 고민해야 함
+            throw new InvalidRefreshTokenException("유효하지 않은 Refresh Token");
         }
 
         return ResponseEntity.ok(ApiBasicResponse.of(new TokenRefreshResponseDto(regrantedAccessToken), HttpStatus.OK));
