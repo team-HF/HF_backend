@@ -8,9 +8,11 @@ import com.hf.healthfriend.auth.oauth2.tokensupport.OAuth2TokenSupport;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.service.MemberService;
+import com.hf.healthfriend.global.spec.ApiBasicResponse;
 import com.hf.healthfriend.global.util.HttpCookieUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -56,29 +58,27 @@ public class OAuth2RedirectionController {
     }
 
     @GetMapping("/kakao")
-    public ResponseEntity<OAuth2LoginResponseDto> get(@RequestParam("code") String code, HttpServletRequest request) {
+    public ResponseEntity<ApiBasicResponse<OAuth2LoginResponseDto>> get(@RequestParam("code") String code, HttpServletRequest request) {
         log.info("Kakao Login has been requested");
         return doTheSameThing(AuthServer.KAKAO, code, request.getRequestURL().toString());
     }
 
     @GetMapping("/google")
-    public ResponseEntity<OAuth2LoginResponseDto> getGoogle(@RequestParam("code") String code, HttpServletRequest request) {
+    public ResponseEntity<ApiBasicResponse<OAuth2LoginResponseDto>> getGoogle(@RequestParam("code") String code, HttpServletRequest request) {
         log.info("Google Login has been requested");
         return doTheSameThing(AuthServer.GOOGLE, code, request.getRequestURL().toString());
     }
 
-    private ResponseEntity<OAuth2LoginResponseDto> doTheSameThing(AuthServer authServer, String code, String redirectUri) {
+    private ResponseEntity<ApiBasicResponse<OAuth2LoginResponseDto>> doTheSameThing(AuthServer authServer, String code, String redirectUri) {
         OAuth2TokenSupport tokenSupport = this.tokenSupportByName.get(authServer);
 
         // 너무 간단한 로직이므로 Service 객체를 따로 정의하지 않고 여기서 했다.
         GrantedTokenInfo grantedTokenInfo = tokenSupport.grantToken(code, redirectUri);
-        MemberCreationResponseDto memberCreationResponseDto = this.memberService.createMember(
-                MemberCreationRequestDto.builder()
-                        .id(grantedTokenInfo.getEmail())
-                        .build());
+
+        boolean memberExists = this.memberService.isMemberExists(grantedTokenInfo.getEmail());
 
         // TODO: 302 Redirection Status를 set 해야 할 듯
         return ResponseEntity.ok()
-                .body(new OAuth2LoginResponseDto(memberCreationResponseDto, grantedTokenInfo));
+                .body(ApiBasicResponse.of(new OAuth2LoginResponseDto(!memberExists, grantedTokenInfo), HttpStatus.OK));
     }
 }
