@@ -54,25 +54,25 @@ public class SecurityConfig {
     private final ApplicationContext context;
 
     @Bean
-    @Profile("oauth")
+    @Profile("!no-auth")
     public AccessControlFilter accessControlFilter() {
         return new AccessControlFilter(this.context);
     }
 
     @Bean
-    @Profile("oauth")
+    @Profile("!no-auth")
     public AccessDeniedExceptionResolverFilter accessDeniedExceptionResolverFilter() {
         return new AccessDeniedExceptionResolverFilter(this.objectMapper);
     }
 
     @Bean
-    @Profile("oauth")
+    @Profile("!no-auth")
     public AuthExceptionHandlerFilter authExceptionHandlerFilter() {
         return new AuthExceptionHandlerFilter(this.objectMapper, this.exceptionHandlers);
     }
 
     @Bean
-    @Profile("oauth")
+    @Profile("!no-auth")
     public SecurityFilterChain domainSecurityFilterChain(HttpSecurity http) throws Exception {
         return
                 http
@@ -98,7 +98,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    @ConditionalOnMissingBean(name = "domainSecurityFilterChain")
+    @Profile("no-auth")
     public SecurityFilterChain noAuthCheckSecurityFilterChain(HttpSecurity http) throws Exception {
         return http.cors(corsCustomizer ->corsCustomizer.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
