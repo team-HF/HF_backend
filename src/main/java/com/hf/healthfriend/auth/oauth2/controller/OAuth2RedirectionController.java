@@ -25,9 +25,7 @@ import java.util.Map;
  * 받아와 요청이 들어온 클라이언트에 전달(Response)한다.
  *
  * @author PGD
- * @deprecated 토큰을 받는 요청을 프론트엔드에서 처리하기로 협의했으므로 이 컨트롤러는 필요없게 됨
  */
-@Deprecated
 @Slf4j
 @RestController
 @RequestMapping("/oauth/code")

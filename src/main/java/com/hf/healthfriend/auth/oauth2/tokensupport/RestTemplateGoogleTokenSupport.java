@@ -39,7 +39,6 @@ public class RestTemplateGoogleTokenSupport implements GoogleOAuth2TokenSupport 
         this.clientSecret = clientSecret;
     }
 
-    @Deprecated
     @Override
     public GrantedTokenInfo grantToken(String code, String redirectUri) {
 

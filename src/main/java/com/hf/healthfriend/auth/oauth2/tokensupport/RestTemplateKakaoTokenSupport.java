@@ -42,7 +42,6 @@ public class RestTemplateKakaoTokenSupport implements KakaoOAuth2TokenSupport {
         this.kakaoClientId = kakaoClientId;
     }
 
-    @Deprecated
     @Override
     public GrantedTokenInfo grantToken(String code, String redirectUri) throws RuntimeException {
         log.debug("redirectUri={}", redirectUri);
