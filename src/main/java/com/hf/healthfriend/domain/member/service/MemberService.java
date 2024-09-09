@@ -43,6 +43,10 @@ public class MemberService {
         return MemberCreationResponseDto.of(saved);
     }
 
+    public boolean isMemberExists(String memberId) {
+        return this.memberRepository.existsById(memberId);
+    }
+
     public MemberDto findMember(String memberId) throws MemberNotFoundException {
         return MemberDto.of(this.memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId)));

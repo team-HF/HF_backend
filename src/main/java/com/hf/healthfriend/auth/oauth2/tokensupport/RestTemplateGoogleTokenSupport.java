@@ -1,5 +1,6 @@
 package com.hf.healthfriend.auth.oauth2.tokensupport;
 
+import com.hf.healthfriend.auth.exception.InvalidCodeException;
 import com.hf.healthfriend.auth.oauth2.constant.AuthServer;
 import com.hf.healthfriend.auth.oauth2.dto.response.GrantedTokenInfo;
 import com.hf.healthfriend.auth.oauth2.dto.response.TokenValidationInfo;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -39,14 +41,20 @@ public class RestTemplateGoogleTokenSupport implements GoogleOAuth2TokenSupport 
         this.clientSecret = clientSecret;
     }
 
-    @Deprecated
     @Override
-    public GrantedTokenInfo grantToken(String code, String redirectUri) {
+    public GrantedTokenInfo grantToken(String code, String redirectUri) throws InvalidCodeException {
 
         LocalDateTime recordNow = LocalDateTime.now();
 
+        ResponseEntity<String> responseEntity;
+        try {
+            responseEntity =
+                    this.restTemplate.exchange(buildRequestEntityForToken(code, redirectUri), String.class);
+        } catch (Exception e) {
+            throw new InvalidCodeException("유효하지 않은 인가 코드: " + code, e);
+        }
         JSONObject responseBody =
-                new JSONObject(this.restTemplate.exchange(buildRequestEntityForToken(code, redirectUri), String.class).getBody());
+                new JSONObject(responseEntity.getBody());
 
         log.trace("Full Response Body\n{}", responseBody);
 

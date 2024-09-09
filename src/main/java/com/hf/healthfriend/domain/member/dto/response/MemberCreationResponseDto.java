@@ -2,6 +2,7 @@ package com.hf.healthfriend.domain.member.dto.response;
 
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.entity.Member;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -12,18 +13,35 @@ import java.time.LocalDateTime;
 @Getter
 @ToString
 public class MemberCreationResponseDto {
+
+    @Schema(description = "생성된 회원의 ID. 소셜 로그인일 경우 memberId와 email은 같다.")
     private final String memberId;
+
+    @Schema(description = "생성된 회원의 Email. 소셜 로그인일 경우 memberId와 email은 같다.")
     private final String email;
+
+    @Schema(description = "권한 설정 때 사용하는 Role. 기본적으로 Role은 자동 지정", defaultValue = "ROLE_MEMBER")
     private final String role;
+
     private final LocalDateTime creationTime;
     private final String nickname;
     private final LocalDate birthDate;
     private final Gender gender;
     private final String introduction;
+
+    @Schema(description = "운동 레벨 - 새싹 = BEGINNER / 고수 = ADVANCED")
     private final FitnessLevel fitnessLevel;
+
+    @Schema(description = "운동할 때 주로 누구랑? - 소규모형 = SMALL / 그룹형 = GROUP")
     private final CompanionStyle companionStyle;
+
+    @Schema(description = "운동할 때 나는 평소? - 의욕만렙형 = EAGER / 귀차니즘형 = LAZY")
     private final FitnessEagerness fitnessEagerness;
+
+    @Schema(description = "나의 운동 목적은? - 벌크업 = BULK_UP / 러닝러닝 = RUNNING")
     private final FitnessObjective fitnessObjective;
+
+    @Schema(description = "주로 하고 있는 운동은? - 고강도 운동 위주 = HIGH_STRESS / 기능성 피트니스 위주 = FUNCTIONAL")
     private final FitnessKind fitnessKind;
 
     public static MemberCreationResponseDto of(Member member) {
