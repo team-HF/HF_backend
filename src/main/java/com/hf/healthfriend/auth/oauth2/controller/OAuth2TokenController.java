@@ -5,8 +5,11 @@ import com.hf.healthfriend.auth.exception.InvalidRefreshTokenException;
 import com.hf.healthfriend.auth.oauth2.dto.request.WrappingRefreshTokenWithCookieRequestDto;
 import com.hf.healthfriend.auth.oauth2.dto.response.TokenRefreshResponseDto;
 import com.hf.healthfriend.auth.oauth2.tokensupport.OAuth2TokenSupport;
+import com.hf.healthfriend.domain.member.dto.MemberDto;
+import com.hf.healthfriend.domain.member.service.MemberService;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
 import com.hf.healthfriend.global.spec.ApiErrorResponse;
+import com.hf.healthfriend.global.spec.schema.MemberResponseSchema;
 import com.hf.healthfriend.global.spec.schema.TokenRefreshResponseSchema;
 import com.hf.healthfriend.global.util.HttpCookieUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,6 +35,7 @@ import java.util.List;
 public class OAuth2TokenController {
     private final List<OAuth2TokenSupport> tokenSupports;
     private final HttpCookieUtils httpCookieUtils;
+    private final MemberService memberService;
 
     @Deprecated
     @PostMapping("/refresh-token/wrap-with-cookie")
@@ -103,5 +108,48 @@ public class OAuth2TokenController {
         }
 
         return ResponseEntity.ok(ApiBasicResponse.of(new TokenRefreshResponseDto(regrantedAccessToken), HttpStatus.OK));
+    }
+
+    @GetMapping("/me")
+    @Operation(
+            summary = "현재 로그인한 회원의 정보 가져오기",
+            description = "Access Token을 통해 현재 로그인한 회원 정보 가져옴"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    description = "회원 찾기 성공",
+                    responseCode = "200",
+                    content = @Content(schema = @Schema(implementation = MemberResponseSchema.class))
+            ),
+            @ApiResponse(
+                    description = "없는 회원 검색 / Error Code: 200",
+                    responseCode = "404",
+                    content = @Content(
+                            schema = @Schema(implementation = ApiErrorResponse.class),
+                            examples = @ExampleObject("""
+                                    {
+                                        "statusCode": 404,
+                                        "statusCodeSeries": 4,
+                                        "errorCode": 200,
+                                        "errorName": "MEMBER_OF_THE_MEMBER_ID_NOT_FOUND",
+                                        "message": "memberId에 해당하는 회원이 없습니다"
+                                    }
+                                    """)
+                    )
+            )
+    })
+    public ResponseEntity<ApiBasicResponse<MemberDto>> whoAmI() {
+        String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (log.isTraceEnabled()) {
+            log.trace("Logged In OAuth 2.0 Member={}", memberId);
+        }
+        MemberDto memberDto = this.memberService.findMember(memberId);
+        return ResponseEntity.ok(
+                ApiBasicResponse.of(
+                        memberDto,
+                        HttpStatus.OK,
+                        "당신이 누군지 알겠습니다"
+                )
+        );
     }
 }
