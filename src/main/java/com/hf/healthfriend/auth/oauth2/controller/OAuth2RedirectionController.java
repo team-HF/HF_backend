@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -42,13 +43,17 @@ import java.util.Map;
 @RestController
 @RequestMapping("/oauth/code")
 public class OAuth2RedirectionController {
+    private static final String REDIRECTION_PATH = "/"; // TODO
+
     private final Map<AuthServer, OAuth2TokenSupport> tokenSupportByName;
     private final HttpCookieUtils cookieUtils;
     private final MemberService memberService;
+    private final String clientOrigin;
 
     public OAuth2RedirectionController(List<OAuth2TokenSupport> oAuth2TokenSupports,
                                        HttpCookieUtils cookieUtils,
-                                       MemberService memberService) {
+                                       MemberService memberService,
+                                       @Value("${client.origin}") String clientOrigin) {
         this.tokenSupportByName = new HashMap<>();
         for (OAuth2TokenSupport tokenSupport : oAuth2TokenSupports) {
             for (AuthServer authServer : AuthServer.values()) {
@@ -60,6 +65,7 @@ public class OAuth2RedirectionController {
 
         this.cookieUtils = cookieUtils;
         this.memberService = memberService;
+        this.clientOrigin = clientOrigin;
     }
 
     @InitBinder
@@ -149,9 +155,14 @@ public class OAuth2RedirectionController {
                 this.cookieUtils.buildResponseCookie(CookieConstants.REFRESH_TOKEN_COOKIE_KEY.getString(),
                         grantedTokenInfo.getRefreshToken());
 
-        // TODO: 302 Redirection Status를 set 해야 할 듯
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
-                .body(ApiBasicResponse.of(new OAuth2LoginResponseDto(!memberExists, grantedTokenInfo), HttpStatus.OK));
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+        headers.add(HttpHeaders.LOCATION, this.clientOrigin + REDIRECTION_PATH);
+
+        return new ResponseEntity<>(
+                ApiBasicResponse.of(new OAuth2LoginResponseDto(!memberExists, grantedTokenInfo), HttpStatus.OK),
+                headers,
+                HttpStatus.PERMANENT_REDIRECT
+        );
     }
 }
