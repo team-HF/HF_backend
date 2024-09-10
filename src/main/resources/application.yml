@@ -40,6 +40,10 @@ springdoc:
     operations-sorter: method
     tags-sorter: alpha
 
+client:
+  domain: localhost
+  origin: http://localhost:3000
+
 ---
 spring:
   config:

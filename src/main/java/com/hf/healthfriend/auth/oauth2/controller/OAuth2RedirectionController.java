@@ -4,22 +4,16 @@ import com.hf.healthfriend.auth.constant.CookieConstants;
 import com.hf.healthfriend.auth.oauth2.constant.AuthServer;
 import com.hf.healthfriend.auth.oauth2.dto.propertyeditor.AuthServerEditor;
 import com.hf.healthfriend.auth.oauth2.dto.response.GrantedTokenInfo;
-import com.hf.healthfriend.auth.oauth2.dto.response.OAuth2LoginResponseDto;
 import com.hf.healthfriend.auth.oauth2.tokensupport.OAuth2TokenSupport;
 import com.hf.healthfriend.domain.member.service.MemberService;
-import com.hf.healthfriend.global.spec.ApiBasicResponse;
-import com.hf.healthfriend.global.spec.ApiErrorResponse;
-import com.hf.healthfriend.global.spec.schema.OAuth2LoginResponseSchema;
 import com.hf.healthfriend.global.util.HttpCookieUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.headers.Header;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -42,13 +36,17 @@ import java.util.Map;
 @RestController
 @RequestMapping("/oauth/code")
 public class OAuth2RedirectionController {
+    private static final String REDIRECTION_PATH = "/"; // TODO
+
     private final Map<AuthServer, OAuth2TokenSupport> tokenSupportByName;
     private final HttpCookieUtils cookieUtils;
     private final MemberService memberService;
+    private final String clientOrigin;
 
     public OAuth2RedirectionController(List<OAuth2TokenSupport> oAuth2TokenSupports,
                                        HttpCookieUtils cookieUtils,
-                                       MemberService memberService) {
+                                       MemberService memberService,
+                                       @Value("${client.origin}") String clientOrigin) {
         this.tokenSupportByName = new HashMap<>();
         for (OAuth2TokenSupport tokenSupport : oAuth2TokenSupports) {
             for (AuthServer authServer : AuthServer.values()) {
@@ -60,6 +58,7 @@ public class OAuth2RedirectionController {
 
         this.cookieUtils = cookieUtils;
         this.memberService = memberService;
+        this.clientOrigin = clientOrigin;
     }
 
     @InitBinder
@@ -71,33 +70,43 @@ public class OAuth2RedirectionController {
     @ApiResponses({
             @ApiResponse(
                     description = "카카오 로그인 성공 및 Access Token, Refresh Token, email 반환",
-                    responseCode = "200",
-                    headers = @Header(
-                            name = "Set-Cookie",
-                            description = "Refresh Token을 담은 HTTP-only, Secure, Same-site: None 쿠키"
-                    ),
-                    content = @Content(schema = @Schema(implementation = OAuth2LoginResponseSchema.class))
+                    responseCode = "308",
+                    headers = {
+                            @Header(
+                                    name = "Location",
+                                    description = "카카오 로그인 성공 후 리다이렉션할 페이지\nTODO: 어디로 가야 할지 프론트분들과 협의해야 함"
+                            ),
+                            @Header(
+                                    name = "Set-Cookie",
+                                    description = """
+                                            발급받은 토큰 정보를 Cookie에 담아서 반환
+                                            쿠키 정보
+                                            - refresh_token: Refresh Token을 담은 HTTP-only, Secure, Same-site: None 쿠키
+                                            - access_token: Access Token을 담은 Secure, Same-site: None 쿠키
+                                            - email: 카카오 Authorization Server로부터 가져온 email을 담은 Secure, Same-site: None 쿠키
+                                            - is_new_member: 신규 회원일 경우 true, 그렇지 않으면 false, Secure, Same-site: None 쿠키
+                                            """
+                            )
+                    }
             ),
             @ApiResponse(
-                    description = "유효하지 않은 인가코드로 인한 카카오 로그인 실패",
-                    responseCode = "401",
-                    content = @Content(
-                            schema = @Schema(implementation = ApiErrorResponse.class),
-                            examples = @ExampleObject("""
-                                    {
-                                        "statusCode": 401,
-                                        "statusCodeSeries": 4,
-                                        "errorCode": 102,
-                                        "errorName": "INVALID_CODE",
-                                        "message": "유효하지 않은 인가코드입니다"
-                                    }
+                    description = "유효하지 않은 인가코드로 인한 카카오 로그인 실패 - 에러 페이지로 리다이렉션",
+                    responseCode = "307",
+                    headers = @Header(
+                            name = "Location",
+                            description = """
+                                    카카오 로그인 실패로 인해 리다이렉션될 오류페이지
+                                    TODO: Path 설정해야 함 (프론트엔드분들과 협의 필요)
+                                    Query Parameters:
+                                      - error-code: 102
+                                      - error-name: INVALID_CODE,
+                                      - message: 유효하지 않은 인가코드입니다
                                     """
-                            )
                     )
             )
     })
     @GetMapping("/kakao")
-    public ResponseEntity<ApiBasicResponse<OAuth2LoginResponseDto>> get(@RequestParam("code") String code, HttpServletRequest request) {
+    public ResponseEntity<Void> get(@RequestParam("code") String code, HttpServletRequest request) {
         log.info("Kakao Login has been requested");
         return doTheSameThing(AuthServer.KAKAO, code, request.getRequestURL().toString());
     }
@@ -106,38 +115,48 @@ public class OAuth2RedirectionController {
     @ApiResponses({
             @ApiResponse(
                     description = "구글 로그인 성공 및 Access Token, Refresh Token, email 반환",
-                    responseCode = "200",
-                    headers = @Header(
-                            name = "Set-Cookie",
-                            description = "Refresh Token을 담은 HTTP-only, Secure, Same-site: None 쿠키"
-                    ),
-                    content = @Content(schema = @Schema(implementation = OAuth2LoginResponseSchema.class))
+                    responseCode = "308",
+                    headers = {
+                            @Header(
+                                    name = "Location",
+                                    description = "구글 로그인 성공 후 리다이렉션할 페이지\nTODO: 어디로 가야 할지 프론트분들과 협의해야 함"
+                            ),
+                            @Header(
+                                    name = "Set-Cookie",
+                                    description = """
+                                            발급받은 토큰 정보를 Cookie에 담아서 반환
+                                            쿠키 정보
+                                            - refresh_token: Refresh Token을 담은 HTTP-only, Secure, Same-site: None 쿠키
+                                            - access_token: Access Token을 담은 Secure, Same-site: None 쿠키
+                                            - email: 구글 Authorization Server로부터 가져온 email을 담은 Secure, Same-site: None 쿠키
+                                            - is_new_member: 신규 회원일 경우 true, 그렇지 않으면 false, Secure, Same-site: None 쿠키
+                                            """
+                            )
+                    }
             ),
             @ApiResponse(
                     description = "유효하지 않은 인가코드로 인한 구글 로그인 실패",
-                    responseCode = "401",
-                    content = @Content(
-                            schema = @Schema(implementation = ApiErrorResponse.class),
-                            examples = @ExampleObject("""
-                                    {
-                                        "statusCode": 401,
-                                        "statusCodeSeries": 4,
-                                        "errorCode": 102,
-                                        "errorName": "INVALID_CODE",
-                                        "message": "유효하지 않은 인가코드입니다"
-                                    }
+                    responseCode = "307",
+                    headers = @Header(
+                            name = "Location",
+                            description = """
+                                    구글 로그인 실패로 인해 리다이렉션될 오류페이지
+                                    TODO: Path 설정해야 함 (프론트엔드분들과 협의 필요)
+                                    Query Parameters:
+                                      - error-code: 102
+                                      - error-name: INVALID_CODE,
+                                      - message: 유효하지 않은 인가코드입니다
                                     """
-                            )
                     )
             )
     })
     @GetMapping("/google")
-    public ResponseEntity<ApiBasicResponse<OAuth2LoginResponseDto>> getGoogle(@RequestParam("code") String code, HttpServletRequest request) {
+    public ResponseEntity<Void> getGoogle(@RequestParam("code") String code, HttpServletRequest request) {
         log.info("Google Login has been requested");
         return doTheSameThing(AuthServer.GOOGLE, code, request.getRequestURL().toString());
     }
 
-    private ResponseEntity<ApiBasicResponse<OAuth2LoginResponseDto>> doTheSameThing(AuthServer authServer, String code, String redirectUri) {
+    private ResponseEntity<Void> doTheSameThing(AuthServer authServer, String code, String redirectUri) {
         OAuth2TokenSupport tokenSupport = this.tokenSupportByName.get(authServer);
 
         // 너무 간단한 로직이므로 Service 객체를 따로 정의하지 않고 여기서 했다.
@@ -146,12 +165,28 @@ public class OAuth2RedirectionController {
         boolean memberExists = this.memberService.isMemberExists(grantedTokenInfo.getEmail());
 
         ResponseCookie refreshTokenCookie =
-                this.cookieUtils.buildResponseCookie(CookieConstants.REFRESH_TOKEN_COOKIE_KEY.getString(),
+                this.cookieUtils.buildHttpOnlyResponseCookie(CookieConstants.COOKIE_NAME_REFRESH_TOKEN.getString(),
                         grantedTokenInfo.getRefreshToken());
+        ResponseCookie accessTokenCookie =
+                this.cookieUtils.buildJavaScriptAccessibleResponseCookie(CookieConstants.COOKIE_NAME_ACCESS_TOKEN.getString(),
+                        grantedTokenInfo.getAccessToken());
+        ResponseCookie emailCookie =
+                this.cookieUtils.buildJavaScriptAccessibleResponseCookie(CookieConstants.COOKIE_NAME_EMAIL.getString(),
+                        grantedTokenInfo.getEmail());
+        ResponseCookie newMemberCookie =
+                this.cookieUtils.buildJavaScriptAccessibleResponseCookie(CookieConstants.COOKIE_NAME_IS_NEW_MEMBER.getString(),
+                        String.valueOf(!memberExists));
 
-        // TODO: 302 Redirection Status를 set 해야 할 듯
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
-                .body(ApiBasicResponse.of(new OAuth2LoginResponseDto(!memberExists, grantedTokenInfo), HttpStatus.OK));
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+        headers.add(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
+        headers.add(HttpHeaders.SET_COOKIE, emailCookie.toString());
+        headers.add(HttpHeaders.SET_COOKIE, newMemberCookie.toString());
+        headers.add(HttpHeaders.LOCATION, this.clientOrigin + REDIRECTION_PATH);
+
+        return new ResponseEntity<>(
+                headers,
+                HttpStatus.PERMANENT_REDIRECT
+        );
     }
 }

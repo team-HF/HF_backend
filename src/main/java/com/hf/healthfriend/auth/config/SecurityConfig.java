@@ -7,6 +7,7 @@ import com.hf.healthfriend.auth.filter.AccessDeniedExceptionResolverFilter;
 import com.hf.healthfriend.auth.filter.AuthExceptionHandlerFilter;
 import com.hf.healthfriend.domain.member.constant.Role;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +26,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Configuration
@@ -51,6 +53,9 @@ public class SecurityConfig {
     private final ObjectMapper objectMapper;
     private final List<AuthenticationExceptionHandler> exceptionHandlers;
     private final ApplicationContext context;
+
+    @Value("${client.origin}")
+    private String clientOrigin;
 
     @Bean
     @Profile("!no-auth")
@@ -111,8 +116,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:8080", "http://localhost:8081"));
-        // config.addAllowedOriginPattern("http://localhost:3000/reissue");
+        config.setAllowedOrigins(Collections.singletonList(this.clientOrigin));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowCredentials(true);
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "Cookie"));
