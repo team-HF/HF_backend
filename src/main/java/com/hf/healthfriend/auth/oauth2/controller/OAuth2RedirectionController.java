@@ -4,7 +4,6 @@ import com.hf.healthfriend.auth.constant.CookieConstants;
 import com.hf.healthfriend.auth.oauth2.constant.AuthServer;
 import com.hf.healthfriend.auth.oauth2.dto.propertyeditor.AuthServerEditor;
 import com.hf.healthfriend.auth.oauth2.dto.response.GrantedTokenInfo;
-import com.hf.healthfriend.auth.oauth2.dto.response.OAuth2LoginResponseDto;
 import com.hf.healthfriend.auth.oauth2.tokensupport.OAuth2TokenSupport;
 import com.hf.healthfriend.domain.member.service.MemberService;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
@@ -103,7 +102,7 @@ public class OAuth2RedirectionController {
             )
     })
     @GetMapping("/kakao")
-    public ResponseEntity<ApiBasicResponse<OAuth2LoginResponseDto>> get(@RequestParam("code") String code, HttpServletRequest request) {
+    public ResponseEntity<ApiBasicResponse<Void>> get(@RequestParam("code") String code, HttpServletRequest request) {
         log.info("Kakao Login has been requested");
         return doTheSameThing(AuthServer.KAKAO, code, request.getRequestURL().toString());
     }
@@ -138,12 +137,12 @@ public class OAuth2RedirectionController {
             )
     })
     @GetMapping("/google")
-    public ResponseEntity<ApiBasicResponse<OAuth2LoginResponseDto>> getGoogle(@RequestParam("code") String code, HttpServletRequest request) {
+    public ResponseEntity<ApiBasicResponse<Void>> getGoogle(@RequestParam("code") String code, HttpServletRequest request) {
         log.info("Google Login has been requested");
         return doTheSameThing(AuthServer.GOOGLE, code, request.getRequestURL().toString());
     }
 
-    private ResponseEntity<ApiBasicResponse<OAuth2LoginResponseDto>> doTheSameThing(AuthServer authServer, String code, String redirectUri) {
+    private ResponseEntity<ApiBasicResponse<Void>> doTheSameThing(AuthServer authServer, String code, String redirectUri) {
         OAuth2TokenSupport tokenSupport = this.tokenSupportByName.get(authServer);
 
         // 너무 간단한 로직이므로 Service 객체를 따로 정의하지 않고 여기서 했다.
@@ -152,15 +151,27 @@ public class OAuth2RedirectionController {
         boolean memberExists = this.memberService.isMemberExists(grantedTokenInfo.getEmail());
 
         ResponseCookie refreshTokenCookie =
-                this.cookieUtils.buildHttpOnlyResponseCookie(CookieConstants.REFRESH_TOKEN_COOKIE_KEY.getString(),
+                this.cookieUtils.buildHttpOnlyResponseCookie(CookieConstants.COOKIE_NAME_REFRESH_TOKEN.getString(),
                         grantedTokenInfo.getRefreshToken());
+        ResponseCookie accessTokenCookie =
+                this.cookieUtils.buildJavaScriptAccessibleResponseCookie(CookieConstants.COOKIE_NAME_ACCESS_TOKEN.getString(),
+                        grantedTokenInfo.getAccessToken());
+        ResponseCookie emailCookie =
+                this.cookieUtils.buildJavaScriptAccessibleResponseCookie(CookieConstants.COOKIE_NAME_EMAIL.getString(),
+                        grantedTokenInfo.getEmail());
+        ResponseCookie newMemberCookie =
+                this.cookieUtils.buildJavaScriptAccessibleResponseCookie(CookieConstants.COOKIE_NAME_IS_NEW_MEMBER.getString(),
+                        String.valueOf(!memberExists));
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+        headers.add(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
+        headers.add(HttpHeaders.SET_COOKIE, emailCookie.toString());
+        headers.add(HttpHeaders.SET_COOKIE, newMemberCookie.toString());
         headers.add(HttpHeaders.LOCATION, this.clientOrigin + REDIRECTION_PATH);
 
         return new ResponseEntity<>(
-                ApiBasicResponse.of(new OAuth2LoginResponseDto(!memberExists, grantedTokenInfo), HttpStatus.OK),
+                ApiBasicResponse.of(HttpStatus.OK),
                 headers,
                 HttpStatus.PERMANENT_REDIRECT
         );
