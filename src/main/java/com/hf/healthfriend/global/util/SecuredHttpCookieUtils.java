@@ -11,9 +11,18 @@ public class SecuredHttpCookieUtils implements HttpCookieUtils {
     }
 
     @Override
-    public ResponseCookie buildResponseCookie(String name, String value) {
+    public ResponseCookie buildHttpOnlyResponseCookie(String name, String value) {
+        return buildCookie(name, value, true);
+    }
+
+    @Override
+    public ResponseCookie buildJavaScriptAccessibleResponseCookie(String name, String value) {
+        return buildCookie(name, value, false);
+    }
+
+    private ResponseCookie buildCookie(String name, String value, boolean httpOnly) {
         return ResponseCookie.from(name, value)
-                .httpOnly(true)
+                .httpOnly(httpOnly)
                 .maxAge(CookieConstants.COOKIE_DURATION_IN_SECONDS.getInt())
                 .domain(this.domain)
                 .path("/")

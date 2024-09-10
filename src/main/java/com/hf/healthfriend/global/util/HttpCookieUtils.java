@@ -13,10 +13,20 @@ import org.springframework.http.ResponseCookie;
 public interface HttpCookieUtils {
 
     /**
-     * ResponseEntity에 담을 ResponseCookie를 생성하는 메소드
+     * ResponseEntity에 담을 ResponseCookie를 생성하는 메소드.
+     * HTTP-only 쿠키를 생성한다.
      * @param name Cookie key
      * @param value Cookie value
-     * @return 클라이언트에 저장할 ResponseCookie 정보
+     * @return 클라이언트에 저장할 ResponseCookie 정보. HTTP-only 쿠키가 아니다.
      */
-    ResponseCookie buildResponseCookie(String name, String value);
+    ResponseCookie buildHttpOnlyResponseCookie(String name, String value);
+
+    /**
+     * ResponseEntity에 담을 ResponseCookie를 생성하는 메소드.
+     * HTTP-only가 아닌 쿠키를 생성한다.
+     * @param name Cookie key
+     * @param value Cookie value
+     * @return 클라이언트에 저장할 ResponseCookie 정보. HTTP-only 쿠키가 아니다.
+     */
+    ResponseCookie buildJavaScriptAccessibleResponseCookie(String name, String value);
 }

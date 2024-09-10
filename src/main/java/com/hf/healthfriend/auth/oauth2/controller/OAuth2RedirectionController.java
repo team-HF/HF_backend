@@ -152,7 +152,7 @@ public class OAuth2RedirectionController {
         boolean memberExists = this.memberService.isMemberExists(grantedTokenInfo.getEmail());
 
         ResponseCookie refreshTokenCookie =
-                this.cookieUtils.buildResponseCookie(CookieConstants.REFRESH_TOKEN_COOKIE_KEY.getString(),
+                this.cookieUtils.buildHttpOnlyResponseCookie(CookieConstants.REFRESH_TOKEN_COOKIE_KEY.getString(),
                         grantedTokenInfo.getRefreshToken());
 
         HttpHeaders headers = new HttpHeaders();

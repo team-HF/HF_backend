@@ -37,7 +37,7 @@ public class OAuth2TokenController {
     public ResponseEntity<ApiBasicResponse<Void>> wrapWithCookie(@RequestBody WrappingRefreshTokenWithCookieRequestDto dto) {
         var refreshToken = dto.getRefreshToken();
         var responseCookie =
-                this.httpCookieUtils.buildResponseCookie(CookieConstants.REFRESH_TOKEN_COOKIE_KEY.getString(), refreshToken);
+                this.httpCookieUtils.buildHttpOnlyResponseCookie(CookieConstants.REFRESH_TOKEN_COOKIE_KEY.getString(), refreshToken);
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
                 .body(ApiBasicResponse.of(HttpStatus.OK, "Refresh Token에 쿠키 저장 완료"));
