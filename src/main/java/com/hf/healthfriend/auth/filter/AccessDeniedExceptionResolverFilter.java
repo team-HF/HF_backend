@@ -39,18 +39,30 @@ public class AccessDeniedExceptionResolverFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } catch (AccessDeniedException e) {
             // TODO: AccessDeniedException 종류를 여러 개
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-            ApiErrorResponse responseBody = ApiErrorResponse.builder()
-                    .statusCode(HttpStatus.FORBIDDEN.value())
-                    .statusCodeSeries(HttpStatus.FORBIDDEN.series().value())
-                    .errorName(ErrorCode.UNAUTHORIZED.name())
-                    .errorCode(ErrorCode.UNAUTHORIZED.code())
-                    .message(ErrorCode.UNAUTHORIZED.message())
-                    .build();
-            try (BufferedWriter bw = new BufferedWriter(response.getWriter())) {
-                bw.write(this.objectMapper.writeValueAsString(responseBody));
+            writeErrorResponse(response);
+            throw e;
+        } catch (ServletException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof AccessDeniedException) {
+                writeErrorResponse(response);
+            } else {
+                throw e;
             }
+        }
+    }
+
+    private void writeErrorResponse(HttpServletResponse response) throws IOException {
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        response.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        ApiErrorResponse responseBody = ApiErrorResponse.builder()
+                .statusCode(HttpStatus.FORBIDDEN.value())
+                .statusCodeSeries(HttpStatus.FORBIDDEN.series().value())
+                .errorName(ErrorCode.UNAUTHORIZED.name())
+                .errorCode(ErrorCode.UNAUTHORIZED.code())
+                .message(ErrorCode.UNAUTHORIZED.message())
+                .build();
+        try (BufferedWriter bw = new BufferedWriter(response.getWriter())) {
+            bw.write(this.objectMapper.writeValueAsString(responseBody));
         }
     }
 }
