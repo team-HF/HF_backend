@@ -5,6 +5,13 @@ spring:
       - constants
       - priv # 각각 개발 환경에 따라 개별 설정이 필요할 수 있으므로
 
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 2KB
+      max-file-size: 5MB
+      max-request-size: 7MB
+
 logging:
   level:
     org:
