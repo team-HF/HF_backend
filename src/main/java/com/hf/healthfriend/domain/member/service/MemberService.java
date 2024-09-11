@@ -47,15 +47,17 @@ public class MemberService {
             log.debug("newMember={}", newMember);
         }
 
-        String name = dto.getProfileImage().getOriginalFilename();
-        String filePath = this.fileUrlResolver.generateFilePath(name, "image");
-        log.info("id={}, filePath={}", newMember.getId(), filePath);
+        if (dto.getProfileImage() != null) {
+            String name = dto.getProfileImage().getOriginalFilename();
+            String filePath = this.fileUrlResolver.generateFilePath(name, "image");
+            log.info("id={}, filePath={}", newMember.getId(), filePath);
 
-        try {
-            this.multipartFileUploader.uploadFile(filePath, dto.getProfileImage());
-            newMember.setProfileImageUrl(filePath);
-        } catch (IOException e) {
-            log.error("[FATAL] 파일 출력 중 Error 발생", e);
+            try {
+                this.multipartFileUploader.uploadFile(filePath, dto.getProfileImage());
+                newMember.setProfileImageUrl(filePath);
+            } catch (IOException e) {
+                log.error("[FATAL] 파일 출력 중 Error 발생", e);
+            }
         }
 
         Member saved = this.memberRepository.save(newMember);

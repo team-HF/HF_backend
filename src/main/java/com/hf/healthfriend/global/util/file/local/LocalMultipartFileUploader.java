@@ -22,8 +22,10 @@ public class LocalMultipartFileUploader implements MultipartFileUploader {
 
     public LocalMultipartFileUploader(ServletContext servletContext) {
         String realContextRoot = servletContext.getRealPath("/");
-        if (realContextRoot.endsWith(File.separator)) {
+        if (realContextRoot != null && realContextRoot.endsWith(File.separator)) {
             realContextRoot = realContextRoot.substring(0, realContextRoot.length() - File.separator.length());
+        } else if (realContextRoot == null) {
+            realContextRoot = "";
         }
         this.rootPath = realContextRoot;
     }

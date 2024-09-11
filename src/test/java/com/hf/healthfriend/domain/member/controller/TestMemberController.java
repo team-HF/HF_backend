@@ -111,22 +111,17 @@ class TestMemberController {
     @DisplayName("POST /members - failure")
     @Test
     void memberCreation_failure() throws Exception {
-        this.mockMvc.perform(post("/members")
-                        .content("""
-                                {
-                                    "id": "sample@gmail.com",
-                                    "nickname": "샘플닉네임",
-                                    "birthDate": "1997-09-16",
-                                    "gender": "MALE",
-                                    "introduction": "안녕하세요",
-                                    "fitnessLevel": "BEGINNER",
-                                    "companionStyle": "GROUP",
-                                    "fitnessEagerness": "EAGER",
-                                    "fitnessObjective": "BULK_UP",
-                                    "fitnessKind": "FUNCTIONAL"
-                                }
-                                """)
-                        .contentType(MediaType.APPLICATION_JSON)
+        this.mockMvc.perform(multipart("/members")
+                        .param("id", "sample@gmail.com")
+                        .param("nickname", "샘플닉네임")
+                        .param("birthDate", "1997-09-16")
+                        .param("gender", "MALE")
+                        .param("introduction", "안녕하세요")
+                        .param("fitnessLevel", "BEGINNER")
+                        .param("companionStyle", "GROUP")
+                        .param("fitnessEagerness", "EAGER")
+                        .param("fitnessObjective", "BULK_UP")
+                        .param("fitnessKind", "FUNCTIONAL")
                         .with(csrf()))
                 .andDo(log())
                 .andDo(print())
