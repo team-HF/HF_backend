@@ -36,7 +36,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/oauth/code")
 public class OAuth2RedirectionController {
-    private static final String REDIRECTION_PATH = "/"; // TODO
+    private static final String REDIRECTION_PATH = "/register/exercise-style";
 
     private final Map<AuthServer, OAuth2TokenSupport> tokenSupportByName;
     private final HttpCookieUtils cookieUtils;
@@ -74,7 +74,7 @@ public class OAuth2RedirectionController {
                     headers = {
                             @Header(
                                     name = "Location",
-                                    description = "카카오 로그인 성공 후 리다이렉션할 페이지\nTODO: 어디로 가야 할지 프론트분들과 협의해야 함"
+                                    description = "카카오 로그인 성공 후 리다이렉션할 페이지\n/register/exercise-style로 리다이렉션"
                             ),
                             @Header(
                                     name = "Set-Cookie",
@@ -90,13 +90,13 @@ public class OAuth2RedirectionController {
                     }
             ),
             @ApiResponse(
-                    description = "유효하지 않은 인가코드로 인한 카카오 로그인 실패 - 에러 페이지로 리다이렉션",
+                    description = "유효하지 않은 인가코드로 인한 카카오 로그인 실패 - 로그인 페이지로 리다이렉션",
                     responseCode = "307",
                     headers = @Header(
                             name = "Location",
                             description = """
-                                    카카오 로그인 실패로 인해 리다이렉션될 오류페이지
-                                    TODO: Path 설정해야 함 (프론트엔드분들과 협의 필요)
+                                    카카오 로그인 실패로 인해 리다이렉션될 로그인 페이지
+                                    /login 으로 이동
                                     Query Parameters:
                                       - error-code: 102
                                       - error-name: INVALID_CODE,
@@ -119,7 +119,7 @@ public class OAuth2RedirectionController {
                     headers = {
                             @Header(
                                     name = "Location",
-                                    description = "구글 로그인 성공 후 리다이렉션할 페이지\nTODO: 어디로 가야 할지 프론트분들과 협의해야 함"
+                                    description = "구글 로그인 성공 후 리다이렉션할 페이지\n/register/exercise-style 로 이동"
                             ),
                             @Header(
                                     name = "Set-Cookie",
@@ -140,8 +140,8 @@ public class OAuth2RedirectionController {
                     headers = @Header(
                             name = "Location",
                             description = """
-                                    구글 로그인 실패로 인해 리다이렉션될 오류페이지
-                                    TODO: Path 설정해야 함 (프론트엔드분들과 협의 필요)
+                                    구글 로그인 실패로 인해 리다이렉션될 로그인 페이지
+                                    /login 으로 이동
                                     Query Parameters:
                                       - error-code: 102
                                       - error-name: INVALID_CODE,

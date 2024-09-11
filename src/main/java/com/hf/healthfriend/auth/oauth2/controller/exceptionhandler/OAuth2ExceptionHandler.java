@@ -40,7 +40,7 @@ public class OAuth2ExceptionHandler {
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(
                 UriComponentsBuilder.fromHttpUrl(this.clientOrigin)
-                        .path("/") // TODO: 유효하지 않은 인가코드일 경우 보내질 경로 (프론트 경로 설정)
+                        .path("/login")
                         .queryParam("error-code", INVALID_CODE.code())
                         .queryParam("error-name", INVALID_CODE.name())
                         .queryParam("message", INVALID_CODE.message())
