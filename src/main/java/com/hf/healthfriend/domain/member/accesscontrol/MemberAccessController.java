@@ -1,51 +1,51 @@
 package com.hf.healthfriend.domain.member.accesscontrol;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hf.healthfriend.auth.accesscontrol.AccessControlTrigger;
 import com.hf.healthfriend.auth.accesscontrol.AccessController;
 import com.hf.healthfriend.domain.member.constant.Role;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Part;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 
 @Slf4j
 @AccessController
 @RequiredArgsConstructor
 public class MemberAccessController {
-    private final MemberRepository memberRepository;
-    private final ObjectMapper objectMapper;
+    private static final int BUFFER_SIZE = 1024;
 
-//    @AccessControlTrigger(path = "/members", method = "POST")
-//    public boolean preventSignUpByOtherClient(BearerTokenAuthentication authentication, HttpServletRequest request)
-//            throws IOException {
-//        MemberCreationRequestDto body;
-//        try (BufferedReader br = request.getReader()) {
-//            StringBuilder sb = new StringBuilder();
-//            String line;
-//            while ((line = br.readLine()) != null) { // 아마 한 줄에 데이터가 다 올 것이므로 필요는 없겠지만... 일단 해 둔다
-//                sb.append(line).append('\n');
-//            }
-//
-//            body = this.objectMapper.readValue(sb.toString(), MemberCreationRequestDto.class);
-//        } catch (StreamReadException | DatabindException e) { // TODO: 각각 예외에 대해 정리하고 어떻게 처리해야 하는지 조사해야 함
-//            throw e; // TODO: 400 Bad Request 응답이 가도록 조치를 취해야 함 (AccessControlFilter에서 처리하면 될 듯)
-//        }
-//
-//        String authenticatedPrincipal = authentication.getName();
-//
-//        if (log.isTraceEnabled()) {
-//            log.trace("authentication.name={}", authenticatedPrincipal);
-//            log.trace("MemberCreationRequestDto.id={}", body.getId());
-//        }
-//
-//        // Access Token으로 인증한 사용자가 정말 자신의 아이디로 된 계정을 생성하려고 했는지 검증
-//        return body.getId().equals(authenticatedPrincipal);
-//    }
+    private final MemberRepository memberRepository;
+
+    @AccessControlTrigger(path = "/members", method = "POST")
+    public boolean preventSignUpByOtherClient(BearerTokenAuthentication authentication, HttpServletRequest request)
+            throws ServletException, IOException {
+        Part idPart = request.getPart("id");
+        String id;
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(idPart.getInputStream()))) {
+            StringBuilder sb = new StringBuilder();
+            char[] buffer = new char[BUFFER_SIZE];
+            while (br.read(buffer) != -1) {
+                sb.append(String.valueOf(buffer));
+            }
+
+            id = sb.toString().trim();
+        }
+        log.trace("id={}", id);
+
+        String authenticatedMemberId = authentication.getName(); // null이면 이미 401이 났을 테니 null이 아닐 것
+
+        return authenticatedMemberId.equals(id.trim());
+    }
 
     @AccessControlTrigger(path = "/members/{memberId}", method = "GET")
     public boolean controlAccessToMemberInfo(BearerTokenAuthentication authentication, HttpServletRequest request) {

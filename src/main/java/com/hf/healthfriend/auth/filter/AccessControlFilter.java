@@ -112,12 +112,14 @@ public class AccessControlFilter extends OncePerRequestFilter {
                 throw new RuntimeException("Parameter types of access control is wrong: "
                         + accessControlBean.getClass() + "." + accessControlMethod.getName());
             }
+
+            HttpServletRequest wrappedRequest = request; //new CachingBodyHttpServletRequestWrapper(request);
             Boolean result = (Boolean)accessControlMethod.invoke(accessControlBean,
                     SecurityContextHolder.getContext().getAuthentication(),
-                    request);
+                    wrappedRequest);
             if (result) {
                 log.trace("Access Control: Request for {} {} is allowed", httpMethod, path);
-                filterChain.doFilter(request, response);
+                filterChain.doFilter(wrappedRequest, response);
                 return;
             }
             log.warn("Access Control: Request for {} {} is not allowed", httpMethod, path);

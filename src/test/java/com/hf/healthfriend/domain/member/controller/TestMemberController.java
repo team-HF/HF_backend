@@ -72,22 +72,17 @@ class TestMemberController {
     @DisplayName("POST /members - success")
     @Test
     void memberCreation_success() throws Exception {
-        this.mockMvc.perform(post("/members")
-                        .content("""
-                                {
-                                    "id": "new@gmail.com",
-                                    "nickname": "새로운인간",
-                                    "birthDate": "1997-09-16",
-                                    "gender": "MALE",
-                                    "introduction": "안녕하세요",
-                                    "fitnessLevel": "BEGINNER",
-                                    "companionStyle": "GROUP",
-                                    "fitnessEagerness": "EAGER",
-                                    "fitnessObjective": "BULK_UP",
-                                    "fitnessKind": "FUNCTIONAL"
-                                }
-                                """)
-                        .contentType(MediaType.APPLICATION_JSON)
+        this.mockMvc.perform(multipart("/members")
+                        .param("id", "new@gmail.com")
+                        .param("nickname", "새로운인간")
+                        .param("birthDate", "1997-09-16")
+                        .param("gender", "MALE")
+                        .param("introduction", "안녕하세요")
+                        .param("fitnessLevel", "BEGINNER")
+                        .param("companionStyle", "GROUP")
+                        .param("fitnessEagerness", "EAGER")
+                        .param("fitnessObjective", "BULK_UP")
+                        .param("fitnessKind", "FUNCTIONAL")
                         .with(csrf()))
                 .andDo(log())
                 .andDo(print())
