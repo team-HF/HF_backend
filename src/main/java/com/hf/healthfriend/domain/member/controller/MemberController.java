@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,7 +36,7 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    @PostMapping(consumes = "application/json", produces = "application/json")
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "회원 생성"
     )
@@ -80,7 +81,8 @@ public class MemberController {
                     )
             )
     })
-    public ResponseEntity<ApiBasicResponse<MemberCreationResponseDto>> createMember(@RequestBody MemberCreationRequestDto requestBody) throws URISyntaxException {
+    public ResponseEntity<ApiBasicResponse<MemberCreationResponseDto>> createMember(
+            @ModelAttribute MemberCreationRequestDto requestBody) throws URISyntaxException {
         log.info("Request Body:\n{}", requestBody);
 
         // TODO: 여기 있으면 안 될 놈 같은데...

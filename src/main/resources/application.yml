@@ -12,6 +12,7 @@ spring:
       max-file-size: 5MB
       max-request-size: 7MB
 
+
 logging:
   level:
     org:
@@ -52,6 +53,8 @@ client:
   domain: localhost
   origin: http://localhost:3000
 
+server:
+  port: 8080
 ---
 spring:
   config:

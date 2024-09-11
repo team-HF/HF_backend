@@ -7,7 +7,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hf.healthfriend.global.util.HttpCookieUtils;
 import com.hf.healthfriend.global.util.SecuredHttpCookieUtils;
 import com.hf.healthfriend.global.util.file.FileUrlResolver;
-import com.hf.healthfriend.global.util.file.LocalFileUrlResolver;
+import com.hf.healthfriend.global.util.file.MultipartFileUploader;
+import com.hf.healthfriend.global.util.file.local.LocalFileUrlResolver;
+import com.hf.healthfriend.global.util.file.local.LocalMultipartFileUploader;
+import jakarta.servlet.ServletContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -41,5 +44,11 @@ public class BeanConfig {
     @ConditionalOnMissingBean(FileUrlResolver.class)
     public LocalFileUrlResolver localWindowsFileUrlResolver(@Value("${server.port}") String port) {
         return new LocalFileUrlResolver("http://localhost:" + port); // 로컬을 염두에 뒀으니까... 걍 하드코딩해도 될 거라 생각...
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(MultipartFileUploader.class)
+    public LocalMultipartFileUploader localMultipartFileUploader(ServletContext servletContext) {
+        return new LocalMultipartFileUploader(servletContext);
     }
 }

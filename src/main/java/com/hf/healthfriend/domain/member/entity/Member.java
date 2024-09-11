@@ -40,6 +40,9 @@ public class Member implements UserDetails {
     @Column(name = "nickname")
     private String nickname;
 
+    @Column(name = "profile_image_url")
+    private String profileImageUrl;
+
     @Column(name = "birth_date")
     @Temporal(TemporalType.DATE)
     private LocalDate birthDate;

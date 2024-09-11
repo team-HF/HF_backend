@@ -3,12 +3,14 @@ package com.hf.healthfriend.domain.member.dto.request;
 import com.hf.healthfriend.domain.member.constant.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
+@Setter // multipart/form-data 받을 땐 Setter가 필요하다고 한다.
 @Getter
 @ToString
 @EqualsAndHashCode
@@ -18,6 +20,9 @@ public class MemberCreationRequestDto {
     private String id;
 
     private String nickname;
+
+    @Schema(description = "회원 프로필 이미지")
+    private MultipartFile profileImage;
 
     @Schema(description = "yyyy-mm-dd 형식 ex) 2017-08-09")
     private LocalDate birthDate;

@@ -16,7 +16,7 @@ public interface FileUrlResolver {
      * @param paths 저장할 파일의 경로
      * @return 파일이 저장될 경로 + 파일명 e.g. /image/my-profile.jpg
      */
-    String resolveFilePath(String filename, String... paths);
+    String generateFilePath(String filename, String... paths);
 
     /**
      * filePath로부터 웹에서 접근할 수 있는 URL을 생성해 준다.
