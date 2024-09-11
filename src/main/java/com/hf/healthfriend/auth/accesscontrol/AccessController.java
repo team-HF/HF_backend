@@ -14,6 +14,7 @@ import java.lang.annotation.Target;
  * AccessControl 어노테이션이 붙은 객체는 스프링 빈으로 등록된다.
  * @author PGD
  * @see AccessControlTrigger
+ * @see com.hf.healthfriend.auth.filter.AccessControlFilter
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
