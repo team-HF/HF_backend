@@ -20,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -60,13 +62,43 @@ public class MemberController {
                                     """
                             )
                     )
+            ),
+            @ApiResponse(
+                    description = "현재 로그인한 회원이 자신과 다른 이름의 회원을 생성하려고 할 때 / Error Code: 101",
+                    responseCode = "403",
+                    content = @Content(
+                            schema = @Schema(implementation = ApiErrorResponse.class),
+                            examples = @ExampleObject("""
+                                    {
+                                        "statusCode": 403,
+                                        "statusCodeSeries": 4,
+                                        "errorCode": 101,
+                                        "errorName": "UNAUTHORIZED",
+                                        "message": "허용되지 않은 접근입니다"
+                                    }
+                                    """)
+                    )
             )
     })
     public ResponseEntity<ApiBasicResponse<MemberCreationResponseDto>> createMember(@RequestBody MemberCreationRequestDto requestBody) throws URISyntaxException {
         log.info("Request Body:\n{}", requestBody);
+
+        // TODO: 여기 있으면 안 될 놈 같은데...
+        // 근데 MemberAccessController에서 처리하려니 Request의 IOStream을 두 번 호출하면 예외가 발생한다.
+        // 그렇다고 Service 레이어에서 처리하기엔 SecurityContextHolder와 같은 웹 기술이 비즈니스 로직에 노출되는 것이 마음에 들지 않는다.
+        // AccessController에서 이 로직을 처리하는 방법을 찾아보자
+        if (!isTheRequester(requestBody.getId())) {
+            throw new AccessDeniedException("허용되지 않은 자원에 대한 접근입니다.");
+        }
+
         MemberCreationResponseDto result = this.memberService.createMember(requestBody);
         return ResponseEntity.created(new URI("/members/" + result.getMemberId()))
                 .body(ApiBasicResponse.of(result, HttpStatus.CREATED));
+    }
+
+    private boolean isTheRequester(String memberIdToBeCreated) {
+        String authenticatedMemberId = SecurityContextHolder.getContext().getAuthentication().getName();
+        return authenticatedMemberId.equals(memberIdToBeCreated);
     }
 
     @GetMapping(value = "/{memberId}", produces = "application/json")

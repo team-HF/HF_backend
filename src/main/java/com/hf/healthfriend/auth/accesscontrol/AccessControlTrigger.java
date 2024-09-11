@@ -17,6 +17,7 @@ import java.lang.annotation.Target;
  * 값은 "GET", "POST", "DELETE", "PATCH", "PUT", "HEAD"와 같은 값을 가져야 하며, 오타가 들어가선 안 된다.
  * @author PGD
  * @see AccessController
+ * @see com.hf.healthfriend.auth.filter.AccessControlFilter
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
