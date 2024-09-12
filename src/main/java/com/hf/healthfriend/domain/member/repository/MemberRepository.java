@@ -1,7 +1,7 @@
 package com.hf.healthfriend.domain.member.repository;
 
-import com.hf.healthfriend.domain.member.dto.MemberUpdateDto;
 import com.hf.healthfriend.domain.member.entity.Member;
+import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
 
 import java.util.Optional;
 

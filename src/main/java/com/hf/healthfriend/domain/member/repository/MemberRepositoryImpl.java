@@ -1,8 +1,8 @@
 package com.hf.healthfriend.domain.member.repository;
 
-import com.hf.healthfriend.domain.member.dto.MemberUpdateDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
+import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -48,6 +48,9 @@ public class MemberRepositoryImpl implements MemberRepository{
         }
         if (updateDto.getNickname() != null) {
             member.setNickname(updateDto.getNickname());
+        }
+        if (updateDto.getProfileImageUrl() != null) {
+            member.setProfileImageUrl(updateDto.getProfileImageUrl());
         }
         if (updateDto.getBirthDate() != null) {
             member.setBirthDate(updateDto.getBirthDate());

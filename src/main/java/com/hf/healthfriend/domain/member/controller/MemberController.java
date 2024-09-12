@@ -1,8 +1,8 @@
 package com.hf.healthfriend.domain.member.controller;
 
 import com.hf.healthfriend.domain.member.dto.MemberDto;
-import com.hf.healthfriend.domain.member.dto.MemberUpdateDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
+import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.service.MemberService;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
@@ -19,9 +19,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -35,7 +34,7 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    @PostMapping(consumes = "application/json", produces = "application/json")
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "회원 생성"
     )
@@ -80,25 +79,13 @@ public class MemberController {
                     )
             )
     })
-    public ResponseEntity<ApiBasicResponse<MemberCreationResponseDto>> createMember(@RequestBody MemberCreationRequestDto requestBody) throws URISyntaxException {
+    public ResponseEntity<ApiBasicResponse<MemberCreationResponseDto>> createMember(
+            @ModelAttribute MemberCreationRequestDto requestBody) throws URISyntaxException {
         log.info("Request Body:\n{}", requestBody);
-
-        // TODO: 여기 있으면 안 될 놈 같은데...
-        // 근데 MemberAccessController에서 처리하려니 Request의 IOStream을 두 번 호출하면 예외가 발생한다.
-        // 그렇다고 Service 레이어에서 처리하기엔 SecurityContextHolder와 같은 웹 기술이 비즈니스 로직에 노출되는 것이 마음에 들지 않는다.
-        // AccessController에서 이 로직을 처리하는 방법을 찾아보자
-        if (!isTheRequester(requestBody.getId())) {
-            throw new AccessDeniedException("허용되지 않은 자원에 대한 접근입니다.");
-        }
 
         MemberCreationResponseDto result = this.memberService.createMember(requestBody);
         return ResponseEntity.created(new URI("/members/" + result.getMemberId()))
                 .body(ApiBasicResponse.of(result, HttpStatus.CREATED));
-    }
-
-    private boolean isTheRequester(String memberIdToBeCreated) {
-        String authenticatedMemberId = SecurityContextHolder.getContext().getAuthentication().getName();
-        return authenticatedMemberId.equals(memberIdToBeCreated);
     }
 
     @GetMapping(value = "/{memberId}", produces = "application/json")
@@ -131,7 +118,7 @@ public class MemberController {
         return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.findMember(memberId), HttpStatus.OK));
     }
 
-    @PatchMapping(value = "/{memberId}", consumes = "application/json", produces = "application/json")
+    @PatchMapping(value = "/{memberId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = "application/json")
     @Operation(summary = "회원 업데이트")
     @ApiResponses({
             @ApiResponse(
@@ -157,7 +144,7 @@ public class MemberController {
             )
     })
     public ResponseEntity<ApiBasicResponse<MemberDto>> updateMember(@PathVariable String memberId,
-                                                                    @RequestBody MemberUpdateDto dto) {
+                                                                    @ModelAttribute MemberUpdateRequestDto dto) {
         MemberDto resultDto = this.memberService.updateMember(memberId, dto);
         return ResponseEntity.ok(ApiBasicResponse.of(resultDto, HttpStatus.OK));
     }

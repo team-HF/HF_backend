@@ -1,21 +1,18 @@
-package com.hf.healthfriend.domain.member.dto;
+package com.hf.healthfriend.domain.member.repository.dto;
 
 import com.hf.healthfriend.domain.member.constant.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Builder
+@Builder(toBuilder = true)
+@Setter
 @Getter
 @ToString
-public class MemberDto {
-    private String memberId;
+public class MemberUpdateDto {
     private Role role;
-    private String email;
-    private LocalDateTime creationTime;
     private String nickname;
     private String profileImageUrl;
     private LocalDate birthDate;
