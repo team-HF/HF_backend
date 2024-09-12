@@ -1,8 +1,8 @@
 package com.hf.healthfriend.domain.member.controller;
 
 import com.hf.healthfriend.domain.member.dto.MemberDto;
-import com.hf.healthfriend.domain.member.dto.MemberUpdateDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
+import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.service.MemberService;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
@@ -118,7 +118,7 @@ public class MemberController {
         return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.findMember(memberId), HttpStatus.OK));
     }
 
-    @PatchMapping(value = "/{memberId}", consumes = "application/json", produces = "application/json")
+    @PatchMapping(value = "/{memberId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = "application/json")
     @Operation(summary = "회원 업데이트")
     @ApiResponses({
             @ApiResponse(
@@ -144,7 +144,7 @@ public class MemberController {
             )
     })
     public ResponseEntity<ApiBasicResponse<MemberDto>> updateMember(@PathVariable String memberId,
-                                                                    @RequestBody MemberUpdateDto dto) {
+                                                                    @ModelAttribute MemberUpdateRequestDto dto) {
         MemberDto resultDto = this.memberService.updateMember(memberId, dto);
         return ResponseEntity.ok(ApiBasicResponse.of(resultDto, HttpStatus.OK));
     }

@@ -1,13 +1,14 @@
 package com.hf.healthfriend.domain.member.service;
 
 import com.hf.healthfriend.domain.member.dto.MemberDto;
-import com.hf.healthfriend.domain.member.dto.MemberUpdateDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
+import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.DuplicateMemberCreationException;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
+import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
 import com.hf.healthfriend.global.util.file.FileUrlResolver;
 import com.hf.healthfriend.global.util.file.MultipartFileUploader;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
@@ -48,15 +50,12 @@ public class MemberService {
         }
 
         if (dto.getProfileImage() != null) {
-            String name = dto.getProfileImage().getOriginalFilename();
-            String filePath = this.fileUrlResolver.generateFilePath(name, "image");
-            log.info("id={}, filePath={}", newMember.getId(), filePath);
-
-            try {
-                this.multipartFileUploader.uploadFile(filePath, dto.getProfileImage());
+            String filePath = storeProfileImage(dto.getProfileImage());
+            if (filePath != null) {
+                log.info("id={}, filePath={}", newMember.getId(), filePath);
                 newMember.setProfileImageUrl(filePath);
-            } catch (IOException e) {
-                log.error("[FATAL] 파일 출력 중 Error 발생", e);
+            } else {
+                log.info("id={}, File not created", newMember.getId());
             }
         }
 
@@ -74,9 +73,45 @@ public class MemberService {
         return bindToDto(findMember);
     }
 
-    public MemberDto updateMember(String memberId, MemberUpdateDto updateDto) throws MemberNotFoundException {
+    public MemberDto updateMember(String memberId, MemberUpdateRequestDto requestDto) throws MemberNotFoundException {
+        MemberUpdateDto updateDto = MemberUpdateDto.builder()
+                .role(requestDto.getRole())
+                .nickname(requestDto.getNickname())
+                .birthDate(requestDto.getBirthDate())
+                .gender(requestDto.getGender())
+                .introduction(requestDto.getIntroduction())
+                .fitnessLevel(requestDto.getFitnessLevel())
+                .companionStyle(requestDto.getCompanionStyle())
+                .fitnessEagerness(requestDto.getFitnessEagerness())
+                .fitnessObjective(requestDto.getFitnessObjective())
+                .fitnessKind(requestDto.getFitnessKind())
+                .build();
+        if (requestDto.getProfileImage() != null) {
+            String filePath = storeProfileImage(requestDto.getProfileImage());
+            if (filePath != null) {
+                log.info("id={}, filePath={}", memberId, filePath);
+                updateDto = updateDto.toBuilder()
+                        .profileImageUrl(filePath)
+                        .build();
+            } else {
+                log.info("id={}, File not updated", memberId);
+            }
+        }
         Member updatedMember = this.memberRepository.update(memberId, updateDto);
         return bindToDto(updatedMember);
+    }
+
+    private String storeProfileImage(MultipartFile profileImage) {
+        String originalFilename = profileImage.getOriginalFilename();
+        String filePath = this.fileUrlResolver.generateFilePath(originalFilename, "image");
+
+        try {
+            this.multipartFileUploader.uploadFile(filePath, profileImage);
+            return filePath;
+        } catch (IOException e) {
+            log.error("[FATAL] 파일 출력 중 Error 발생", e);
+            return null;
+        }
     }
 
     private MemberDto bindToDto(Member member) {

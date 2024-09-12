@@ -177,7 +177,7 @@ class TestMemberController {
     @Test
     void updateMember_success() throws Exception {
         this.mockMvc.perform(patch("/members/{memberId}", "sample@gmail.com")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
                         .accept(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andDo(log())
@@ -195,7 +195,7 @@ class TestMemberController {
     @Test
     void updateMember_memberNotFound() throws Exception {
         this.mockMvc.perform(patch("/members/{memberId}", "no@such.member")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
                         .accept(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andDo(log())

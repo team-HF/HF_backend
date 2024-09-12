@@ -2,8 +2,8 @@ package com.hf.healthfriend.domain.member.service;
 
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.dto.MemberDto;
-import com.hf.healthfriend.domain.member.dto.MemberUpdateDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
+import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
@@ -226,25 +226,25 @@ class TestMemberService {
                 .isThrownBy(() -> this.memberService.findMember("no@such.member"));
     }
 
-    static Stream<MemberUpdateDto> updateMember_success() {
+    static Stream<MemberUpdateRequestDto> updateMember_success() {
         return Stream.of(
-                MemberUpdateDto.builder()
+                MemberUpdateRequestDto.builder()
                         .role(Role.ROLE_ADMIN)
                         .build(),
-                MemberUpdateDto.builder()
+                MemberUpdateRequestDto.builder()
                         .birthDate(LocalDate.of(1995, Month.APRIL, 17))
                         .build(),
-                MemberUpdateDto.builder()
+                MemberUpdateRequestDto.builder()
                         .nickname("으아아아아")
                         .gender(Gender.FEMALE)
                         .build(),
-                MemberUpdateDto.builder()
+                MemberUpdateRequestDto.builder()
                         .introduction("수정된 한 줄 소개")
                         .companionStyle(CompanionStyle.GROUP)
                         .build(),
-                MemberUpdateDto.builder()
+                MemberUpdateRequestDto.builder()
                         .build(),
-                MemberUpdateDto.builder()
+                MemberUpdateRequestDto.builder()
                         .role(Role.ROLE_ADMIN)
                         .nickname("바뀐닉네임")
                         .birthDate(LocalDate.of(2001, Month.AUGUST, 16))
@@ -256,7 +256,7 @@ class TestMemberService {
                         .fitnessObjective(FitnessObjective.BULK_UP)
                         .fitnessKind(FitnessKind.HIGH_STRESS)
                         .build(),
-                MemberUpdateDto.builder()
+                MemberUpdateRequestDto.builder()
                         .role(Role.ROLE_ADMIN)
                         .nickname("샘플닉네임")
                         .birthDate(LocalDate.now())
@@ -274,7 +274,7 @@ class TestMemberService {
     @DisplayName("updateMember - 제대로 수정됨")
     @MethodSource
     @ParameterizedTest
-    void updateMember_success(MemberUpdateDto updateDto) {
+    void updateMember_success(MemberUpdateRequestDto updateDto) {
         MemberCreationRequestDto requestDto = MemberCreationRequestDto.builder()
                 .id("sample@gmail.com")
                 .nickname("샘플닉네임")
@@ -290,7 +290,7 @@ class TestMemberService {
 
         this.memberService.createMember(requestDto);
 
-        Map<String, Object> updateValueMap = Arrays.stream(MemberUpdateDto.class.getDeclaredMethods())
+        Map<String, Object> updateValueMap = Arrays.stream(MemberUpdateRequestDto.class.getDeclaredMethods())
                 .filter((m) -> m.getName().startsWith("get"))
                 .filter((m) -> {
                     try {
@@ -345,7 +345,7 @@ class TestMemberService {
     @DisplayName("updateMember - 없는 회원일 경우 MemberNotFoundException 발생")
     @Test
     void updateMember_MemberNotFoundException() {
-        MemberUpdateDto updateDto = MemberUpdateDto.builder()
+        MemberUpdateRequestDto updateDto = MemberUpdateRequestDto.builder()
                 .build();
         assertThatExceptionOfType(MemberNotFoundException.class)
                 .isThrownBy(() -> this.memberService.updateMember("no@such.member", updateDto));
