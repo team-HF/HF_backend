@@ -1,6 +1,7 @@
 package com.hf.healthfriend.domain.member.entity;
 
 import com.hf.healthfriend.domain.member.constant.*;
+import com.hf.healthfriend.domain.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -9,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -73,6 +75,9 @@ public class Member implements UserDetails {
     @Column(name = "fitness_kind")
     @Enumerated(EnumType.STRING)
     private FitnessKind fitnessKind;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Post> posts = new ArrayList<>();
 
     public Member(String email) {
         this.id = email;
