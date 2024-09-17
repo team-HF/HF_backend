@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.post.entity;
 
+import com.hf.healthfriend.domain.BaseTimeEntity;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.post.constant.PostCategory;
 import jakarta.persistence.*;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Post {
+public class Post extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long postId;
@@ -21,14 +22,13 @@ public class Post {
     @NotNull
     private String title;
 
+    @NotNull
+    private String content;
+
     @Enumerated(EnumType.STRING)
     private PostCategory category;
 
-    private LocalDateTime creationTime;
-    private LocalDateTime lastModified;
-
-    @Builder.Default
-    private Long viewCount = 0L;
+    private Long viewCount;
 
 
     @Description("삭제한 post")
@@ -41,6 +41,16 @@ public class Post {
 
     public void delete(){
         this.isDeleted=true;
+    }
+
+    public void update(String title, String content, PostCategory category) {
+        this.title = title;
+        this.content = content;
+        this.category = category;
+    }
+
+    public void updateViewCount(Long viewCount) {
+        this.viewCount = viewCount+1;
     }
 
 
