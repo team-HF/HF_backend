@@ -14,8 +14,11 @@ import java.time.LocalDateTime;
 @ToString
 public class MemberCreationResponseDto {
 
-    @Schema(description = "생성된 회원의 ID. 소셜 로그인일 경우 memberId와 email은 같다.")
-    private final String memberId;
+    @Schema(description = "생성된 회원의 ID")
+    private final Long memberId;
+
+    @Schema(description = "login용 ID. 소셜 로그인일 경우 email과 값이 같다.")
+    private final String loginId;
 
     @Schema(description = "생성된 회원의 Email. 소셜 로그인일 경우 memberId와 email은 같다.")
     private final String email;
@@ -47,6 +50,7 @@ public class MemberCreationResponseDto {
     public static MemberCreationResponseDto of(Member member) {
         return MemberCreationResponseDto.builder()
                 .memberId(member.getId())
+                .loginId(member.getLoginId())
                 .email(member.getEmail())
                 .role(member.getRole().name())
                 .creationTime(member.getCreationTime())

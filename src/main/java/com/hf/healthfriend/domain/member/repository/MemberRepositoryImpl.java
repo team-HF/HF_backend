@@ -4,10 +4,12 @@ import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class MemberRepositoryImpl implements MemberRepository{
@@ -15,12 +17,18 @@ public class MemberRepositoryImpl implements MemberRepository{
 
     @Override
     public Member save(Member member) {
+        log.debug("new member={}", member);
         return this.jpaRepository.save(member);
     }
 
     @Override
-    public Optional<Member> findById(String id) {
+    public Optional<Member> findById(Long id) {
         return this.jpaRepository.findById(id);
+    }
+
+    @Override
+    public Optional<Member> findByLoginId(String loginId) {
+        return this.jpaRepository.findByLoginId(loginId);
     }
 
     @Override
@@ -29,8 +37,13 @@ public class MemberRepositoryImpl implements MemberRepository{
     }
 
     @Override
-    public boolean existsById(String id) {
+    public boolean existsById(Long id) {
         return this.jpaRepository.existsById(id);
+    }
+
+    @Override
+    public boolean existsByLoginId(String loginId) {
+        return this.jpaRepository.existsByLoginId(loginId);
     }
 
     @Override
@@ -39,7 +52,7 @@ public class MemberRepositoryImpl implements MemberRepository{
     }
 
     @Override
-    public Member update(String memberId, MemberUpdateDto updateDto) {
+    public Member update(Long memberId, MemberUpdateDto updateDto) {
         Member member = this.jpaRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
 

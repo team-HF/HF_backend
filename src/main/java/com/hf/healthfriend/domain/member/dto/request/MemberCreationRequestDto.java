@@ -17,7 +17,7 @@ import java.time.LocalDate;
 public class MemberCreationRequestDto {
 
     @Schema(description = "생성할 회원의 ID. 소셜 로그인일 경우 id와 email은 같다. email은 id로 설정된다.")
-    private String id;
+    private String loginId;
 
     private String nickname;
 

@@ -113,7 +113,7 @@ public class MemberController {
                     )
             )
     })
-    public ResponseEntity<ApiBasicResponse<MemberDto>> findMember(@PathVariable String memberId) {
+    public ResponseEntity<ApiBasicResponse<MemberDto>> findMember(@PathVariable Long memberId) {
         log.info("Find member of id={}", memberId);
         return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.findMember(memberId), HttpStatus.OK));
     }
@@ -143,7 +143,7 @@ public class MemberController {
                     )
             )
     })
-    public ResponseEntity<ApiBasicResponse<MemberDto>> updateMember(@PathVariable String memberId,
+    public ResponseEntity<ApiBasicResponse<MemberDto>> updateMember(@PathVariable Long memberId,
                                                                     @ModelAttribute MemberUpdateRequestDto dto) {
         MemberDto resultDto = this.memberService.updateMember(memberId, dto);
         return ResponseEntity.ok(ApiBasicResponse.of(resultDto, HttpStatus.OK));

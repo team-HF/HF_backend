@@ -12,25 +12,46 @@ import lombok.ToString;
 @Getter
 @ToString
 public class MemberNotFoundException extends RuntimeException {
-    private final String memberId;
+    private Long memberId;
+    private String loginId;
 
-    public MemberNotFoundException(String memberId) {
+    public MemberNotFoundException(Long memberId) {
         super();
         this.memberId = memberId;
     }
 
-    public MemberNotFoundException(String memberId, String message) {
+    public MemberNotFoundException(String loginId) {
+        super();
+        this.loginId = loginId;
+    }
+
+    public MemberNotFoundException(Long memberId, String message) {
         super(message);
         this.memberId = memberId;
     }
 
-    public MemberNotFoundException(String memberId, Throwable cause) {
+    public MemberNotFoundException(String loginId, String message) {
+        super(message);
+        this.loginId = loginId;
+    }
+
+    public MemberNotFoundException(Long memberId, Throwable cause) {
         super(cause);
         this.memberId = memberId;
     }
 
-    public MemberNotFoundException(String memberId, String message, Throwable cause) {
+    public MemberNotFoundException(String loginId, Throwable cause) {
+        super(cause);
+        this.loginId = loginId;
+    }
+
+    public MemberNotFoundException(Long memberId, String message, Throwable cause) {
         super(message, cause);
         this.memberId = memberId;
+    }
+
+    public MemberNotFoundException(String loginId, String message, Throwable cause) {
+        super(message, cause);
+        this.loginId = loginId;
     }
 }

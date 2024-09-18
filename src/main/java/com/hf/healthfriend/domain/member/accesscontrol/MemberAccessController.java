@@ -3,6 +3,7 @@ package com.hf.healthfriend.domain.member.accesscontrol;
 import com.hf.healthfriend.auth.accesscontrol.AccessControlTrigger;
 import com.hf.healthfriend.auth.accesscontrol.AccessController;
 import com.hf.healthfriend.domain.member.constant.Role;
+import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,19 +17,20 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @AccessController
 @RequiredArgsConstructor
 public class MemberAccessController {
-    private static final int BUFFER_SIZE = 1024;
+    private static final int BUFFER_SIZE = 256;
 
     private final MemberRepository memberRepository;
 
     @AccessControlTrigger(path = "/members", method = "POST")
     public boolean preventSignUpByOtherClient(BearerTokenAuthentication authentication, HttpServletRequest request)
             throws ServletException, IOException {
-        Part idPart = request.getPart("id");
+        Part idPart = request.getPart("loginId");
         String id;
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(idPart.getInputStream()))) {
@@ -68,9 +70,11 @@ public class MemberAccessController {
         }
 
         String path = request.getRequestURI();
-        String resourceMemberId = path.substring(path.lastIndexOf('/') + 1);
+        long resourceMemberId = Long.parseLong(path.substring(path.lastIndexOf('/') + 1));
 
-        if (!memberRepository.existsById(resourceMemberId)) {
+        Optional<Member> findMemberOp = memberRepository.findById(resourceMemberId);
+
+        if (findMemberOp.isEmpty()) {
             return true;
         }
 
@@ -78,8 +82,8 @@ public class MemberAccessController {
             log.trace("path={}", path);
             log.trace("pathVariable={}", resourceMemberId);
             log.trace("authentication.getName()={}", authentication.getName());
-            log.trace("pathVariable.equals(authentication.getName())={}", resourceMemberId.equals(authentication.getName()));
+            log.trace("findMemberOp.get().getLoginId().equals(authentication.getName())={}", findMemberOp.get().getLoginId().equals(authentication.getName()));
         }
-        return resourceMemberId.equals(authentication.getName());
+        return findMemberOp.get().getLoginId().equals(authentication.getName());
     }
 }

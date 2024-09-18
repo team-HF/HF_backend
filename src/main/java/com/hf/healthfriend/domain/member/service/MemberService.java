@@ -39,11 +39,11 @@ public class MemberService {
      */
     public MemberCreationResponseDto createMember(MemberCreationRequestDto dto)
             throws DuplicateMemberCreationException {
-        if (this.memberRepository.existsById(dto.getId())) {
-            throw new DuplicateMemberCreationException(dto.getId());
+        if (this.memberRepository.existsByLoginId(dto.getLoginId())) {
+            throw new DuplicateMemberCreationException(dto.getLoginId());
         }
 
-        Member newMember = new Member(dto.getId());
+        Member newMember = new Member(dto.getLoginId());
         BeanUtils.copyProperties(dto, newMember);
         if (log.isDebugEnabled()) {
             log.debug("newMember={}", newMember);
@@ -63,17 +63,32 @@ public class MemberService {
         return MemberCreationResponseDto.of(saved);
     }
 
-    public boolean isMemberExists(String memberId) {
+    public boolean isMemberExists(Long memberId) {
         return this.memberRepository.existsById(memberId);
     }
 
-    public MemberDto findMember(String memberId) throws MemberNotFoundException {
+    public boolean isMemberOfEmailExists(String email) {
+        return this.memberRepository.existsByEmail(email);
+    }
+
+    public MemberDto findMember(Long memberId) throws MemberNotFoundException {
         Member findMember = this.memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
         return bindToDto(findMember);
     }
 
-    public MemberDto updateMember(String memberId, MemberUpdateRequestDto requestDto) throws MemberNotFoundException {
+    public MemberDto findMemberByLoginId(String loginId) throws MemberNotFoundException {
+        // TODO: 현재 정책에서 loginId == email 이지만 추후 정책 변경 혹은 확장에 대비해서 여기 코드 고쳐야 함
+        return findMemberByEmail(loginId);
+    }
+
+    public MemberDto findMemberByEmail(String email) throws MemberNotFoundException {
+        Member findMember = this.memberRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberNotFoundException(email));
+        return bindToDto(findMember);
+    }
+
+    public MemberDto updateMember(Long memberId, MemberUpdateRequestDto requestDto) throws MemberNotFoundException {
         MemberUpdateDto updateDto = MemberUpdateDto.builder()
                 .role(requestDto.getRole())
                 .nickname(requestDto.getNickname())
@@ -117,6 +132,7 @@ public class MemberService {
     private MemberDto bindToDto(Member member) {
         return MemberDto.builder()
                 .memberId(member.getId())
+                .loginId(member.getLoginId())
                 .role(member.getRole())
                 .email(member.getEmail())
                 .creationTime(member.getCreationTime())

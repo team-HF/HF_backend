@@ -22,14 +22,18 @@ import java.util.List;
 public class Member implements UserDetails {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
-    private String id;
+    private Long id;
+
+    @Column(name = "login_id", unique = true, nullable = false)
+    private String loginId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private Role role = Role.ROLE_MEMBER;
 
-    @Column(name = "email")
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
     @Column(name = "password")
@@ -42,7 +46,7 @@ public class Member implements UserDetails {
     @Column(name = "nickname")
     private String nickname;
 
-    @Column(name = "profile_image_url")
+    @Column(name = "profile_url")
     private String profileImageUrl;
 
     @Column(name = "birth_date")
@@ -79,13 +83,17 @@ public class Member implements UserDetails {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
 
+    public Member(long memberId) {
+        this.id = memberId;
+    }
+
     public Member(String email) {
-        this.id = email;
+        this.loginId = email;
         this.email = email;
     }
 
-    public Member(String id, String email, String password) {
-        this.id = id;
+    public Member(String loginId, String email, String password) {
+        this.loginId = loginId;
         this.email = email;
         this.password = password;
     }
@@ -101,6 +109,6 @@ public class Member implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.id;
+        return String.valueOf(this.id);
     }
 }

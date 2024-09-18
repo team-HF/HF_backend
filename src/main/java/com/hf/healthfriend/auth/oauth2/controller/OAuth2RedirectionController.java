@@ -162,7 +162,7 @@ public class OAuth2RedirectionController {
         // 너무 간단한 로직이므로 Service 객체를 따로 정의하지 않고 여기서 했다.
         GrantedTokenInfo grantedTokenInfo = tokenSupport.grantToken(code, redirectUri);
 
-        boolean memberExists = this.memberService.isMemberExists(grantedTokenInfo.getEmail());
+        boolean memberExists = this.memberService.isMemberOfEmailExists(grantedTokenInfo.getEmail());
 
         ResponseCookie refreshTokenCookie =
                 this.cookieUtils.buildHttpOnlyResponseCookie(CookieConstants.COOKIE_NAME_REFRESH_TOKEN.getString(),

@@ -22,9 +22,9 @@ public class KakaoOpaqueTokenIntrospectorDelegator implements OpaqueTokenIntrosp
     public OAuth2AuthenticatedPrincipal introspect(String token) {
         // TODO: GoogleOpaqueTokenIntrospectorDelegator와 똑같은 로직이 반복된다. 굳이 둘로 나눌 필요는 없을지도
         TokenValidationInfo tokenValidationInfo = this.tokenSupport.validateToken(token);
-        MemberDto memberDto = this.memberService.findMember(tokenValidationInfo.getEmail());
+        MemberDto memberDto = this.memberService.findMemberByEmail(tokenValidationInfo.getEmail());
         return new SingleAuthorityOAuth2Principal(
-                memberDto.getMemberId(),
+                memberDto.getLoginId(),
                 memberDto.getRole()
         );
     }
