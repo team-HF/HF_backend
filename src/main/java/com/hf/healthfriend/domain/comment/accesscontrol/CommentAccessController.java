@@ -5,23 +5,18 @@ import com.hf.healthfriend.auth.accesscontrol.AccessController;
 import com.hf.healthfriend.domain.comment.entity.Comment;
 import com.hf.healthfriend.domain.comment.repository.CommentRepository;
 import com.hf.healthfriend.domain.member.constant.Role;
-import com.hf.healthfriend.domain.member.entity.Member;
-import com.hf.healthfriend.domain.member.repository.MemberRepository;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
 
-import java.io.IOException;
 import java.util.Optional;
 
 @Slf4j
 @AccessController
 @RequiredArgsConstructor
 public class CommentAccessController {
-    private final MemberRepository memberRepository;
     private final CommentRepository commentRepository;
 
     @AccessControlTrigger(path = "/hr/comments/{commentId}", method = "DELETE")
@@ -48,16 +43,13 @@ public class CommentAccessController {
             return true; // 그대로 진행시켜서 404 Not Found가 나도록
         }
 
-        Optional<Member> accessingMemberOp = this.memberRepository.findByEmail(authentication.getName());
-        if (accessingMemberOp.isEmpty()) {
-            return false;
+        if (log.isTraceEnabled()) {
+            log.trace("authentication={}", authentication);
+            log.trace("authentication.principal={}", authentication.getPrincipal());
+            log.trace("authentication.name={}", authentication.getName());
         }
 
-        Member accessingMember = accessingMemberOp.get();
-
-        log.debug("accessingMember={}", accessingMember);
-
         Comment comment = commentOp.get();
-        return comment.getWriter().getId().equals(accessingMember.getId());
+        return comment.getWriter().getId().equals(Long.parseLong(authentication.getName()));
     }
 }

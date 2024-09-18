@@ -3,12 +3,9 @@ package com.hf.healthfriend.domain.member.accesscontrol;
 import com.hf.healthfriend.auth.accesscontrol.AccessControlTrigger;
 import com.hf.healthfriend.auth.accesscontrol.AccessController;
 import com.hf.healthfriend.domain.member.constant.Role;
-import com.hf.healthfriend.domain.member.entity.Member;
-import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.Part;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
@@ -17,15 +14,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @AccessController
-@RequiredArgsConstructor
 public class MemberAccessController {
     private static final int BUFFER_SIZE = 256;
-
-    private final MemberRepository memberRepository;
 
     @AccessControlTrigger(path = "/hr/members", method = "POST")
     public boolean preventSignUpByOtherClient(BearerTokenAuthentication authentication, HttpServletRequest request)
@@ -45,6 +38,8 @@ public class MemberAccessController {
         log.trace("id={}", id);
 
         String authenticatedMemberId = authentication.getName(); // null이면 이미 401이 났을 테니 null이 아닐 것
+
+        log.trace("authenticatedMemberId={}", authenticatedMemberId);
 
         return authenticatedMemberId.equals(id.trim());
     }
@@ -70,20 +65,14 @@ public class MemberAccessController {
         }
 
         String path = request.getRequestURI();
-        long resourceMemberId = Long.parseLong(path.substring(path.lastIndexOf('/') + 1));
-
-        Optional<Member> findMemberOp = memberRepository.findById(resourceMemberId);
-
-        if (findMemberOp.isEmpty()) {
-            return true;
-        }
+        String resourceMemberId = path.substring(path.lastIndexOf('/') + 1);
 
         if (log.isTraceEnabled()) {
             log.trace("path={}", path);
             log.trace("pathVariable={}", resourceMemberId);
             log.trace("authentication.getName()={}", authentication.getName());
-            log.trace("findMemberOp.get().getLoginId().equals(authentication.getName())={}", findMemberOp.get().getLoginId().equals(authentication.getName()));
+            log.trace("resourceMemberId.equals(authentication.getName())={}", resourceMemberId.equals(authentication.getName()));
         }
-        return findMemberOp.get().getLoginId().equals(authentication.getName());
+        return resourceMemberId.equals(authentication.getName());
     }
 }

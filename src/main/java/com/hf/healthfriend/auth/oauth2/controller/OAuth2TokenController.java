@@ -139,11 +139,11 @@ public class OAuth2TokenController {
             )
     })
     public ResponseEntity<ApiBasicResponse<MemberDto>> whoAmI() {
-        String loginId = SecurityContextHolder.getContext().getAuthentication().getName();
+        long id = Long.parseLong(SecurityContextHolder.getContext().getAuthentication().getName());
         if (log.isTraceEnabled()) {
-            log.trace("Logged In OAuth 2.0 Member={}", loginId);
+            log.trace("Logged In OAuth 2.0 Member={}", id);
         }
-        MemberDto memberDto = this.memberService.findMemberByLoginId(loginId);
+        MemberDto memberDto = this.memberService.findMember(id);
         return ResponseEntity.ok(
                 ApiBasicResponse.of(
                         memberDto,

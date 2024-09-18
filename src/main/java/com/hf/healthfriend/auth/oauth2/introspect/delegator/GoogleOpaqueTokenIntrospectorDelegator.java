@@ -23,7 +23,7 @@ public class GoogleOpaqueTokenIntrospectorDelegator implements OpaqueTokenIntros
         TokenValidationInfo tokenValidationInfo = this.tokenSupport.validateToken(token);
         MemberDto memberDto = this.memberService.findMemberByEmail(tokenValidationInfo.getEmail());
         return new SingleAuthorityOAuth2Principal(
-                memberDto.getLoginId(),
+                String.valueOf(memberDto.getMemberId()),
                 memberDto.getRole()
         );
     }
