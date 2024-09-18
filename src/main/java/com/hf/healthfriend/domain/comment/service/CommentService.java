@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.comment.service;
 
+import com.hf.healthfriend.domain.comment.dto.CommentDto;
 import com.hf.healthfriend.domain.comment.dto.request.CommentCreationRequestDto;
 import com.hf.healthfriend.domain.comment.dto.response.CommentCreationResponseDto;
 import com.hf.healthfriend.domain.comment.entity.Comment;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Slf4j
@@ -43,5 +45,12 @@ public class CommentService {
         if (!success) {
             throw new NoSuchElementException();
         }
+    }
+
+    public List<CommentDto> getCommentsOfPost(Long postId) { // TODO: postId에 해당하는 Post가 없을 경우 어떻게?
+        return this.commentRepository.findCommentsByPostId(postId)
+                .stream()
+                .map(CommentDto::of)
+                .toList();
     }
 }

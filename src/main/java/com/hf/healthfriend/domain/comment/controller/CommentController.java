@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.comment.controller;
 
+import com.hf.healthfriend.domain.comment.dto.CommentDto;
 import com.hf.healthfriend.domain.comment.dto.request.CommentCreationRequestDto;
 import com.hf.healthfriend.domain.comment.dto.response.CommentCreationResponseDto;
 import com.hf.healthfriend.domain.comment.service.CommentService;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -35,5 +37,12 @@ public class CommentController {
     public ResponseEntity<ApiBasicResponse<Void>> deleteComment(@PathVariable("commentId") long commentId) {
         this.commentService.deleteComment(commentId);
         return ResponseEntity.ok(ApiBasicResponse.of(HttpStatus.OK));
+    }
+
+    @GetMapping("/posts/{postId}/comments")
+    public ResponseEntity<ApiBasicResponse<List<CommentDto>>> findCommentsOfSpecificPost(@PathVariable("postId") long postId) {
+        List<CommentDto> result = this.commentService.getCommentsOfPost(postId);
+        log.info("result={}", result);
+        return ResponseEntity.ok(ApiBasicResponse.of(result, HttpStatus.OK));
     }
 }

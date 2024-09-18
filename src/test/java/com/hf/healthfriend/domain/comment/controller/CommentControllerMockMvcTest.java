@@ -1,8 +1,12 @@
 package com.hf.healthfriend.domain.comment.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hf.healthfriend.domain.comment.dto.CommentDto;
 import com.hf.healthfriend.domain.comment.dto.request.CommentCreationRequestDto;
 import com.hf.healthfriend.domain.comment.dto.response.CommentCreationResponseDto;
 import com.hf.healthfriend.domain.comment.service.CommentService;
+import com.hf.healthfriend.global.spec.ApiBasicResponse;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,15 +18,17 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Slf4j
@@ -55,6 +61,32 @@ class CommentControllerMockMvcTest {
                                 .writerId(1000L)
                                 .content("sample-content")
                                 .build()
+                );
+        when(this.commentService.getCommentsOfPost(10000L))
+                .thenReturn(
+                        List.of(
+                                CommentDto.builder()
+                                        .commentId(1L)
+                                        .postId(10000L)
+                                        .writerId(100L)
+                                        .content("sample1")
+                                        .creationTime(LocalDateTime.now())
+                                        .build(),
+                                CommentDto.builder()
+                                        .commentId(2L)
+                                        .postId(10000L)
+                                        .writerId(100L)
+                                        .content("sample2")
+                                        .creationTime(LocalDateTime.now())
+                                        .build(),
+                                CommentDto.builder()
+                                        .commentId(3L)
+                                        .postId(10000L)
+                                        .writerId(101L)
+                                        .content("sample3")
+                                        .creationTime(LocalDateTime.now())
+                                        .build()
+                        )
                 );
     }
 
@@ -102,5 +134,24 @@ class CommentControllerMockMvcTest {
 
         this.mockMvc.perform(delete("/hr/comments/{commentId}", creationResult.getCommentId()))
                 .andExpect(status().isOk());
+    }
+
+    @Autowired
+    ObjectMapper objectMapper;
+
+    @DisplayName("GET /posts/{postId}/comments - 조회 성공")
+    @Test
+    void findCommentsOfSpecificPost() throws Exception {
+        String responseBodyAsString = this.mockMvc.perform(get("/hr/posts/{postId}/comments", 10000L)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse().getContentAsString();
+
+        log.info("responseBodyAsString:\n{}", responseBodyAsString);
+        ApiBasicResponse<List<CommentDto>> responseBody = this.objectMapper.readValue(responseBodyAsString, new TypeReference<ApiBasicResponse<List<CommentDto>>>() {
+        });
+
+        assertThat(responseBody.getStatusCode()).isEqualTo(HttpStatus.OK.value());
+        assertThat(responseBody.getStatusCodeSeries()).isEqualTo(HttpStatus.OK.series().value());
+        assertThat(responseBody.getContent()).size().isEqualTo(3);
     }
 }

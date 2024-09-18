@@ -1,20 +1,31 @@
 package com.hf.healthfriend.domain.comment.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+import com.hf.healthfriend.domain.comment.entity.Comment;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor
 @Builder
 @Getter
 @ToString
 public class CommentDto {
-    private final Long commentId;
-    private final Long postId;
-    private final Long writerId;
-    private final String content;
-    private final LocalDateTime creationTime;
-    private final LocalDateTime lastModified;
-    private final boolean isDeleted;
+    private Long commentId;
+    private Long postId;
+    private Long writerId;
+    private String content;
+    private LocalDateTime creationTime;
+    private LocalDateTime lastModified;
+
+    public static CommentDto of(Comment entity) {
+        return CommentDto.builder()
+                .commentId(entity.getCommentId())
+                .postId(entity.getPost().getPostId())
+                .writerId(entity.getWriter().getId())
+                .content(entity.getContent())
+                .creationTime(entity.getCreationTime())
+                .lastModified(entity.getLastModified())
+                .build();
+    }
 }

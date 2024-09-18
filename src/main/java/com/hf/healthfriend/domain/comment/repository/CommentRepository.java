@@ -4,6 +4,7 @@ import com.hf.healthfriend.domain.comment.entity.Comment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -28,5 +29,9 @@ public class CommentRepository {
         Comment comment = commentOp.get();
         comment.setDeleted(true);
         return true;
+    }
+
+    public List<Comment> findCommentsByPostId(Long postId) {
+        return this.commentJpaRepository.findByPostId(postId);
     }
 }
