@@ -30,4 +30,10 @@ public class CommentController {
                         .toUri())
                 .body(ApiBasicResponse.of(result, HttpStatus.CREATED));
     }
+
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<ApiBasicResponse<Void>> deleteComment(@PathVariable("commentId") long commentId) {
+        this.commentService.deleteComment(commentId);
+        return ResponseEntity.ok(ApiBasicResponse.of(HttpStatus.OK));
+    }
 }

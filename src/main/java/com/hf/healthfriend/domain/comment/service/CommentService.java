@@ -1,6 +1,5 @@
 package com.hf.healthfriend.domain.comment.service;
 
-import com.hf.healthfriend.domain.comment.dto.CommentDto;
 import com.hf.healthfriend.domain.comment.dto.request.CommentCreationRequestDto;
 import com.hf.healthfriend.domain.comment.dto.response.CommentCreationResponseDto;
 import com.hf.healthfriend.domain.comment.entity.Comment;
@@ -11,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+
+import java.util.NoSuchElementException;
 
 @Slf4j
 @Service
@@ -35,5 +36,12 @@ public class CommentService {
                 .content(newComment.getContent())
                 .creationTime(newComment.getCreationTime())
                 .build();
+    }
+
+    public void deleteComment(Long commentId) throws NoSuchElementException { // TODO: NoSuchElementException이 맞을까?
+        boolean success = this.commentRepository.deleteById(commentId);
+        if (!success) {
+            throw new NoSuchElementException();
+        }
     }
 }
