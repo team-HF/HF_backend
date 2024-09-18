@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Getter
 @Setter
@@ -45,9 +45,31 @@ public class Comment {
     private LocalDateTime lastModified = null;
 
     @Column(name = "is_deleted")
+    @Builder.Default
     private boolean isDeleted = false;
+
+    public Comment(@NotNull Post post, @NotNull Member writer, String content) {
+        this.post = post;
+        this.writer = writer;
+        this.content = content;
+        this.creationTime = LocalDateTime.now();
+        this.isDeleted = false;
+    }
 
     public void delete() {
         this.isDeleted = true;
+    }
+
+    @Override
+    public String toString() {
+        return "Comment{" +
+                "commentId=" + commentId +
+                ", postId=" + post.getPostId() +
+                ", writerId=" + writer.getId() +
+                ", content='" + content + '\'' +
+                ", creationTime=" + creationTime +
+                ", lastModified=" + lastModified +
+                ", isDeleted=" + isDeleted +
+                '}';
     }
 }
