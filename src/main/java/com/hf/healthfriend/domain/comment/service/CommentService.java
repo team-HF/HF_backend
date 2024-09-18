@@ -5,6 +5,7 @@ import com.hf.healthfriend.domain.comment.dto.request.CommentCreationRequestDto;
 import com.hf.healthfriend.domain.comment.dto.response.CommentCreationResponseDto;
 import com.hf.healthfriend.domain.comment.entity.Comment;
 import com.hf.healthfriend.domain.comment.repository.CommentRepository;
+import com.hf.healthfriend.domain.comment.repository.dto.CommentUpdateDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.post.entity.Post;
 import lombok.RequiredArgsConstructor;
@@ -59,5 +60,10 @@ public class CommentService {
                 .stream()
                 .map(CommentDto::of)
                 .toList();
+    }
+
+    public CommentDto updateComment(Long commentId, CommentUpdateDto updateDto) {
+        Comment updatedComment = this.commentRepository.updateComment(commentId, updateDto);
+        return CommentDto.of(updatedComment);
     }
 }

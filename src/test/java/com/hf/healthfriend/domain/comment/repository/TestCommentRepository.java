@@ -1,6 +1,7 @@
 package com.hf.healthfriend.domain.comment.repository;
 
 import com.hf.healthfriend.domain.comment.entity.Comment;
+import com.hf.healthfriend.domain.comment.repository.dto.CommentUpdateDto;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
@@ -20,10 +21,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @Slf4j
 @SpringBootTest
@@ -223,5 +227,44 @@ class TestCommentRepository {
         log.info("result={}", result);
 
         assertThat(result).size().isEqualTo(expectedSize);
+    }
+
+    @DisplayName("updateComment - 수정 성공")
+    @Test
+    void updateComment_success() {
+        Comment comment = new Comment(Post.builder().postId(this.postId).build(), new Member(commentWriterIds.get(0)), "previous-content");
+
+        this.commentRepository.save(comment);
+
+        log.info("Before update: {}", comment);
+
+        LocalDateTime record = LocalDateTime.now();
+        Comment result =
+                this.commentRepository.updateComment(comment.getCommentId(), CommentUpdateDto.builder().content("New Content").build());
+
+        assertThat(result.getContent()).isEqualTo("New Content");
+        assertThat(result.getLastModified()).isAfterOrEqualTo(record);
+    }
+
+    @DisplayName("updateComment - 수정에는 성공했지만 Update DTO의 null은 반영 안 됨")
+    @Test
+    void updateComment_success_butNullNotReflected() {
+        Comment comment = new Comment(Post.builder().postId(this.postId).build(), new Member(commentWriterIds.get(0)), "previous-content");
+
+        this.commentRepository.save(comment);
+
+        log.info("Before update: {}", comment);
+
+        Comment result =
+                this.commentRepository.updateComment(comment.getCommentId(), CommentUpdateDto.builder().content(null).build());
+
+        assertThat(result.getContent()).isEqualTo("previous-content");
+    }
+
+    @DisplayName("updateComment - 그런 comment 없어서 수정 실패")
+    @Test
+    void updateComment_fail_sinceNoSuchCommentOfCommentId() {
+        assertThatExceptionOfType(NoSuchElementException.class)
+                .isThrownBy(() -> this.commentRepository.updateComment(11351L, CommentUpdateDto.builder().content("New Content").build()));
     }
 }
