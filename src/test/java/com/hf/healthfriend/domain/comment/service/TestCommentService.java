@@ -2,6 +2,7 @@ package com.hf.healthfriend.domain.comment.service;
 
 import com.hf.healthfriend.domain.comment.dto.request.CommentCreationRequestDto;
 import com.hf.healthfriend.domain.comment.dto.response.CommentCreationResponseDto;
+import com.hf.healthfriend.domain.comment.exception.CommentNotFoundException;
 import com.hf.healthfriend.domain.comment.repository.CommentRepository;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.entity.Member;
@@ -187,7 +188,7 @@ class TestCommentService {
     @DisplayName("deleteComment - 없는 Comment를 삭제하려고 해서 실패")
     @Test
     void deleteComment_fail_noSuchElementException() {
-        assertThatExceptionOfType(NoSuchElementException.class)
+        assertThatExceptionOfType(CommentNotFoundException.class)
                 .isThrownBy(() -> this.commentService.deleteComment(1000L));
     }
 }

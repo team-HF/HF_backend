@@ -4,6 +4,7 @@ import com.hf.healthfriend.domain.comment.dto.CommentDto;
 import com.hf.healthfriend.domain.comment.dto.request.CommentCreationRequestDto;
 import com.hf.healthfriend.domain.comment.dto.response.CommentCreationResponseDto;
 import com.hf.healthfriend.domain.comment.entity.Comment;
+import com.hf.healthfriend.domain.comment.exception.CommentNotFoundException;
 import com.hf.healthfriend.domain.comment.repository.CommentRepository;
 import com.hf.healthfriend.domain.comment.repository.dto.CommentUpdateDto;
 import com.hf.healthfriend.domain.member.entity.Member;
@@ -14,7 +15,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Slf4j
 @Service
@@ -41,11 +41,8 @@ public class CommentService {
                 .build();
     }
 
-    public void deleteComment(Long commentId) throws NoSuchElementException { // TODO: NoSuchElementException이 맞을까?
-        boolean success = this.commentRepository.deleteById(commentId);
-        if (!success) {
-            throw new NoSuchElementException();
-        }
+    public void deleteComment(Long commentId) throws CommentNotFoundException {
+        this.commentRepository.deleteById(commentId);
     }
 
     public List<CommentDto> getCommentsOfPost(Long postId) { // TODO: postId에 해당하는 Post가 없을 경우 어떻게?
@@ -62,7 +59,7 @@ public class CommentService {
                 .toList();
     }
 
-    public CommentDto updateComment(Long commentId, CommentUpdateDto updateDto) {
+    public CommentDto updateComment(Long commentId, CommentUpdateDto updateDto) throws CommentNotFoundException {
         Comment updatedComment = this.commentRepository.updateComment(commentId, updateDto);
         return CommentDto.of(updatedComment);
     }
