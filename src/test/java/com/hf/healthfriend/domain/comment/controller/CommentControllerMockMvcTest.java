@@ -88,6 +88,32 @@ class CommentControllerMockMvcTest {
                                         .build()
                         )
                 );
+        when(this.commentService.getCommentsOfWriter(10000L))
+                .thenReturn(
+                        List.of(
+                                CommentDto.builder()
+                                        .commentId(1L)
+                                        .postId(1000L)
+                                        .writerId(10000L)
+                                        .content("sample1")
+                                        .creationTime(LocalDateTime.now())
+                                        .build(),
+                                CommentDto.builder()
+                                        .commentId(2L)
+                                        .postId(1000L)
+                                        .writerId(10000L)
+                                        .content("sample2")
+                                        .creationTime(LocalDateTime.now())
+                                        .build(),
+                                CommentDto.builder()
+                                        .commentId(3L)
+                                        .postId(1001L)
+                                        .writerId(10000L)
+                                        .content("sample3")
+                                        .creationTime(LocalDateTime.now())
+                                        .build()
+                        )
+                );
     }
 
     @DisplayName("POST /posts/{postId}/comments - create a comment - 201 expected")
@@ -143,6 +169,24 @@ class CommentControllerMockMvcTest {
     @Test
     void findCommentsOfSpecificPost() throws Exception {
         String responseBodyAsString = this.mockMvc.perform(get("/hr/posts/{postId}/comments", 10000L)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse().getContentAsString();
+
+        log.info("responseBodyAsString:\n{}", responseBodyAsString);
+        ApiBasicResponse<List<CommentDto>> responseBody = this.objectMapper.readValue(responseBodyAsString, new TypeReference<ApiBasicResponse<List<CommentDto>>>() {
+        });
+
+        assertThat(responseBody.getStatusCode()).isEqualTo(HttpStatus.OK.value());
+        assertThat(responseBody.getStatusCodeSeries()).isEqualTo(HttpStatus.OK.series().value());
+        assertThat(responseBody.getContent()).size().isEqualTo(3);
+    }
+
+
+    @DisplayName("GET /comments?writerId= - 조회 성공")
+    @Test
+    void findCommentsOfSpecificWriter() throws Exception {
+        String responseBodyAsString = this.mockMvc.perform(get("/hr/comments")
+                        .param("writerId", String.valueOf(10000))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString();
 

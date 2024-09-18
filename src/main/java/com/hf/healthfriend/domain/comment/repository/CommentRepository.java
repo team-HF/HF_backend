@@ -34,4 +34,9 @@ public class CommentRepository {
     public List<Comment> findCommentsByPostId(Long postId) {
         return this.commentJpaRepository.findByPostId(postId);
     }
+
+    // TODO: 추후 Pagination이 필요할 듯
+    public List<Comment> findCommentsByWriterId(Long writerId) {
+        return this.commentJpaRepository.findByWriterId(writerId);
+    }
 }

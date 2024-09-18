@@ -45,4 +45,11 @@ public class CommentController {
         log.info("result={}", result);
         return ResponseEntity.ok(ApiBasicResponse.of(result, HttpStatus.OK));
     }
+
+    @GetMapping("/comments")
+    public ResponseEntity<ApiBasicResponse<List<CommentDto>>> findCommentsOfSpecificMember(@RequestParam("writerId") long writerId) {
+        List<CommentDto> result = this.commentService.getCommentsOfWriter(writerId);
+        log.info("result={}", result);
+        return ResponseEntity.ok(ApiBasicResponse.of(result, HttpStatus.OK));
+    }
 }

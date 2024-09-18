@@ -53,4 +53,11 @@ public class CommentService {
                 .map(CommentDto::of)
                 .toList();
     }
+
+    public List<CommentDto> getCommentsOfWriter(Long writerId) { // TODO: 존재하지 않는 Member일 경우 어떻게?
+        return this.commentRepository.findCommentsByWriterId(writerId)
+                .stream()
+                .map(CommentDto::of)
+                .toList();
+    }
 }

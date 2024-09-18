@@ -16,4 +16,12 @@ public interface CommentJpaRepository extends JpaRepository<Comment, Long> {
                 AND c.isDeleted = FALSE
             """)
     List<Comment> findByPostId(@Param("postId") long postId);
+
+    @Query("""
+            SELECT c
+            FROM Comment c
+            WHERE c.writer.id = :writerId
+                AND c.isDeleted = FALSE
+            """)
+    List<Comment> findByWriterId(@Param("writerId") long writerId);
 }

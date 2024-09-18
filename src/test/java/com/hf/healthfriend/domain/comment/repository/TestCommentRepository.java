@@ -161,4 +161,67 @@ class TestCommentRepository {
 
         assertThat(result).size().isEqualTo(expectedSize);
     }
+
+    @DisplayName("findCommentsByWriterId - 다 찾아옴")
+    @Test
+    void findCommentsByWriterId_findAll() {
+        // Given
+        long commentWriterId = this.commentWriterIds.get(0);
+        List<Comment> commentsToInsert = List.of(
+                new Comment(Post.builder().postId(this.postId).build(), new Member(commentWriterId), "content1"),
+                new Comment(Post.builder().postId(this.postId).build(), new Member(commentWriterId), "content2"),
+                new Comment(Post.builder().postId(this.postId).build(), new Member(commentWriterId), "content3")
+        );
+
+        commentsToInsert.forEach((c) -> this.commentRepository.save(c));
+
+        // When
+        long writerIdToQuery = commentWriterId;
+
+        // Then
+        List<Comment> result = this.commentRepository.findCommentsByWriterId(writerIdToQuery);
+
+        log.info("result={}", result);
+
+        assertThat(result).size().isEqualTo(3);
+    }
+
+    static Stream<Arguments> findCommentsByWriterId_excludeDeleted() {
+        // Arguments의 첫 번째 값은 this.commentRepository.findCommentsByPostId 메소드의
+        // size 예상값
+        // 두 번째 이후의 값은 삭제할 Comment의 indices
+        return Stream.of(
+                Arguments.of(2, new int[] { 0 }),
+                Arguments.of(2, new int[] { 1 }),
+                Arguments.of(2, new int[] { 2 }),
+                Arguments.of(1, new int[] { 0, 2 }),
+                Arguments.of(0, new int[] { 0, 1, 2 })
+        );
+    }
+
+    @DisplayName("findCommentsByWriterId - isDeleted = true 인 거 제외하는 거 체크")
+    @MethodSource
+    @ParameterizedTest
+    void findCommentsByWriterId_excludeDeleted(int expectedSize, int[] indicesOfCommentsToDelete) {
+        // Given
+        long commentWriterId = this.commentWriterIds.get(0);
+        List<Comment> commentsToInsert = List.of(
+                new Comment(Post.builder().postId(this.postId).build(), new Member(commentWriterId), "content1"),
+                new Comment(Post.builder().postId(this.postId).build(), new Member(commentWriterId), "content2"),
+                new Comment(Post.builder().postId(this.postId).build(), new Member(commentWriterId), "content3")
+        );
+
+        commentsToInsert.forEach((c) -> this.commentRepository.save(c));
+
+        for (int indexOfCommentToDelete : indicesOfCommentsToDelete) {
+            this.commentRepository.deleteById(commentsToInsert.get(indexOfCommentToDelete).getCommentId());
+        }
+
+        // Then
+        List<Comment> result = this.commentRepository.findCommentsByWriterId(this.commentWriterIds.get(0));
+
+        log.info("result={}", result);
+
+        assertThat(result).size().isEqualTo(expectedSize);
+    }
 }
