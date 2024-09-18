@@ -45,7 +45,7 @@ class TestMemberService {
     @Test
     void createMember_withEveryData() {
         MemberCreationRequestDto requestDto = MemberCreationRequestDto.builder()
-                .loginId("sample@gmail.com")
+                .id("sample@gmail.com")
                 .nickname("샘플닉네임")
                 .birthDate(LocalDate.now())
                 .gender(Gender.MALE)
@@ -111,16 +111,16 @@ class TestMemberService {
     static Stream<MemberCreationRequestDto> createMember_omittedData() {
         return Stream.of(
                 MemberCreationRequestDto.builder()
-                        .loginId("sample@gmail.com")
+                        .id("sample@gmail.com")
                         .build(),
                 MemberCreationRequestDto.builder()
-                        .loginId("elpmas@khu.ac.kr")
+                        .id("elpmas@khu.ac.kr")
                         .nickname("샘플닉네임")
                         .birthDate(LocalDate.now())
                         .gender(Gender.FEMALE)
                         .build(),
                 MemberCreationRequestDto.builder()
-                        .loginId("asdf@naver.com")
+                        .id("asdf@naver.com")
                         .fitnessEagerness(FitnessEagerness.LAZY)
                         .build()
         );
@@ -138,7 +138,7 @@ class TestMemberService {
     @Test
     void isMemberExists_returnTrue() {
         MemberCreationRequestDto requestDto = MemberCreationRequestDto.builder()
-                .loginId("sample@gmail.com")
+                .id("sample@gmail.com")
                 .nickname("샘플닉네임")
                 .birthDate(LocalDate.now())
                 .gender(Gender.MALE)
@@ -162,7 +162,7 @@ class TestMemberService {
     @Test
     void isMemberExists_returnFalse() {
         MemberCreationRequestDto requestDto = MemberCreationRequestDto.builder()
-                .loginId("sample@gmail.com")
+                .id("sample@gmail.com")
                 .nickname("샘플닉네임")
                 .birthDate(LocalDate.now())
                 .gender(Gender.MALE)
@@ -186,7 +186,7 @@ class TestMemberService {
     @Test
     void findMember_success() {
         MemberCreationRequestDto requestDto = MemberCreationRequestDto.builder()
-                .loginId("sample@gmail.com")
+                .id("sample@gmail.com")
                 .nickname("샘플닉네임")
                 .birthDate(LocalDate.now())
                 .gender(Gender.MALE)
@@ -205,7 +205,7 @@ class TestMemberService {
 
         log.info("result={}", result);
 
-        assertThat(result.getLoginId()).isEqualTo(requestDto.getLoginId());
+        assertThat(result.getLoginId()).isEqualTo(requestDto.getId());
         assertThat(result.getNickname()).isEqualTo(requestDto.getNickname());
         assertThat(result.getCreationTime()).isAfterOrEqualTo(beforeExecution);
         assertThat(result.getCreationTime()).isBeforeOrEqualTo(LocalDateTime.now());
@@ -276,7 +276,7 @@ class TestMemberService {
     @ParameterizedTest
     void updateMember_success(MemberUpdateRequestDto updateDto) {
         MemberCreationRequestDto requestDto = MemberCreationRequestDto.builder()
-                .loginId("sample@gmail.com")
+                .id("sample@gmail.com")
                 .nickname("샘플닉네임")
                 .birthDate(LocalDate.now())
                 .gender(Gender.MALE)

@@ -53,7 +53,7 @@ class TestMemberController {
     @BeforeEach
     void beforeEach() {
         MemberCreationRequestDto creationRequestDtoDuplicate = MemberCreationRequestDto.builder()
-                .loginId("sample@gmail.com")
+                .id("sample@gmail.com")
                 .nickname("샘플닉네임")
                 .birthDate(LocalDate.of(1997, Month.SEPTEMBER, 16))
                 .gender(Gender.MALE)
@@ -77,7 +77,7 @@ class TestMemberController {
     @Test
     void memberCreation_success() throws Exception {
         this.mockMvc.perform(multipart("/hr/members")
-                        .param("loginId", "new@gmail.com")
+                        .param("id", "new@gmail.com")
                         .param("nickname", "새로운인간")
                         .param("birthDate", "1997-09-16")
                         .param("gender", "MALE")
@@ -111,7 +111,7 @@ class TestMemberController {
     @Test
     void memberCreation_failure() throws Exception {
         this.mockMvc.perform(multipart("/hr/members")
-                        .param("loginId", "sample@gmail.com")
+                        .param("id", "sample@gmail.com")
                         .param("nickname", "샘플닉네임")
                         .param("birthDate", "1997-09-16")
                         .param("gender", "MALE")

@@ -39,11 +39,11 @@ public class MemberService {
      */
     public MemberCreationResponseDto createMember(MemberCreationRequestDto dto)
             throws DuplicateMemberCreationException {
-        if (this.memberRepository.existsByLoginId(dto.getLoginId())) {
-            throw new DuplicateMemberCreationException(dto.getLoginId());
+        if (this.memberRepository.existsByLoginId(dto.getId())) {
+            throw new DuplicateMemberCreationException(dto.getId());
         }
 
-        Member newMember = new Member(dto.getLoginId());
+        Member newMember = new Member(dto.getId());
         BeanUtils.copyProperties(dto, newMember);
         if (log.isDebugEnabled()) {
             log.debug("newMember={}", newMember);

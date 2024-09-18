@@ -30,7 +30,7 @@ public class MemberAccessController {
     @AccessControlTrigger(path = "/hr/members", method = "POST")
     public boolean preventSignUpByOtherClient(BearerTokenAuthentication authentication, HttpServletRequest request)
             throws ServletException, IOException {
-        Part idPart = request.getPart("loginId");
+        Part idPart = request.getPart("id");
         String id;
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(idPart.getInputStream()))) {
