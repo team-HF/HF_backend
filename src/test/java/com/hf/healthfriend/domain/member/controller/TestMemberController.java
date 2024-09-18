@@ -73,10 +73,10 @@ class TestMemberController {
                 .build();
     }
 
-    @DisplayName("POST /members - success")
+    @DisplayName("POST /hr/members - success")
     @Test
     void memberCreation_success() throws Exception {
-        this.mockMvc.perform(multipart("/members")
+        this.mockMvc.perform(multipart("/hr/members")
                         .param("loginId", "new@gmail.com")
                         .param("nickname", "새로운인간")
                         .param("birthDate", "1997-09-16")
@@ -107,10 +107,10 @@ class TestMemberController {
 
     }
 
-    @DisplayName("POST /members - failure")
+    @DisplayName("POST /hr/members - failure")
     @Test
     void memberCreation_failure() throws Exception {
-        this.mockMvc.perform(multipart("/members")
+        this.mockMvc.perform(multipart("/hr/members")
                         .param("loginId", "sample@gmail.com")
                         .param("nickname", "샘플닉네임")
                         .param("birthDate", "1997-09-16")
@@ -134,10 +134,11 @@ class TestMemberController {
                         """));
     }
 
-    @DisplayName("GET /members/{memberId} - succeess to find member")
+    @DisplayName("GET /hr/members/{memberId} - succeess to find member")
     @Test
     void findMember_success() throws Exception {
-        this.mockMvc.perform(get("/members/{memberId}", this.createdMemberId)
+        log.info("createdMemberId={}", this.createdMemberId);
+        this.mockMvc.perform(get("/hr/members/{memberId}", this.createdMemberId)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(log())
                 .andDo(print())
@@ -159,10 +160,10 @@ class TestMemberController {
                         """));
     }
 
-    @DisplayName("GET /members/{memberId} - Member not found")
+    @DisplayName("GET /hr/members/{memberId} - Member not found")
     @Test
     void findMember_memberNotFound() throws Exception {
-        this.mockMvc.perform(get("/members/{memberId}", this.createdMemberId + 1)
+        this.mockMvc.perform(get("/hr/members/{memberId}", this.createdMemberId + 1)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(log())
                 .andDo(print())
@@ -177,10 +178,10 @@ class TestMemberController {
                         """));
     }
 
-    @DisplayName("PATCH /members/{memberId} - success")
+    @DisplayName("PATCH /hr/members/{memberId} - success")
     @Test
     void updateMember_success() throws Exception {
-        this.mockMvc.perform(patch("/members/{memberId}", this.createdMemberId)
+        this.mockMvc.perform(patch("/hr/members/{memberId}", this.createdMemberId)
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .accept(MediaType.APPLICATION_JSON)
                         .content("{}"))
@@ -195,10 +196,10 @@ class TestMemberController {
                         """));
     }
 
-    @DisplayName("PATCH /members/{memberId} - Member not found")
+    @DisplayName("PATCH /hr/members/{memberId} - Member not found")
     @Test
     void updateMember_memberNotFound() throws Exception {
-        this.mockMvc.perform(patch("/members/{memberId}", this.createdMemberId + 1)
+        this.mockMvc.perform(patch("/hr/members/{memberId}", this.createdMemberId + 1)
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .accept(MediaType.APPLICATION_JSON)
                         .content("{}"))

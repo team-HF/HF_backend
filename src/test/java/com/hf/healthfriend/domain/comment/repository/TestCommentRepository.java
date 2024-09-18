@@ -1,6 +1,7 @@
 package com.hf.healthfriend.domain.comment.repository;
 
 import com.hf.healthfriend.domain.comment.entity.Comment;
+import com.hf.healthfriend.domain.comment.exception.CommentNotFoundException;
 import com.hf.healthfriend.domain.comment.repository.dto.CommentUpdateDto;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.entity.Member;
@@ -23,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -263,8 +263,8 @@ class TestCommentRepository {
 
     @DisplayName("updateComment - 그런 comment 없어서 수정 실패")
     @Test
-    void updateComment_fail_sinceNoSuchCommentOfCommentId() {
-        assertThatExceptionOfType(NoSuchElementException.class)
+    void updateComment_fail_sinceCommentNotFoundException() {
+        assertThatExceptionOfType(CommentNotFoundException.class)
                 .isThrownBy(() -> this.commentRepository.updateComment(11351L, CommentUpdateDto.builder().content("New Content").build()));
     }
 }

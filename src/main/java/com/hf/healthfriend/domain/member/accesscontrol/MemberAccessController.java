@@ -27,7 +27,7 @@ public class MemberAccessController {
 
     private final MemberRepository memberRepository;
 
-    @AccessControlTrigger(path = "/members", method = "POST")
+    @AccessControlTrigger(path = "/hr/members", method = "POST")
     public boolean preventSignUpByOtherClient(BearerTokenAuthentication authentication, HttpServletRequest request)
             throws ServletException, IOException {
         Part idPart = request.getPart("loginId");
@@ -49,12 +49,12 @@ public class MemberAccessController {
         return authenticatedMemberId.equals(id.trim());
     }
 
-    @AccessControlTrigger(path = "/members/{memberId}", method = "GET")
+    @AccessControlTrigger(path = "/hr/members/{memberId}", method = "GET")
     public boolean controlAccessToMemberInfo(BearerTokenAuthentication authentication, HttpServletRequest request) {
         return accessControl(authentication, request);
     }
 
-    @AccessControlTrigger(path = "/members/{memberId}", method = "PATCH")
+    @AccessControlTrigger(path = "/hr/members/{memberId}", method = "PATCH")
     public boolean accessControlForUpdateMember(BearerTokenAuthentication authentication, HttpServletRequest request) {
         return accessControl(authentication, request);
     }
