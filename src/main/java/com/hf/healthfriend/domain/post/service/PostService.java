@@ -13,6 +13,7 @@ import com.hf.healthfriend.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -23,30 +24,26 @@ public class PostService {
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
 
-    public Long save(PostWriteRequest postWriteRequest, String memberId) {
+    public Long save(PostWriteRequest postWriteRequest, BearerTokenAuthentication authentication) {
+        String memberId = authentication.getName();
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
         Post post = postWriteRequest.toEntity(member);
         return postRepository.save(post).getPostId();
     }
 
-    public Long update(PostWriteRequest postWriteRequest, Long postId,String memberId ){
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberNotFoundException(memberId));
-        Post post = postRepository.findByIdAndIsDeletedFalse(postId)
+    public Long update(PostWriteRequest postWriteRequest, Long postId){
+        Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
                 .orElseThrow(() -> new CustomException(PostErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
-        if (!post.getMember().equals(member)){
-            throw new CustomException(PostErrorCode.FORBIDDEN_UPDATE,HttpStatus.FORBIDDEN);
-        }
         post.update(postWriteRequest.getTitle(), postWriteRequest.getContent(), PostCategory.valueOf(postWriteRequest.getCategory()));
         return post.getPostId();
     }
 
 
     public PostGetResponse get(Long postId) {
-        Post post = postRepository.findByIdAndIsDeletedFalse(postId)
+        Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
                 .orElseThrow(() -> new CustomException(PostErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
-        /** 쿠키로 중복 조회 처리 필요 (당근 기준?)**/
+        /** 비회원 조회수 -> 쿠키, 회원 조회수 -> Redis 리팩토링 필요**/
         post.updateViewCount(post.getViewCount());
         return PostGetResponse.builder()
                 .postId(post.getPostId())
@@ -58,14 +55,9 @@ public class PostService {
                 .build();
     }
 
-    public void delete(Long postId,String memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberNotFoundException(memberId));
-        Post post = postRepository.findByIdAndIsDeletedFalse(postId)
+    public void delete(Long postId) {
+        Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
                 .orElseThrow(() -> new CustomException(PostErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
-        if (!post.getMember().equals(member)){
-            throw new CustomException(PostErrorCode.FORBIDDEN_DELETE,HttpStatus.FORBIDDEN);
-        }
         post.delete();
     }
 
