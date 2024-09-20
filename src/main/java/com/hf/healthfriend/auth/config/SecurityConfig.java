@@ -5,6 +5,7 @@ import com.hf.healthfriend.auth.exceptionhandling.AuthenticationExceptionHandler
 import com.hf.healthfriend.auth.filter.AccessControlFilter;
 import com.hf.healthfriend.auth.filter.AccessDeniedExceptionResolverFilter;
 import com.hf.healthfriend.auth.filter.AuthExceptionHandlerFilter;
+import com.hf.healthfriend.auth.filter.JsonParserFilter;
 import com.hf.healthfriend.domain.member.constant.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,7 +21,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
+import org.springframework.security.web.savedrequest.RequestCacheAwareFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -50,7 +53,6 @@ public class SecurityConfig {
             "/v3/**"
     };
 
-    private final OpaqueTokenIntrospector opaqueTokenIntrospector;
     private final ObjectMapper objectMapper;
     private final List<AuthenticationExceptionHandler> exceptionHandlers;
     private final ApplicationContext context;
@@ -78,7 +80,7 @@ public class SecurityConfig {
 
     @Bean
     @Profile("!no-auth")
-    public SecurityFilterChain domainSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain domainSecurityFilterChain(HttpSecurity http, OpaqueTokenIntrospector opaqueTokenIntrospector) throws Exception {
         return
                 http
                         .cors(corsCustomizer ->corsCustomizer.configurationSource(corsConfigurationSource()))
@@ -94,7 +96,7 @@ public class SecurityConfig {
                         )
                         .oauth2ResourceServer((oauth) ->
                                 oauth.opaqueToken((opaqueToken) ->
-                                        opaqueToken.introspector(this.opaqueTokenIntrospector)))
+                                        opaqueToken.introspector(opaqueTokenIntrospector)))
                         .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                         .addFilterBefore(authExceptionHandlerFilter(), BearerTokenAuthenticationFilter.class)
                         .addFilterBefore(accessDeniedExceptionResolverFilter(), AuthorizationFilter.class)
@@ -104,13 +106,14 @@ public class SecurityConfig {
 
     @Bean
     @Profile("no-auth")
-    public SecurityFilterChain noAuthCheckSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain noAuthCheckSecurityFilterChain(HttpSecurity http, JsonParserFilter jsonParserFilter) throws Exception {
         return http.cors(corsCustomizer ->corsCustomizer.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((request) -> request.anyRequest().permitAll())
+                .addFilterBefore(jsonParserFilter, RequestCacheAwareFilter.class)
                 .build();
     }
 
