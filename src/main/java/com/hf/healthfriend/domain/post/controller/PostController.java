@@ -7,6 +7,8 @@ import com.hf.healthfriend.global.spec.ApiBasicResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -46,8 +48,8 @@ public class PostController {
             @ApiResponse(responseCode = "400", description = "조회 실패")
     })
     @GetMapping("/posts/{postId}")
-    public ResponseEntity<ApiBasicResponse<PostGetResponse>> get(@PathVariable Long postId) {
-        PostGetResponse postGetResponse = postService.get(postId);
+    public ResponseEntity<ApiBasicResponse<PostGetResponse>> get(@PathVariable Long postId, HttpServletRequest request, HttpServletResponse response) {
+        PostGetResponse postGetResponse = postService.get(postId,request,response);
         return ResponseEntity.ok(ApiBasicResponse.of(postGetResponse, HttpStatus.OK));
     }
 

@@ -10,6 +10,9 @@ import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.exception.CustomException;
 import com.hf.healthfriend.domain.post.exception.PostErrorCode;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +28,7 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
+    private final ViewService viewService;
 
     public Long save(PostWriteRequest postWriteRequest, BearerTokenAuthentication authentication) {
         String memberId = authentication.getName();
@@ -42,11 +46,14 @@ public class PostService {
     }
 
 
-    public PostGetResponse get(Long postId) {
+    public PostGetResponse get(Long postId, HttpServletRequest request, HttpServletResponse response) {
         Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
                 .orElseThrow(() -> new CustomException(PostErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
-        /** 비회원 조회수 -> 쿠키, 회원 조회수 -> Redis 리팩토링 필요**/
-        post.updateViewCount(post.getViewCount());
+        if(viewService.canAddViewCount(request,postId)) {
+            Cookie cookie = viewService.createCookie(postId);
+            response.addCookie(cookie);
+            post.updateViewCount(post.getViewCount());
+        }
         return PostGetResponse.builder()
                 .postId(post.getPostId())
                 .title(post.getTitle())
