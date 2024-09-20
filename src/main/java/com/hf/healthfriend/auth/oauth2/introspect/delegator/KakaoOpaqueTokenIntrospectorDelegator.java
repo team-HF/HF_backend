@@ -7,11 +7,13 @@ import com.hf.healthfriend.auth.oauth2.tokensupport.KakaoOAuth2TokenSupport;
 import com.hf.healthfriend.domain.member.dto.MemberDto;
 import com.hf.healthfriend.domain.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Profile("!no-auth")
 public class KakaoOpaqueTokenIntrospectorDelegator implements OpaqueTokenIntrospectorDelegator {
     private final MemberService memberService;
     private final KakaoOAuth2TokenSupport tokenSupport;

@@ -7,6 +7,7 @@ import com.hf.healthfriend.domain.member.constant.Role;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Profile("!no-auth")
 public class DelegatingOpaqueTokenIntrospector implements OpaqueTokenIntrospector {
     private final List<OpaqueTokenIntrospectorDelegator> delegators;
 
