@@ -38,4 +38,4 @@ out/
 
 application-secret.*
 application-priv*
-application.yml
+application*

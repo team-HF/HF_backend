@@ -10,6 +10,7 @@ import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.exception.CustomException;
 import com.hf.healthfriend.domain.post.exception.PostErrorCode;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 @Service
 public class PostService {
 
