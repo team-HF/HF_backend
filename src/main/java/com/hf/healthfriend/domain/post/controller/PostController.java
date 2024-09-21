@@ -3,17 +3,18 @@ package com.hf.healthfriend.domain.post.controller;
 import com.hf.healthfriend.domain.post.dto.request.PostWriteRequest;
 import com.hf.healthfriend.domain.post.dto.response.PostGetResponse;
 import com.hf.healthfriend.domain.post.service.PostService;
+import com.hf.healthfriend.domain.post.service.ViewService;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Post API", description = "커뮤니티 API")
@@ -22,14 +23,15 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class PostController {
     private final PostService postService;
+    private final ViewService viewService;
 
     @Operation(summary = "글 작성", responses = {
             @ApiResponse(responseCode = "200", description = "작성 성공"),
             @ApiResponse(responseCode = "400", description = "작성 실패")
     })
     @PostMapping("/posts")
-    public ResponseEntity<ApiBasicResponse<Long>> create(@Valid @RequestBody PostWriteRequest postWriteRequest, BearerTokenAuthentication authentication) {
-        Long postId = postService.save(postWriteRequest, authentication);
+    public ResponseEntity<ApiBasicResponse<Long>> create(@Valid @RequestBody PostWriteRequest postWriteRequest) {
+        Long postId = postService.save(postWriteRequest);
         return ResponseEntity.ok(ApiBasicResponse.of(postId, HttpStatus.OK));
     }
 
@@ -49,7 +51,26 @@ public class PostController {
     })
     @GetMapping("/posts/{postId}")
     public ResponseEntity<ApiBasicResponse<PostGetResponse>> get(@PathVariable Long postId, HttpServletRequest request, HttpServletResponse response) {
-        PostGetResponse postGetResponse = postService.get(postId,request,response);
+        Cookie[] cookies = request.getCookies();
+        String visitCookieValue = null;
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("visit")) {
+                    visitCookieValue = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        boolean canUpdateViewCount = viewService.canAddViewCount(visitCookieValue,postId);
+        if(canUpdateViewCount){
+            String updatedCookieValue = viewService.addPostIdToVisitCookie(visitCookieValue,postId);
+            Cookie newCookie = new Cookie("visit", updatedCookieValue);
+            newCookie.setPath("/");
+            newCookie.setMaxAge(60*60*24);
+            newCookie.setHttpOnly(true);
+            response.addCookie(newCookie);
+        }
+        PostGetResponse postGetResponse = postService.get(postId,canUpdateViewCount);
         return ResponseEntity.ok(ApiBasicResponse.of(postGetResponse, HttpStatus.OK));
     }
 

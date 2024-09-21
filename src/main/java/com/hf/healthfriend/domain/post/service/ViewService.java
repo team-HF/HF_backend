@@ -8,26 +8,18 @@ import java.util.Arrays;
 
 @Service
 public class ViewService {
-    public boolean canAddViewCount(HttpServletRequest request, Long postId) {
-        Cookie[] cookies = request.getCookies();
-        if(cookies == null) {
+    public boolean canAddViewCount(String cookieValue, Long postId) {
+        if(cookieValue == null || cookieValue.isEmpty()) {
             return true;
         }
-        return Arrays.stream(cookies)
-                .noneMatch(cookie -> cookie.getName().equals("visit") &&
-                        cookie.getValue().contains(toString(postId)));
+        return !cookieValue.contains(String.valueOf(postId));
     }
 
-    public Cookie createCookie(Long id) {
-        Cookie cookie = new Cookie("visit", toString(id));
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(60 * 60 * 24);
-        return cookie;
-    }
-
-    private String toString(Long id) {
-        return String.valueOf(id);
+    public String addPostIdToVisitCookie(String visitCookieValue, Long postId) {
+        if (visitCookieValue == null) {
+            return "/" + postId + "/";
+        }
+        return visitCookieValue + postId + "/";
     }
 
 }
