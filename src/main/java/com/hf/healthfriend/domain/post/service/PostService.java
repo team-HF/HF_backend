@@ -46,12 +46,10 @@ public class PostService {
     }
 
 
-    public PostGetResponse get(Long postId, HttpServletRequest request, HttpServletResponse response) {
+    public PostGetResponse get(Long postId,boolean canUpdateViewCount) {
         Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
                 .orElseThrow(() -> new CustomException(PostErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
-        if(viewService.canAddViewCount(request,postId)) {
-            Cookie cookie = viewService.createCookie(postId);
-            response.addCookie(cookie);
+        if(canUpdateViewCount) {
             post.updateViewCount(post.getViewCount());
         }
         return PostGetResponse.builder()
