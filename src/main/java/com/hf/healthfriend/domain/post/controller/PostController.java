@@ -15,7 +15,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Post API", description = "커뮤니티 API")
@@ -31,8 +30,8 @@ public class PostController {
             @ApiResponse(responseCode = "400", description = "작성 실패")
     })
     @PostMapping("/posts")
-    public ResponseEntity<ApiBasicResponse<Long>> create(@Valid @RequestBody PostWriteRequest postWriteRequest, BearerTokenAuthentication authentication) {
-        Long postId = postService.save(postWriteRequest, authentication);
+    public ResponseEntity<ApiBasicResponse<Long>> create(@Valid @RequestBody PostWriteRequest postWriteRequest) {
+        Long postId = postService.save(postWriteRequest);
         return ResponseEntity.ok(ApiBasicResponse.of(postId, HttpStatus.OK));
     }
 

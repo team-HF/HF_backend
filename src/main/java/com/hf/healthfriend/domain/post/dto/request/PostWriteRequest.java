@@ -5,9 +5,11 @@ import com.hf.healthfriend.domain.post.constant.PostCategory;
 import com.hf.healthfriend.domain.post.entity.Post;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
 public class PostWriteRequest{
     @NotBlank
     String category;
@@ -17,6 +19,8 @@ public class PostWriteRequest{
     @NotBlank(message = "내용을 입력해주세요.")
     @Size(min = 10, max = 1000, message = "내용은 10자 이상 1000자 이하로 입력해주세요.")
     String content;
+    @NotBlank(message="작성자 아이디는 필수값입니다. ")
+    String writerId;
 
     public Post toEntity(Member member){
         PostCategory postCategory = PostCategory.valueOf(category);
