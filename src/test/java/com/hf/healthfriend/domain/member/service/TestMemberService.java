@@ -126,11 +126,11 @@ class TestMemberService {
         );
     }
 
-    @DisplayName("createMember - 누락된 데이터가 있어도 필수값만 있으면 됨")
+    @DisplayName("createMember - 누락된 데이터가 있으면 삽입 실패 - DataIntegrityViolationException")
     @MethodSource
     @ParameterizedTest
     void createMember_omittedData(MemberCreationRequestDto testcase) {
-        assertThatNoException()
+        assertThatExceptionOfType(DataIntegrityViolationException.class)
                 .isThrownBy(() -> this.memberService.createMember(testcase));
     }
 

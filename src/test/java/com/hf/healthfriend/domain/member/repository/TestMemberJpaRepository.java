@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.member.repository;
 
+import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.entity.Member;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -26,6 +28,7 @@ public class TestMemberJpaRepository {
     @Test
     void save() {
         Member member = new Member("sample-member", "sample@gmail.com", null);
+        setRequiredFieldsOfMemberWithWeirdData(member);
         assertThatNoException().isThrownBy(() -> this.memberJpaRepository.save(member));
     }
 
@@ -35,6 +38,7 @@ public class TestMemberJpaRepository {
         String loginId = "sample-member";
 
         Member member = new Member(loginId, "sample@gmail.com", null);
+        setRequiredFieldsOfMemberWithWeirdData(member);
         this.memberJpaRepository.save(member);
 
         Member findMember = this.memberJpaRepository.findByLoginId(loginId).orElseThrow(NoSuchElementException::new);
@@ -52,10 +56,23 @@ public class TestMemberJpaRepository {
         String loginId = "sample-member";
 
         Member member = new Member(loginId, "sample@gmail.com", null);
+        setRequiredFieldsOfMemberWithWeirdData(member);
         this.memberJpaRepository.save(member);
 
         Optional<Member> findMemberOp = this.memberJpaRepository.findByLoginId(loginId + "SUFFIX");
 
         assertThat(findMemberOp).isEmpty();
+    }
+
+    private void setRequiredFieldsOfMemberWithWeirdData(Member member) {
+        member.setNickname("sample-nickname");
+        member.setBirthDate(LocalDate.of(1997, 9, 16));
+        member.setGender(Gender.MALE);
+        member.setIntroduction("안심하세요. 도둑입니다.");
+        member.setFitnessLevel(FitnessLevel.ADVANCED);
+        member.setCompanionStyle(CompanionStyle.GROUP);
+        member.setFitnessObjective(FitnessObjective.RUNNING);
+        member.setFitnessEagerness(FitnessEagerness.EAGER);
+        member.setFitnessKind(FitnessKind.FUNCTIONAL);
     }
 }

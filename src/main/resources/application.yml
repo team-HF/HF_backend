@@ -5,7 +5,6 @@ spring:
       - secret
       - constants
       - priv # 각각 개발 환경에 따라 개별 설정이 필요할 수 있으므로
-      - local-dev
   servlet:
     multipart:
       enabled: true

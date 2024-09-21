@@ -26,7 +26,7 @@ public class PostService {
     private final MemberRepository memberRepository;
 
     public Long save(PostWriteRequest postWriteRequest) {
-        String memberId = postWriteRequest.getWriterId();
+        Long memberId = postWriteRequest.getWriterId();
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
         Post post = postWriteRequest.toEntity(member);

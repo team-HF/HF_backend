@@ -36,7 +36,7 @@ public class Post extends BaseTimeEntity {
     private Boolean isDeleted = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "writer_id")
     private Member member;
 
     public void delete(){
