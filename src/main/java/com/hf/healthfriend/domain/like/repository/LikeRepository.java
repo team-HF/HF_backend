@@ -1,6 +1,8 @@
 package com.hf.healthfriend.domain.like.repository;
 
 import com.hf.healthfriend.domain.like.entity.Like;
+import com.hf.healthfriend.domain.member.entity.Member;
+import com.hf.healthfriend.domain.post.entity.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,4 +31,6 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
                 AND l.canceled = FALSE
             """)
     List<Like> findByPostId(@Param("postId") Long postId);
+
+    boolean existsByPostAndMember(Post post, Member member);
 }
