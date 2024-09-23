@@ -1,14 +1,23 @@
 package com.hf.healthfriend.domain.like.service;
 
 import com.hf.healthfriend.domain.like.dto.LikeDto;
+import com.hf.healthfriend.domain.like.entity.Like;
 import com.hf.healthfriend.domain.like.exception.DuplicateLikeException;
+import com.hf.healthfriend.domain.like.repository.LikeRepository;
+import com.hf.healthfriend.domain.member.entity.Member;
+import com.hf.healthfriend.domain.post.entity.Post;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
+@RequiredArgsConstructor
+@Transactional
 public class LikeService {
+    private final LikeRepository likeRepository;
 
     /**
      * 좋아요를 추가한다.
@@ -20,7 +29,18 @@ public class LikeService {
      *                                좋아요를 남기려고 할 경우
      */
     public Long addLike(LikeDto likeDto) throws DuplicateLikeException {
-        throw new UnsupportedOperationException();
+        Post post = Post.builder()
+                .postId(likeDto.getPostId())
+                .build();
+        Member member = new Member(likeDto.getMemberId());
+        boolean exists = this.likeRepository.existsByPostAndMember(post, member);
+        if (exists) {
+            throw new DuplicateLikeException(likeDto.getPostId(), likeDto.getMemberId());
+        }
+
+        Like like = new Like(member, post);
+        Like savedLike = this.likeRepository.save(like);
+        return savedLike.getLikeId();
     }
 
     /**
@@ -31,18 +51,25 @@ public class LikeService {
      * @throws NoSuchElementException likeId를 ID로 하는 Like entity가 없을 경우
      */
     public LikeDto getLike(Long likeId) throws NoSuchElementException {
-        throw new UnsupportedOperationException();
+        Like searchedLike = this.likeRepository.findById(likeId).orElseThrow(() ->
+                new NoSuchElementException(String.format("존재하지 않는 Like입니다. ID=%d", likeId)));// TODO 하드코딩 고치기
+        return LikeDto.of(searchedLike);
     }
 
     public List<LikeDto> getLikeOfPost(Long postId) {
-        throw new UnsupportedOperationException();
+        return entityListToDtoList(this.likeRepository.findByPostId(postId));
     }
 
     public List<LikeDto> getLikeOfMember(Long memberId) {
-        throw new UnsupportedOperationException();
+        return entityListToDtoList(this.likeRepository.findByMemberId(memberId));
+    }
+
+    private List<LikeDto> entityListToDtoList(List<Like> entities) {
+        return entities.stream().map(LikeDto::of).toList();
     }
 
     public void cancelLike(Long likeIdToCancel) throws NoSuchElementException {
-        throw new UnsupportedOperationException();
+        Like likeEntity = this.likeRepository.findById(likeIdToCancel).orElseThrow(NoSuchElementException::new);// TODO: 메시지?
+        likeEntity.cancel();
     }
 }

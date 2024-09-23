@@ -79,6 +79,7 @@ class LikeServiceTest {
         member.setCompanionStyle(CompanionStyle.GROUP);
         member.setFitnessEagerness(FitnessEagerness.EAGER);
         member.setFitnessObjective(FitnessObjective.BULK_UP);
+        member.setFitnessKind(FitnessKind.FUNCTIONAL);
         return member;
     }
 
