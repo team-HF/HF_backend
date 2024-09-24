@@ -143,7 +143,7 @@ class LikeRepositoryTest {
 
     @DisplayName("findByPostId - cancel된 Like는 가져오지 않음")
     @Test
-    void findByPostId_ignoreCanceledLike() {
+    void findByPostId_ignoreCanceledLikes() {
         this.likeMember2_Post1.cancel();
 
         List<Like> result = this.likeRepository.findByPostId(this.savedPost1.getPostId());
@@ -154,6 +154,23 @@ class LikeRepositoryTest {
         assertThat(result.stream().map(Like::getLikeId).toList())
                 .containsExactlyInAnyOrder(this.likeMember1_Post1.getLikeId(),
                         this.likeMember3_Post1.getLikeId());
+    }
+
+    @DisplayName("countByPostId")
+    @Test
+    void countByPostId() {
+        Long result = this.likeRepository.countByPostId(this.savedPost1.getPostId());
+        assertThat(result).isEqualTo(3);
+    }
+
+    @DisplayName("countByPostId - 취소된 좋아요는 무시")
+    @Test
+    void countByPostId_ignoreCanceledLikes() {
+        this.likeMember2_Post1.cancel();
+
+        Long result = this.likeRepository.countByPostId(this.savedPost1.getPostId());
+
+        assertThat(result).isEqualTo(2);
     }
 
     @DisplayName("existsByPostAndMember - exists and return true")

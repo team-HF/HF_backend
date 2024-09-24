@@ -41,5 +41,13 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
             """)
     List<Like> findByPostId(@Param("postId") Long postId);
 
+    @Query("""
+            SELECT COUNT(l.likeId)
+            FROM Like l
+            WHERE l.post.postId = :postId
+                AND l.canceled = FALSE
+            """)
+    Long countByPostId(@Param("postId") Long postId);
+
     boolean existsByPostAndMember(Post post, Member member);
 }

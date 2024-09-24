@@ -23,22 +23,21 @@ public class LikeService {
     /**
      * 좋아요를 추가한다.
      *
-     * @param likeDto likeDto.memberId != null && likeDto.postId != null
-     *                likeDto.likeId는 nullable
+     * @param memberId 좋아요를 남기는 회원의 ID. Not null
+     * @param postId   좋아요를 남길 글의 ID. Not Null
      * @return 자동 생성된 Like entity의 ID
-     * @throws DuplicateLikeException 특정 회원이 특정 포스트에 대해 이미 좋아요를 남겼는데 중복해서
-     *                                좋아요를 남기려고 할 경우
+     * @throws DuplicateLikeException DuplicateLikeException 특정 회원이 특정 포스트에 대해 이미 좋아요를 남겼는데 중복해서
+     *                                *                                좋아요를 남기려고 할 경우
      */
-    public Long addLike(LikeDto likeDto) throws DuplicateLikeException {
-        Long memberId = likeDto.getMemberId();
-        Long postId = likeDto.getPostId();
+    public Long addLike(Long memberId, Long postId) throws DuplicateLikeException {
         Optional<Like> likeOp = this.likeRepository.findByMemberIdAndPostId(memberId, postId);
         if (likeOp.isEmpty()) {
-            Post post = Post.builder()
-                    .postId(likeDto.getPostId())
-                    .build();
-            Member member = new Member(likeDto.getMemberId());
-            Like like = new Like(member, post);
+            Like like = new Like(
+                    new Member(memberId),
+                    Post.builder()
+                            .postId(postId)
+                            .build()
+            );
             Like savedLike = this.likeRepository.save(like);
             return savedLike.getLikeId();
         }
@@ -46,7 +45,7 @@ public class LikeService {
         Like like = likeOp.get();
 
         if (!like.isCanceled()) {
-            throw new DuplicateLikeException(likeDto.getPostId(), likeDto.getMemberId());
+            throw new DuplicateLikeException(postId, memberId);
         }
 
         like.uncancel();
@@ -69,6 +68,10 @@ public class LikeService {
 
     public List<LikeDto> getLikeOfPost(Long postId) {
         return entityListToDtoList(this.likeRepository.findByPostId(postId));
+    }
+
+    public Long getLikeCountOfPost(Long postId) {
+        return this.likeRepository.countByPostId(postId);
     }
 
     public List<LikeDto> getLikeOfMember(Long memberId) {
