@@ -3,7 +3,10 @@ package com.hf.healthfriend.domain.like.entity;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.post.entity.Post;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * 좋아요 기능 관련 Entity 객체
@@ -38,6 +41,10 @@ public class Like {
     public Like(Member member, Post post) {
         this.member = member;
         this.post = post;
+    }
+
+    public void uncancel() {
+        this.canceled = false;
     }
 
     public void cancel() {

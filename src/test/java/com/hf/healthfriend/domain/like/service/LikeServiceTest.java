@@ -10,6 +10,7 @@ import com.hf.healthfriend.domain.post.constant.PostCategory;
 import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -102,6 +103,28 @@ class LikeServiceTest {
 
         assertThatNoException()
                 .isThrownBy(() -> this.likeService.addLike(likeDto));
+    }
+
+    @DisplayName("addLike - 좋아요 취소 후 다시 addLike 호출")
+    @Test
+    void addLike_againAfterCancel() {
+        LikeDto likeDto = new LikeDto(
+                this.sampleMembers.get("member1").getId(),
+                this.samplePosts.get("post1").getPostId()
+        );
+
+        Long generatedId = this.likeService.addLike(likeDto);
+
+        this.likeService.cancelLike(generatedId);
+
+        try {
+            Long likeId = this.likeService.addLike(likeDto);
+
+            assertThat(likeId).isEqualTo(generatedId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assertions.fail();
+        }
     }
 
     @DisplayName("addLike - 중복 좋아요 시 예외 발생 - DuplicateLikeException")

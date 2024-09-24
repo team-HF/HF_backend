@@ -19,6 +19,15 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
     Optional<Like> findById(@Param("likeId") Long likeId);
 
     @Query("""
+            SELECT l
+            FROM Like l
+            WHERE l.post.postId = :postId
+                AND l.member.id = :memberId
+            """)
+    Optional<Like> findByMemberIdAndPostId(@Param("memberId") Long memberId,
+                                           @Param("postId") Long postId);
+
+    @Query("""
             SELECT l FROM Like l
             WHERE l.member.id = :memberId
                 AND l.canceled = FALSE

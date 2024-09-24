@@ -1,6 +1,5 @@
 package com.hf.healthfriend.domain.like.exception;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 

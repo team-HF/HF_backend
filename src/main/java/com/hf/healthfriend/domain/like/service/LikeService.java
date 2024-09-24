@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,18 +30,28 @@ public class LikeService {
      *                                좋아요를 남기려고 할 경우
      */
     public Long addLike(LikeDto likeDto) throws DuplicateLikeException {
-        Post post = Post.builder()
-                .postId(likeDto.getPostId())
-                .build();
-        Member member = new Member(likeDto.getMemberId());
-        boolean exists = this.likeRepository.existsByPostAndMember(post, member);
-        if (exists) {
+        Long memberId = likeDto.getMemberId();
+        Long postId = likeDto.getPostId();
+        Optional<Like> likeOp = this.likeRepository.findByMemberIdAndPostId(memberId, postId);
+        if (likeOp.isEmpty()) {
+            Post post = Post.builder()
+                    .postId(likeDto.getPostId())
+                    .build();
+            Member member = new Member(likeDto.getMemberId());
+            Like like = new Like(member, post);
+            Like savedLike = this.likeRepository.save(like);
+            return savedLike.getLikeId();
+        }
+
+        Like like = likeOp.get();
+
+        if (!like.isCanceled()) {
             throw new DuplicateLikeException(likeDto.getPostId(), likeDto.getMemberId());
         }
 
-        Like like = new Like(member, post);
-        Like savedLike = this.likeRepository.save(like);
-        return savedLike.getLikeId();
+        like.uncancel();
+
+        return like.getLikeId();
     }
 
     /**
