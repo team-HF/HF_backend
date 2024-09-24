@@ -30,7 +30,7 @@ public class CommentRepository {
             throw new CommentNotFoundException("Comment entity of commentId not exists", commentId);
         }
         Comment comment = commentOp.get();
-        comment.setDeleted(true);
+        comment.delete();
     }
 
     public Optional<Comment> findById(Long commentId) {
@@ -63,9 +63,9 @@ public class CommentRepository {
 
         // TODO: Java Reflection을 활용해 유연한 update가 가능할 듯
         if (updateDto.getContent() != null) {
-            comment.setContent(updateDto.getContent());
+            comment.updateContent(updateDto.getContent());
         }
-        comment.setLastModified(LocalDateTime.now()); // TODO: Update DTO의 모든 null일 경우 어떻게 할까?
+        comment.updateLastModified(LocalDateTime.now()); // TODO: Update DTO의 모든 null일 경우 어떻게 할까?
         return comment;
     }
 }

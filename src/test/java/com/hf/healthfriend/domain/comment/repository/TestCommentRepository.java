@@ -100,6 +100,16 @@ class TestCommentRepository {
         entity.setFitnessKind(FitnessKind.FUNCTIONAL);
     }
 
+    @DisplayName("findById - 삭제된 레코드는 가져오지 않음")
+    @Test
+    void findById_ignoreDeleted() {
+        Comment comment =
+                new Comment(Post.builder().postId(this.postId).build(), new Member(this.commentWriterIds.get(0)), "content1");
+        Long generatedId = this.commentRepository.save(comment).getCommentId();
+        this.commentRepository.deleteById(generatedId);
+        assertThat(this.commentRepository.findById(generatedId)).isEmpty();
+    }
+
     @DisplayName("findCommentsByPostId - 다 찾아옴")
     @Test
     void findCommentsByPostId_findAll() {
@@ -266,5 +276,18 @@ class TestCommentRepository {
     void updateComment_fail_sinceCommentNotFoundException() {
         assertThatExceptionOfType(CommentNotFoundException.class)
                 .isThrownBy(() -> this.commentRepository.updateComment(11351L, CommentUpdateDto.builder().content("New Content").build()));
+    }
+
+    @DisplayName("deleteById - 삭제된 엔티티를 또 삭제하려고 하면 CommentNotFoundException 발생")
+    @Test
+    void deleteById_failWhenAttemptsToDeleteDeletedComment() {
+        Comment comment = new Comment(Post.builder().postId(this.postId).build(),
+                new Member(this.commentWriterIds.get(0)),
+                "content1");
+        Long generatedId = this.commentRepository.save(comment).getCommentId();
+        this.commentRepository.deleteById(generatedId);
+
+        assertThatExceptionOfType(CommentNotFoundException.class)
+                .isThrownBy(() -> this.commentRepository.deleteById(generatedId));
     }
 }

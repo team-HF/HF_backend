@@ -158,7 +158,7 @@ class CommentControllerMockMvcTest {
         CommentCreationResponseDto creationResult = this.commentService.createComment(10000L, requestDto);
 
 
-        this.mockMvc.perform(delete("/hr/comments/{commentId}", creationResult.getCommentId()))
+        this.mockMvc.perform(delete("/hr/comments/{commentId}", creationResult.commentId()))
                 .andExpect(status().isOk());
     }
 

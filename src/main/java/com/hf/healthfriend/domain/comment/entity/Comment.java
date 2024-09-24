@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Getter
-@Setter
 public class Comment extends BaseTimeEntity {
 
     @Id
@@ -44,6 +43,14 @@ public class Comment extends BaseTimeEntity {
         this.writer = writer;
         this.content = content;
         this.isDeleted = false;
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
+    public void updateLastModified(LocalDateTime modifiedTime) {
+        super.setLastModified(modifiedTime);
     }
 
     public void delete() {

@@ -78,10 +78,10 @@ class TestCommentService {
         CommentCreationResponseDto result = this.commentService.createComment(post.getPostId(), requestDto);
         log.info("result={}", result);
 
-        assertThat(result.getPostId()).isEqualTo(post.getPostId());
-        assertThat(result.getWriterId()).isEqualTo(commentWriter.getId());
-        assertThat(result.getContent()).isEqualTo("sample-comment");
-        assertThat(result.getCreationTime()).isAfterOrEqualTo(beforeStart);
+        assertThat(result.postId()).isEqualTo(post.getPostId());
+        assertThat(result.writerId()).isEqualTo(commentWriter.getId());
+        assertThat(result.content()).isEqualTo("sample-comment");
+        assertThat(result.creationTime()).isAfterOrEqualTo(beforeStart);
     }
 
     @DisplayName("createComment - 생성 실패 - post is null")
@@ -176,11 +176,11 @@ class TestCommentService {
         log.info("result={}", result);
 
         // When
-        Long newCommentId = result.getCommentId();
+        Long newCommentId = result.commentId();
 
         // Then
         assertThatNoException()
-                .isThrownBy(() -> this.commentService.deleteComment(result.getCommentId()));
+                .isThrownBy(() -> this.commentService.deleteComment(result.commentId()));
     }
 
     @DisplayName("deleteComment - 없는 Comment를 삭제하려고 해서 실패")

@@ -16,6 +16,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.InvocationTargetException;
@@ -32,6 +33,12 @@ import static org.assertj.core.api.Assertions.*;
 
 @Slf4j
 @SpringBootTest
+@ActiveProfiles({
+        "local-dev",
+        "secret",
+        "constants",
+        "priv"
+})
 @Transactional
 class TestMemberService {
 

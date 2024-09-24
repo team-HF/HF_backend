@@ -8,6 +8,7 @@ import com.hf.healthfriend.domain.comment.service.CommentService;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -35,10 +36,10 @@ public class CommentController {
     )
     public ResponseEntity<ApiBasicResponse<CommentCreationResponseDto>> createComment(
             @PathVariable("postId") long postId,
-            @RequestBody CommentCreationRequestDto requestDto) {
+            @RequestBody @Valid CommentCreationRequestDto requestDto) {
         CommentCreationResponseDto result = this.commentService.createComment(postId, requestDto);
         return ResponseEntity.created(UriComponentsBuilder.fromPath("/posts/{postId}/comments/{commentId}")
-                        .buildAndExpand(Map.of("postId", postId, "commentId", result.getCommentId()))
+                        .buildAndExpand(Map.of("postId", postId, "commentId", result.commentId()))
                         .toUri())
                 .body(ApiBasicResponse.of(result, HttpStatus.CREATED));
     }
