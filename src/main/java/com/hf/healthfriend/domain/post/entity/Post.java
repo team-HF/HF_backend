@@ -1,6 +1,7 @@
 package com.hf.healthfriend.domain.post.entity;
 
 import com.hf.healthfriend.domain.BaseTimeEntity;
+import com.hf.healthfriend.domain.comment.entity.Comment;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.post.constant.PostCategory;
 import jakarta.persistence.*;
@@ -8,6 +9,8 @@ import jakarta.validation.constraints.NotNull;
 import jdk.jfr.Description;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -38,6 +41,9 @@ public class Post extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "writer_id")
     private Member member;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 
     public void delete(){
         this.isDeleted=true;
