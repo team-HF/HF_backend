@@ -21,9 +21,9 @@ public class GoogleOpaqueTokenIntrospectorDelegator implements OpaqueTokenIntros
     @Override
     public OAuth2AuthenticatedPrincipal introspect(String token) {
         TokenValidationInfo tokenValidationInfo = this.tokenSupport.validateToken(token);
-        MemberDto memberDto = this.memberService.findMember(tokenValidationInfo.getEmail());
+        MemberDto memberDto = this.memberService.findMemberByEmail(tokenValidationInfo.getEmail());
         return new SingleAuthorityOAuth2Principal(
-                memberDto.getMemberId(),
+                String.valueOf(memberDto.getMemberId()),
                 memberDto.getRole()
         );
     }

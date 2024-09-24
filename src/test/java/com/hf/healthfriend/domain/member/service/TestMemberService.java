@@ -15,7 +15,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.InvocationTargetException;
@@ -32,6 +33,12 @@ import static org.assertj.core.api.Assertions.*;
 
 @Slf4j
 @SpringBootTest
+@ActiveProfiles({
+        "local-dev",
+        "secret",
+        "constants",
+        "priv"
+})
 @Transactional
 class TestMemberService {
 
@@ -64,14 +71,14 @@ class TestMemberService {
 
         log.info("responseDto={}", responseDto);
 
-        assertThat(responseDto.getMemberId()).isEqualTo("sample@gmail.com");
+        assertThat(responseDto.getLoginId()).isEqualTo("sample@gmail.com");
         assertThat(responseDto.getCreationTime()).isAfterOrEqualTo(now);
         assertThat(responseDto.getRole()).isEqualTo(Role.ROLE_MEMBER.name());
         assertThat(responseDto.getEmail()).isEqualTo("sample@gmail.com");
 
 
         assertThat(responseDto.getBirthDate()).isEqualTo(requestDto.getBirthDate());
-        assertThat(responseDto.getMemberId()).isEqualTo("sample@gmail.com");
+        assertThat(responseDto.getLoginId()).isEqualTo("sample@gmail.com");
         assertThat(responseDto.getGender()).isEqualTo(Gender.MALE);
         assertThat(responseDto.getNickname()).isEqualTo("샘플닉네임");
         assertThat(responseDto.getIntroduction()).isEqualTo("안녕하세요. 뚱입니다.");
@@ -80,12 +87,12 @@ class TestMemberService {
         assertThat(responseDto.getFitnessObjective()).isEqualTo(FitnessObjective.RUNNING);
         assertThat(responseDto.getFitnessKind()).isEqualTo(FitnessKind.FUNCTIONAL);
 
-        Member member = this.memberJpaRepository.findById("sample@gmail.com").orElseThrow();
+        Member member = this.memberJpaRepository.findByEmail("sample@gmail.com").orElseThrow();
 
         log.info("Member from repository={}", member);
 
         assertThat(member).isNotNull();
-        assertThat(member.getId()).isEqualTo("sample@gmail.com");
+        assertThat(member.getLoginId()).isEqualTo("sample@gmail.com");
         assertThat(member.getEmail()).isEqualTo("sample@gmail.com");
     }
 
@@ -104,7 +111,7 @@ class TestMemberService {
                 .fitnessKind(FitnessKind.FUNCTIONAL)
                 .build();
 
-        assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
+        assertThatExceptionOfType(DataIntegrityViolationException.class)
                 .isThrownBy(() -> this.memberService.createMember(requestDto));
     }
 
@@ -126,11 +133,11 @@ class TestMemberService {
         );
     }
 
-    @DisplayName("createMember - 누락된 데이터가 있어도 필수값만 있으면 됨")
+    @DisplayName("createMember - 누락된 데이터가 있으면 삽입 실패 - DataIntegrityViolationException")
     @MethodSource
     @ParameterizedTest
     void createMember_omittedData(MemberCreationRequestDto testcase) {
-        assertThatNoException()
+        assertThatExceptionOfType(DataIntegrityViolationException.class)
                 .isThrownBy(() -> this.memberService.createMember(testcase));
     }
 
@@ -154,7 +161,7 @@ class TestMemberService {
 
         this.memberService.createMember(requestDto);
 
-        boolean memberExists = this.memberService.isMemberExists("sample@gmail.com");
+        boolean memberExists = this.memberService.isMemberOfEmailExists("sample@gmail.com");
         assertThat(memberExists).isTrue();
     }
 
@@ -178,7 +185,7 @@ class TestMemberService {
 
         this.memberService.createMember(requestDto);
 
-        boolean memberExists = this.memberService.isMemberExists("no@such.member");
+        boolean memberExists = this.memberService.isMemberOfEmailExists("no@such.member");
         assertThat(memberExists).isFalse();
     }
 
@@ -201,11 +208,11 @@ class TestMemberService {
         LocalDateTime beforeExecution = LocalDateTime.now();
         this.memberService.createMember(requestDto);
 
-        MemberDto result = this.memberService.findMember("sample@gmail.com");
+        MemberDto result = this.memberService.findMemberByEmail("sample@gmail.com");
 
         log.info("result={}", result);
 
-        assertThat(result.getMemberId()).isEqualTo(requestDto.getId());
+        assertThat(result.getLoginId()).isEqualTo(requestDto.getId());
         assertThat(result.getNickname()).isEqualTo(requestDto.getNickname());
         assertThat(result.getCreationTime()).isAfterOrEqualTo(beforeExecution);
         assertThat(result.getCreationTime()).isBeforeOrEqualTo(LocalDateTime.now());
@@ -223,7 +230,7 @@ class TestMemberService {
     @Test
     void findMember_fail_MemberNotFoundException() {
         assertThatExceptionOfType(MemberNotFoundException.class)
-                .isThrownBy(() -> this.memberService.findMember("no@such.member"));
+                .isThrownBy(() -> this.memberService.findMemberByEmail("no@such.member"));
     }
 
     static Stream<MemberUpdateRequestDto> updateMember_success() {
@@ -288,7 +295,7 @@ class TestMemberService {
                 .fitnessKind(FitnessKind.FUNCTIONAL)
                 .build();
 
-        this.memberService.createMember(requestDto);
+        MemberCreationResponseDto creationDto = this.memberService.createMember(requestDto);
 
         Map<String, Object> updateValueMap = Arrays.stream(MemberUpdateRequestDto.class.getDeclaredMethods())
                 .filter((m) -> m.getName().startsWith("get"))
@@ -311,11 +318,11 @@ class TestMemberService {
 
         log.info("updateValueMap={}", updateValueMap);
 
-        MemberDto beforeUpdate = this.memberService.findMember("sample@gmail.com");
+        MemberDto beforeUpdate = this.memberService.findMemberByEmail("sample@gmail.com");
 
-        this.memberService.updateMember("sample@gmail.com", updateDto);
+        this.memberService.updateMember(creationDto.getMemberId(), updateDto);
 
-        MemberDto updatedMember = this.memberService.findMember("sample@gmail.com");
+        MemberDto updatedMember = this.memberService.findMemberByEmail("sample@gmail.com");
 
         for (Method getter : Arrays.stream(MemberDto.class.getDeclaredMethods()).filter((m) -> m.getName().startsWith("get")).toArray(Method[]::new)) {
             String fieldName = getterToFieldName(getter.getName());
@@ -348,6 +355,6 @@ class TestMemberService {
         MemberUpdateRequestDto updateDto = MemberUpdateRequestDto.builder()
                 .build();
         assertThatExceptionOfType(MemberNotFoundException.class)
-                .isThrownBy(() -> this.memberService.updateMember("no@such.member", updateDto));
+                .isThrownBy(() -> this.memberService.updateMember(1521L, updateDto));
     }
 }

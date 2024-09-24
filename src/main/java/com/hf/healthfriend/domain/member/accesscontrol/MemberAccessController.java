@@ -3,11 +3,9 @@ package com.hf.healthfriend.domain.member.accesscontrol;
 import com.hf.healthfriend.auth.accesscontrol.AccessControlTrigger;
 import com.hf.healthfriend.auth.accesscontrol.AccessController;
 import com.hf.healthfriend.domain.member.constant.Role;
-import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.Part;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
@@ -19,13 +17,10 @@ import java.util.List;
 
 @Slf4j
 @AccessController
-@RequiredArgsConstructor
 public class MemberAccessController {
-    private static final int BUFFER_SIZE = 1024;
+    private static final int BUFFER_SIZE = 256;
 
-    private final MemberRepository memberRepository;
-
-    @AccessControlTrigger(path = "/members", method = "POST")
+    @AccessControlTrigger(path = "/hr/members", method = "POST")
     public boolean preventSignUpByOtherClient(BearerTokenAuthentication authentication, HttpServletRequest request)
             throws ServletException, IOException {
         Part idPart = request.getPart("id");
@@ -44,15 +39,17 @@ public class MemberAccessController {
 
         String authenticatedMemberId = authentication.getName(); // null이면 이미 401이 났을 테니 null이 아닐 것
 
+        log.trace("authenticatedMemberId={}", authenticatedMemberId);
+
         return authenticatedMemberId.equals(id.trim());
     }
 
-    @AccessControlTrigger(path = "/members/{memberId}", method = "GET")
+    @AccessControlTrigger(path = "/hr/members/{memberId}", method = "GET")
     public boolean controlAccessToMemberInfo(BearerTokenAuthentication authentication, HttpServletRequest request) {
         return accessControl(authentication, request);
     }
 
-    @AccessControlTrigger(path = "/members/{memberId}", method = "PATCH")
+    @AccessControlTrigger(path = "/hr/members/{memberId}", method = "PATCH")
     public boolean accessControlForUpdateMember(BearerTokenAuthentication authentication, HttpServletRequest request) {
         return accessControl(authentication, request);
     }
@@ -70,15 +67,11 @@ public class MemberAccessController {
         String path = request.getRequestURI();
         String resourceMemberId = path.substring(path.lastIndexOf('/') + 1);
 
-        if (!memberRepository.existsById(resourceMemberId)) {
-            return true;
-        }
-
         if (log.isTraceEnabled()) {
             log.trace("path={}", path);
             log.trace("pathVariable={}", resourceMemberId);
             log.trace("authentication.getName()={}", authentication.getName());
-            log.trace("pathVariable.equals(authentication.getName())={}", resourceMemberId.equals(authentication.getName()));
+            log.trace("resourceMemberId.equals(authentication.getName())={}", resourceMemberId.equals(authentication.getName()));
         }
         return resourceMemberId.equals(authentication.getName());
     }

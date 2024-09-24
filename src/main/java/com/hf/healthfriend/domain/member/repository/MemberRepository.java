@@ -9,13 +9,17 @@ public interface MemberRepository {
 
     Member save(Member member);
 
-    Optional<Member> findById(String id);
+    Optional<Member> findById(Long id);
+
+    Optional<Member> findByLoginId(String loginId);
 
     Optional<Member> findByEmail(String email);
 
-    boolean existsById(String id);
+    boolean existsById(Long id);
+
+    boolean existsByLoginId(String loginId);
 
     boolean existsByEmail(String email);
 
-    Member update(String memberId, MemberUpdateDto updateDto);
+    Member update(Long memberId, MemberUpdateDto updateDto);
 }

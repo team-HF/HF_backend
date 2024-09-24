@@ -2,6 +2,7 @@ package com.hf.healthfriend.domain.member.controller;
 
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
+import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exceptionhandler.MemberExceptionHandlerControllerAdvice;
 import com.hf.healthfriend.domain.member.service.MemberService;
@@ -47,6 +48,8 @@ class TestMemberController {
     @Autowired
     MemberService memberService;
 
+    long createdMemberId;
+
     @BeforeEach
     void beforeEach() {
         MemberCreationRequestDto creationRequestDtoDuplicate = MemberCreationRequestDto.builder()
@@ -62,17 +65,18 @@ class TestMemberController {
                 .fitnessKind(FitnessKind.FUNCTIONAL)
                 .build();
 
-        this.memberService.createMember(creationRequestDtoDuplicate);
+        MemberCreationResponseDto responseDto = this.memberService.createMember(creationRequestDtoDuplicate);
+        this.createdMemberId = responseDto.getMemberId();
 
         this.mockMvc = MockMvcBuilders.standaloneSetup(new MemberController(this.memberService))
                 .setControllerAdvice(this.memberExceptionHandlerControllerAdvice)
                 .build();
     }
 
-    @DisplayName("POST /members - success")
+    @DisplayName("POST /hr/members - success")
     @Test
     void memberCreation_success() throws Exception {
-        this.mockMvc.perform(multipart("/members")
+        this.mockMvc.perform(multipart("/hr/members")
                         .param("id", "new@gmail.com")
                         .param("nickname", "새로운인간")
                         .param("birthDate", "1997-09-16")
@@ -92,7 +96,7 @@ class TestMemberController {
                             "statusCode": 201,
                             "statusCodeSeries": 2,
                             "content": {
-                                "memberId": "new@gmail.com",
+                                "loginId": "new@gmail.com",
                                 "email": "new@gmail.com",
                                 "role": "ROLE_MEMBER",
                                 "nickname": "새로운인간",
@@ -103,10 +107,10 @@ class TestMemberController {
 
     }
 
-    @DisplayName("POST /members - failure")
+    @DisplayName("POST /hr/members - failure")
     @Test
     void memberCreation_failure() throws Exception {
-        this.mockMvc.perform(multipart("/members")
+        this.mockMvc.perform(multipart("/hr/members")
                         .param("id", "sample@gmail.com")
                         .param("nickname", "샘플닉네임")
                         .param("birthDate", "1997-09-16")
@@ -130,10 +134,11 @@ class TestMemberController {
                         """));
     }
 
-    @DisplayName("GET /members/{memberId} - succeess to find member")
+    @DisplayName("GET /hr/members/{memberId} - succeess to find member")
     @Test
     void findMember_success() throws Exception {
-        this.mockMvc.perform(get("/members/{memberId}", "sample@gmail.com")
+        log.info("createdMemberId={}", this.createdMemberId);
+        this.mockMvc.perform(get("/hr/members/{memberId}", this.createdMemberId)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(log())
                 .andDo(print())
@@ -143,7 +148,7 @@ class TestMemberController {
                             "statusCode": 200,
                             "statusCodeSeries": 2,
                             "content": {
-                                "memberId": "sample@gmail.com",
+                                "loginId": "sample@gmail.com",
                                 "nickname": "샘플닉네임",
                                 "role": "ROLE_MEMBER",
                                 "email": "sample@gmail.com",
@@ -155,10 +160,10 @@ class TestMemberController {
                         """));
     }
 
-    @DisplayName("GET /members/{memberId} - Member not found")
+    @DisplayName("GET /hr/members/{memberId} - Member not found")
     @Test
     void findMember_memberNotFound() throws Exception {
-        this.mockMvc.perform(get("/members/{memberId}", "no@such.member")
+        this.mockMvc.perform(get("/hr/members/{memberId}", this.createdMemberId + 1)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(log())
                 .andDo(print())
@@ -173,10 +178,10 @@ class TestMemberController {
                         """));
     }
 
-    @DisplayName("PATCH /members/{memberId} - success")
+    @DisplayName("PATCH /hr/members/{memberId} - success")
     @Test
     void updateMember_success() throws Exception {
-        this.mockMvc.perform(patch("/members/{memberId}", "sample@gmail.com")
+        this.mockMvc.perform(patch("/hr/members/{memberId}", this.createdMemberId)
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .accept(MediaType.APPLICATION_JSON)
                         .content("{}"))
@@ -191,10 +196,10 @@ class TestMemberController {
                         """));
     }
 
-    @DisplayName("PATCH /members/{memberId} - Member not found")
+    @DisplayName("PATCH /hr/members/{memberId} - Member not found")
     @Test
     void updateMember_memberNotFound() throws Exception {
-        this.mockMvc.perform(patch("/members/{memberId}", "no@such.member")
+        this.mockMvc.perform(patch("/hr/members/{memberId}", this.createdMemberId + 1)
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .accept(MediaType.APPLICATION_JSON)
                         .content("{}"))

@@ -29,7 +29,7 @@ import java.net.URISyntaxException;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/members")
+@RequestMapping("/hr/members")
 public class MemberController {
 
     private final MemberService memberService;
@@ -84,7 +84,7 @@ public class MemberController {
         log.info("Request Body:\n{}", requestBody);
 
         MemberCreationResponseDto result = this.memberService.createMember(requestBody);
-        return ResponseEntity.created(new URI("/members/" + result.getMemberId()))
+        return ResponseEntity.created(new URI("/hr/members/" + result.getMemberId()))
                 .body(ApiBasicResponse.of(result, HttpStatus.CREATED));
     }
 
@@ -113,7 +113,7 @@ public class MemberController {
                     )
             )
     })
-    public ResponseEntity<ApiBasicResponse<MemberDto>> findMember(@PathVariable String memberId) {
+    public ResponseEntity<ApiBasicResponse<MemberDto>> findMember(@PathVariable("memberId") Long memberId) {
         log.info("Find member of id={}", memberId);
         return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.findMember(memberId), HttpStatus.OK));
     }
@@ -143,7 +143,7 @@ public class MemberController {
                     )
             )
     })
-    public ResponseEntity<ApiBasicResponse<MemberDto>> updateMember(@PathVariable String memberId,
+    public ResponseEntity<ApiBasicResponse<MemberDto>> updateMember(@PathVariable("memberId") Long memberId,
                                                                     @ModelAttribute MemberUpdateRequestDto dto) {
         MemberDto resultDto = this.memberService.updateMember(memberId, dto);
         return ResponseEntity.ok(ApiBasicResponse.of(resultDto, HttpStatus.OK));

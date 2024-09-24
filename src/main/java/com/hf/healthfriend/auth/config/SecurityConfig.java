@@ -89,7 +89,7 @@ public class SecurityConfig {
                         .httpBasic(AbstractHttpConfigurer::disable)
                         .authorizeHttpRequests((auth) -> auth
                                 .requestMatchers(WHITE_LIST).permitAll()
-                                .requestMatchers(HttpMethod.POST, "/members").hasAnyRole(
+                                .requestMatchers(HttpMethod.POST, "/hr/members").hasAnyRole(
                                         Role.ROLE_NON_MEMBER.roleName(), Role.ROLE_MEMBER.roleName()
                                 )
                                 .anyRequest().hasAnyRole(Role.ROLE_ADMIN.roleName(), Role.ROLE_MEMBER.roleName())

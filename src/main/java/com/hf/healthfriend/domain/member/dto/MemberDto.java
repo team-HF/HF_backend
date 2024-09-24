@@ -12,7 +12,8 @@ import java.time.LocalDateTime;
 @Getter
 @ToString
 public class MemberDto {
-    private String memberId;
+    private Long memberId;
+    private String loginId;
     private Role role;
     private String email;
     private LocalDateTime creationTime;
