@@ -18,6 +18,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -35,6 +36,13 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 @Slf4j
 @SpringBootTest
 @Transactional
+@ActiveProfiles({
+        "local-dev",
+        "secret",
+        "constants",
+        "priv",
+        "no-auth"
+})
 class TestLikeControllerMockMvc {
 
     MockMvc mockMvc;
@@ -63,8 +71,8 @@ class TestLikeControllerMockMvc {
 
         this.sampleMembers = Map.of(
                 "member1", generateSampleMember("sample1@gmail.com", "nick1"),
-                "member2", generateSampleMember("sample1@gmail.com", "nick1"),
-                "member3", generateSampleMember("sample1@gmail.com", "nick1")
+                "member2", generateSampleMember("sample2@gmail.com", "nick2"),
+                "member3", generateSampleMember("sample3@gmail.com", "nick3")
         );
 
         this.samplePosts = Map.of(
@@ -119,7 +127,7 @@ class TestLikeControllerMockMvc {
 
         this.mockMvc.perform(
                 MockMvcRequestBuilders.post("/hr/posts/{postId}/likes", this.samplePosts.get("post1").getPostId())
-                        .queryParam("memberId", String.valueOf(this.sampleMembers.get("member3").getId()))
+                        .queryParam("memberId", String.valueOf(this.sampleMembers.get("member1").getId()))
         ).andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
@@ -139,10 +147,12 @@ class TestLikeControllerMockMvc {
                 ).andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().json(String.format("""
                         {
-                            "postId": %d,
-                            "memberId": %d
+                            "content": {
+                                "postId": %d,
+                                "memberId": %d
+                            }
                         }
-                        """, this.sampleMembers.get("member1").getId(), this.samplePosts.get("post1").getPostId())));
+                        """, this.samplePosts.get("post1").getPostId(), this.sampleMembers.get("member1").getId())));
     }
 
     @DisplayName("GET /hr/posts/{postId}/likes - 특정 글에 남긴 좋아요 조회")
@@ -270,5 +280,13 @@ class TestLikeControllerMockMvc {
 
         assertThatExceptionOfType(NoSuchElementException.class)
                 .isThrownBy(() -> this.likeService.getLike(generatedId));
+    }
+
+    @DisplayName("DELETE /hr/likes/{likeId} - 좋아요 취소 - 존재하지 않는 좋아요 취소 시도 때문에 404")
+    @Test
+    void cancelLike_404NotFoundExpected() throws Exception {
+        this.mockMvc.perform(
+                MockMvcRequestBuilders.delete("/hr/likes/{likeId}", 15134124L)
+        ).andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 }
