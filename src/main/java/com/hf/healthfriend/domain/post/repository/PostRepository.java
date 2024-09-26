@@ -11,4 +11,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Optional<Post> findByPostIdAndIsDeletedFalse(Long id);
     Page<Post> findAll(Pageable pageable);
 
+    Long countCommentsByPostId(Long postId);
+
 }

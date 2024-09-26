@@ -80,9 +80,9 @@ public class PostService {
                         .category(post.getCategory().name())
                         .viewCount(post.getViewCount())
                         .creationTime(post.getCreationTime())
-                        .commentCount(post.getComments().size())
+                        .commentCount(postRepository.countCommentsByPostId(post.getPostId()))
                         .content(post.getContent())
-                        //.likeCount(post.getLikes().size())
+                        //.likeCount(postRepository.countLikesByPostId(post.getPostId()))
                         .build());
         return postList.getContent();
     }
