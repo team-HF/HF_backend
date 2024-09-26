@@ -2,6 +2,7 @@ package com.hf.healthfriend.domain.post.controller;
 
 import com.hf.healthfriend.domain.post.dto.request.PostWriteRequest;
 import com.hf.healthfriend.domain.post.dto.response.PostGetResponse;
+import com.hf.healthfriend.domain.post.dto.response.PostListObject;
 import com.hf.healthfriend.domain.post.service.PostService;
 import com.hf.healthfriend.domain.post.service.ViewService;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
@@ -16,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "Post API", description = "커뮤니티 API")
 @RequiredArgsConstructor
@@ -83,5 +86,16 @@ public class PostController {
         postService.delete(postId);
         return ResponseEntity.ok(ApiBasicResponse.of(HttpStatus.OK));
     }
+
+    @Operation(summary = "목록 조회", responses = {
+            @ApiResponse(responseCode = "200", description = "목록 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "목록 조회 실패")
+    })
+    @GetMapping("/list")
+    public ResponseEntity<ApiBasicResponse<List<PostListObject>>> getList(
+            @RequestParam(value = "page", defaultValue = "1") int page) {
+        return ResponseEntity.ok(ApiBasicResponse.of(postService.getList(page),HttpStatus.OK));
+    }
+
 
 }
