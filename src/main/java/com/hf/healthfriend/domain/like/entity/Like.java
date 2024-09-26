@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 /**
  * 좋아요 기능 관련 Entity 객체
@@ -30,7 +29,6 @@ public class Like {
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
-    @Setter
     @Column(name = "is_canceled", nullable = false)
     private boolean canceled = false;
 

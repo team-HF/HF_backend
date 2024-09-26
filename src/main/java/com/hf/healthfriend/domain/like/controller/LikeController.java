@@ -51,26 +51,21 @@ public class LikeController {
         );
     }
 
-    @GetMapping("/likes/{likeId}")
+    @GetMapping(value = "/posts/{postId}/likes", params = "memberId")
     @Operation(
-            summary = "단일 좋아요 조회",
+            summary = "회원이 해당 글에 좋아요를 남겼는지 여부 조회",
             responses = {
                     @ApiResponse(
-                            description = "단일 좋아요 조회 성공",
+                            description = "좋아요 여부 조회 성공",
                             responseCode = "200",
                             content = @Content(schema = @Schema(implementation = LikeDtoSchema.class))
-                    ),
-                    @ApiResponse(
-                            description = "존재하지 않는 좋아요 정보 조회 시도",
-                            responseCode = "404",
-                            content = @Content(schema = @Schema(implementation = BasicErrorResponse.class))
                     )
             }
     )
-    public ResponseEntity<ApiBasicResponse<LikeDto>> getSingleLike(@PathVariable("likeId") Long likeId) {
-        LikeDto responseDto = this.likeService.getLike(likeId);
+    public ResponseEntity<ApiBasicResponse<Boolean>> doesMemberLikeThePost(@PathVariable("postId") Long postId,
+                                                                   @RequestParam("memberId") Long memberId) {
         return new ResponseEntity<>(
-                ApiBasicResponse.of(responseDto, HttpStatus.OK),
+                ApiBasicResponse.of(this.likeService.doesMemberLikePost(memberId, postId), HttpStatus.OK),
                 HttpStatus.OK
         );
     }

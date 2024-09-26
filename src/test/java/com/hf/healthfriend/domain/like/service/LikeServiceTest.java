@@ -2,6 +2,7 @@ package com.hf.healthfriend.domain.like.service;
 
 import com.hf.healthfriend.domain.like.dto.LikeDto;
 import com.hf.healthfriend.domain.like.exception.DuplicateLikeException;
+import com.hf.healthfriend.domain.like.exception.PostOrMemberNotExistsException;
 import com.hf.healthfriend.domain.like.repository.LikeRepository;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.entity.Member;
@@ -14,6 +15,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -140,6 +143,18 @@ class LikeServiceTest {
                         this.sampleMembers.get("member1").getId(),
                         this.samplePosts.get("post1").getPostId()
                 ));
+    }
+
+    @DisplayName("addLike - 존재하지 않는 Post나 Member와 연관관계 매핑을 가질 경우 예외 발생")
+    @CsvSource(value = {
+            "0:1", "1:0", "1:1"
+    }, delimiter = ':')
+    @ParameterizedTest
+    void addLike_fail_postOfPostIdOrMemberOfMemberIdNotExists(int memberIdIncr, int postIdIncr) {
+        Long memberId = this.sampleMembers.get("member1").getId();
+        Long postId = this.samplePosts.get("post1").getPostId();
+        assertThatExceptionOfType(PostOrMemberNotExistsException.class)
+                .isThrownBy(() -> this.likeService.addLike(memberId + memberIdIncr, postId + + postIdIncr));
     }
 
     @DisplayName("getLike - success")

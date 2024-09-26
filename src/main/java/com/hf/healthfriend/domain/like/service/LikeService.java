@@ -3,10 +3,12 @@ package com.hf.healthfriend.domain.like.service;
 import com.hf.healthfriend.domain.like.dto.LikeDto;
 import com.hf.healthfriend.domain.like.entity.Like;
 import com.hf.healthfriend.domain.like.exception.DuplicateLikeException;
+import com.hf.healthfriend.domain.like.exception.PostOrMemberNotExistsException;
 import com.hf.healthfriend.domain.like.repository.LikeRepository;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.post.entity.Post;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,8 +40,12 @@ public class LikeService {
                             .postId(postId)
                             .build()
             );
-            Like savedLike = this.likeRepository.save(like);
-            return savedLike.getLikeId();
+            try {
+                Like savedLike = this.likeRepository.save(like);
+                return savedLike.getLikeId();
+            } catch (DataIntegrityViolationException e) {
+                throw new PostOrMemberNotExistsException(e, memberId, postId);
+            }
         }
 
         Like like = likeOp.get();
@@ -55,6 +61,7 @@ public class LikeService {
 
     /**
      * likeId를 search key로 하여 단일 Like 정보를 가져온다.
+     * 이 Service에 의존성을 가지는 객체에서 사용할 수 있으므로 남겨 놓음.
      *
      * @param likeId 찾고자 하는 Like의 ID
      * @return Like entity의 정보를 가진 Like entity
@@ -64,6 +71,17 @@ public class LikeService {
         Like searchedLike = this.likeRepository.findById(likeId).orElseThrow(() ->
                 new NoSuchElementException(String.format("존재하지 않는 Like입니다. ID=%d", likeId)));// TODO 하드코딩 고치기
         return LikeDto.of(searchedLike);
+    }
+
+    /**
+     * 특정 회원이 특정 글에 좋아요를 남겼는지 확인
+     *
+     * @param memberId 좋아요를 남겼는지 체크할 회원의 ID
+     * @param postId 회원이 좋아요를 남겼는지 체크할 Post의 ID
+     * @return 해당 회원이 해당 글에 좋아요를 남겼으면 true, 그렇지 않으면 false
+     */
+    public boolean doesMemberLikePost(Long memberId, Long postId) {
+        return this.likeRepository.existsByMemberIdAndPostId(memberId, postId);
     }
 
     public List<LikeDto> getLikeOfPost(Long postId) {

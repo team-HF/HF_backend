@@ -26,9 +26,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -131,26 +129,52 @@ class TestLikeControllerMockMvc {
         ).andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
-    @DisplayName("GET /hr/likes/{likeId} - 단일 좋아요 조회 성공")
+    @DisplayName("POST /hr/posts/{postId}/likes - 해당 회원이나 글이 존재하지 않을 경우 400 Bad Request")
     @Test
-    void getSingleLike_success() throws Exception {
-        // 중요하지 않은 엔드포인트라 그냥 대충 테스트
+    void addDuplicateLikes_noMemberOrPost_expect400BadRequest() throws Exception {
+        Long notExistsPostId = findNotExistsPostId();
+        Long notExistsMemberId = findNotExistsMemberId();
+        this.mockMvc.perform(
+                MockMvcRequestBuilders.post("/hr/posts/{postId}/likes", notExistsPostId)
+                        .queryParam("memberId", String.valueOf(notExistsMemberId))
+        ).andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
 
-        Long generatedLikeId =
-                this.likeService.addLike(
-                        this.sampleMembers.get("member1").getId(),
-                        this.samplePosts.get("post1").getPostId()
-                );
+    private Long findNotExistsPostId() {
+        Random random = new Random();
+        long id = random.nextLong();
+        Optional<Post> postOp = this.postRepository.findById(id);
+        if (postOp.isPresent()) {
+            return findNotExistsPostId();
+        }
+        return id;
+    }
+
+    private Long findNotExistsMemberId() {
+        Random random = new Random();
+        long id = random.nextLong();
+        Optional<Member> memberOp = this.memberRepository.findById(id);
+        if (memberOp.isPresent()) {
+            return findNotExistsPostId();
+        }
+        return id;
+    }
+
+    @DisplayName("GET /hr/posts/{postId}/likes - 회원이 해당 글에 좋아요를 남겼는지 여부 조회")
+    @Test
+    void doesMemberLikeThePost_success() throws Exception {
+        this.likeService.addLike(
+                this.sampleMembers.get("member1").getId(),
+                this.samplePosts.get("post1").getPostId()
+        );
 
         this.mockMvc.perform(
-                        MockMvcRequestBuilders.get("/hr/likes/{likeId}", generatedLikeId)
+                        MockMvcRequestBuilders.get("/hr/posts/{postId}/likes", this.samplePosts.get("post1").getPostId())
+                                .param("memberId", String.valueOf(this.sampleMembers.get("member1").getId()))
                 ).andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().json(String.format("""
                         {
-                            "content": {
-                                "postId": %d,
-                                "memberId": %d
-                            }
+                            "content": true
                         }
                         """, this.samplePosts.get("post1").getPostId(), this.sampleMembers.get("member1").getId())));
     }

@@ -28,6 +28,15 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
                                            @Param("postId") Long postId);
 
     @Query("""
+            SELECT COUNT(l.likeId) > 0
+            FROM Like l
+            WHERE l.member.id = :memberId
+                AND l.post.postId = :postId
+            """)
+    boolean existsByMemberIdAndPostId(@Param("memberId") Long memberId,
+                                      @Param("postId") Long postId);
+
+    @Query("""
             SELECT l FROM Like l
             WHERE l.member.id = :memberId
                 AND l.canceled = FALSE
