@@ -1,7 +1,6 @@
 package com.hf.healthfriend.domain.post.dto.response;
 
 import lombok.Builder;
-import lombok.Getter;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +13,7 @@ public record PostListObject(
         LocalDateTime creationTime,
         long viewCount,
         long likeCount,
-        long commentCount
+        long commentCount,
+        String fitnessLevel
 ) {
 }
