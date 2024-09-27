@@ -13,7 +13,7 @@ import static com.hf.healthfriend.global.exception.ErrorCode.MEMBER_ALREADY_EXIS
 import static com.hf.healthfriend.global.exception.ErrorCode.MEMBER_OF_THE_MEMBER_ID_NOT_FOUND;
 
 @Slf4j
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "com.hf.healthfriend.domain.member")
 public class MemberExceptionHandlerControllerAdvice {
 
     @ExceptionHandler(MemberNotFoundException.class)

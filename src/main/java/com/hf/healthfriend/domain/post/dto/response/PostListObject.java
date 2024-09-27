@@ -1,7 +1,6 @@
 package com.hf.healthfriend.domain.post.dto.response;
 
 import lombok.Builder;
-import lombok.Getter;
 
 import java.time.LocalDateTime;
 
