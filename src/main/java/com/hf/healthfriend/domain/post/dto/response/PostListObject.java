@@ -14,6 +14,7 @@ public record PostListObject(
         LocalDateTime creationTime,
         long viewCount,
         long likeCount,
-        long commentCount
+        long commentCount,
+        String fitnessLevel
 ) {
 }

@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.post.service;
 
+import com.hf.healthfriend.domain.member.constant.FitnessLevel;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
@@ -82,6 +83,25 @@ public class PostService {
                         .creationTime(post.getCreationTime())
                         .commentCount(postRepository.countCommentsByPostId(post.getPostId()))
                         .content(post.getContent())
+                        .fitnessLevel(post.getMember().getFitnessLevel().name())
+                        //.likeCount(postRepository.countLikesByPostId(post.getPostId()))
+                        .build());
+        return postList.getContent();
+    }
+
+    public List<PostListObject> getsearchedList(int pageNumber, String keyword) {
+        Pageable pageable = PageRequest.of(pageNumber-1, 10,
+                Sort.by("creationTime").descending());
+        Page<PostListObject> postList = postRepository.findByTitleContainingOrContentContaining(pageable,keyword)
+                .map(post -> PostListObject.builder()
+                        .postId(post.getPostId())
+                        .title(post.getTitle())
+                        .category(post.getCategory().name())
+                        .viewCount(post.getViewCount())
+                        .creationTime(post.getCreationTime())
+                        .commentCount(postRepository.countCommentsByPostId(post.getPostId()))
+                        .content(post.getContent())
+                        .fitnessLevel(post.getMember().getFitnessLevel().name())
                         //.likeCount(postRepository.countLikesByPostId(post.getPostId()))
                         .build());
         return postList.getContent();

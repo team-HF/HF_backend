@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface PostRepository extends JpaRepository<Post, Long> {
     Optional<Post> findByPostIdAndIsDeletedFalse(Long id);
     Page<Post> findAll(Pageable pageable);
-
+    Page<Post> findByTitleContainingOrContentContaining(Pageable pageable, String keyword);
     Long countCommentsByPostId(Long postId);
 
 }
