@@ -1,6 +1,7 @@
 package com.hf.healthfriend.domain.post.service;
 
 import com.hf.healthfriend.domain.comment.dto.CommentDto;
+import com.hf.healthfriend.domain.comment.repository.CommentJpaRepository;
 import com.hf.healthfriend.domain.comment.service.CommentService;
 import com.hf.healthfriend.domain.like.service.LikeService;
 import com.hf.healthfriend.domain.member.entity.Member;
@@ -34,6 +35,7 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
+    private final CommentJpaRepository commentJpaRepository;
     private final CommentService commentService;
     private final LikeService likeService;
 
@@ -92,10 +94,10 @@ public class PostService {
                         .category(post.getCategory().name())
                         .viewCount(post.getViewCount())
                         .creationTime(post.getCreationTime())
-                        .commentCount(postRepository.countCommentsByPostId(post.getPostId()))
+                        .commentCount(commentJpaRepository.countByPost_PostId(post.getPostId()))
                         .content(post.getContent())
                         .fitnessLevel(post.getMember().getFitnessLevel().name())
-                        //.likeCount(postRepository.countLikesByPostId(post.getPostId()))
+                        .likeCount(likeService.getLikeCountOfPost(post.getPostId()))
                         .build());
         return postList.getContent();
     }
@@ -103,19 +105,29 @@ public class PostService {
     public List<PostListObject> getsearchedList(int pageNumber, String keyword) {
         Pageable pageable = PageRequest.of(pageNumber-1, 10,
                 Sort.by("creationTime").descending());
-        Page<PostListObject> postList = postRepository.findByTitleContainingOrContentContaining(pageable,keyword)
+        Page<PostListObject> postList = postRepository.findByTitleOrContentContaining(keyword,pageable)
                 .map(post -> PostListObject.builder()
                         .postId(post.getPostId())
                         .title(post.getTitle())
                         .category(post.getCategory().name())
                         .viewCount(post.getViewCount())
                         .creationTime(post.getCreationTime())
-                        .commentCount(postRepository.countCommentsByPostId(post.getPostId()))
-                        .content(post.getContent())
+                        .commentCount(commentJpaRepository.countByPost_PostId(post.getPostId()))
+                        .content(getSentenceContainKeyword(keyword,post.getContent()))
                         .fitnessLevel(post.getMember().getFitnessLevel().name())
-                        //.likeCount(postRepository.countLikesByPostId(post.getPostId()))
+                        .likeCount(likeService.getLikeCountOfPost(post.getPostId()))
                         .build());
         return postList.getContent();
+    }
+
+    public String getSentenceContainKeyword(String keyword, String content){
+        String[] sentences = content.split("(?<=[.!?])");
+        for (String sentence : sentences) {
+            if (sentence.contains(keyword)) {
+                return sentence.trim();
+            }
+        }
+        return null;
     }
 
 

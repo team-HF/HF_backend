@@ -2,6 +2,8 @@ package com.hf.healthfriend.domain.post.dto.response;
 
 import com.hf.healthfriend.domain.comment.dto.CommentDto;
 import com.hf.healthfriend.domain.comment.dto.response.CommentCreationResponseDto;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,7 +12,7 @@ import java.util.List;
 public record PostGetResponse(
         long postId,
         String postCategory,
-        String memberId,
+        Long memberId,
         String title,
         String content,
         LocalDateTime createDate,
