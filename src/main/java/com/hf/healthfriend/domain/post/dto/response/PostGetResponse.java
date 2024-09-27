@@ -1,7 +1,10 @@
 package com.hf.healthfriend.domain.post.dto.response;
 
+import com.hf.healthfriend.domain.comment.dto.CommentDto;
+import com.hf.healthfriend.domain.comment.dto.response.CommentCreationResponseDto;
 import lombok.Builder;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Builder
 public record PostGetResponse(
@@ -11,6 +14,8 @@ public record PostGetResponse(
         String title,
         String content,
         LocalDateTime createDate,
-        Long view_count
+        Long viewCount,
+        Long likeCount,
+        List<CommentDto> comments
 ) {
 }

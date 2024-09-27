@@ -1,6 +1,8 @@
 package com.hf.healthfriend.domain.post.service;
 
-import com.hf.healthfriend.domain.member.constant.FitnessLevel;
+import com.hf.healthfriend.domain.comment.dto.CommentDto;
+import com.hf.healthfriend.domain.comment.service.CommentService;
+import com.hf.healthfriend.domain.like.service.LikeService;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
@@ -32,6 +34,8 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
+    private final CommentService commentService;
+    private final LikeService likeService;
 
     public Long save(PostWriteRequest postWriteRequest) {
         Long memberId = postWriteRequest.getWriterId();
@@ -53,15 +57,22 @@ public class PostService {
         Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
                 .orElseThrow(() -> new CustomException(PostErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
         if(canUpdateViewCount) {
+            /**
+             * TODO : 동시성 처리 필요
+             */
             post.updateViewCount(post.getViewCount());
         }
+        List<CommentDto> commentList = commentService.getCommentsOfPost(postId);
+        Long likeCount = likeService.getLikeCountOfPost(postId);
         return PostGetResponse.builder()
                 .postId(post.getPostId())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .postCategory(post.getCategory().name())
-                .view_count(post.getViewCount())
+                .viewCount(post.getViewCount())
+                .comments(commentList)
                 .createDate(post.getCreationTime())
+                .likeCount(likeCount)
                 .build();
     }
 
