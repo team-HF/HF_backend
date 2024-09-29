@@ -48,4 +48,11 @@ public class SpecService {
                 .map(Spec::getSpecId)
                 .toList();
     }
+
+    public List<SpecDto> getSpecsOfMember(Long memberId) {
+        return this.specRepository.findByMemberId(memberId)
+                .stream()
+                .map(SpecDto::of)
+                .toList();
+    }
 }

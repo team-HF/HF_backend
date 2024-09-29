@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.spec.dto;
 
+import com.hf.healthfriend.domain.spec.entity.Spec;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
@@ -28,4 +29,14 @@ public class SpecDto {
 
     @NotNull
     private String description;
+
+    public static SpecDto of(Spec entity) {
+        return new SpecDto(
+                entity.getStartDate(),
+                entity.getEndDate(),
+                entity.isCurrent(),
+                entity.getTitle(),
+                entity.getDescription()
+        );
+    }
 }
