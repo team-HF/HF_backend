@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -71,7 +72,7 @@ class TestSpecService {
                 description
         );
 
-        Long generatedId = this.specService.addSpec(this.member.getId(), specDto);
-        assertThat(generatedId).isNotNull();
+        List<Long> generatedIds = this.specService.addSpec(this.member.getId(), List.of(specDto));
+        generatedIds.forEach((id) -> assertThat(id).isNotNull());
     }
 }
