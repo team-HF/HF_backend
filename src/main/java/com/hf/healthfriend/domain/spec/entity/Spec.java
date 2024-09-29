@@ -46,14 +46,6 @@ public class Spec {
         this.specId = specId;
     }
 
-    public Spec(Member member, LocalDate startDate, boolean isCurrent, String title, String description) {
-        this.member = member;
-        this.startDate = startDate;
-        this.isCurrent = isCurrent;
-        this.title = title;
-        this.description = description;
-    }
-
     public Spec(Member member,
                 LocalDate startDate,
                 LocalDate endDate,
