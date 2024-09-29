@@ -1,11 +1,13 @@
 package com.hf.healthfriend.domain.member.dto.request;
 
 import com.hf.healthfriend.domain.member.constant.*;
+import com.hf.healthfriend.domain.spec.dto.SpecDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -46,4 +48,7 @@ public class MemberCreationRequestDto {
 
     @Schema(description = "주로 하고 있는 운동은? - 고강도 운동 위주 = HIGH_STRESS / 기능성 피트니스 위주 = FUNCTIONAL")
     private FitnessKind fitnessKind;
+
+    @Schema(description = "경력 및 수상이력 목록")
+    private List<SpecDto> specs;
 }
