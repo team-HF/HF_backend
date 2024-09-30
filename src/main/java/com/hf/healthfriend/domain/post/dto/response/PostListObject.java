@@ -2,6 +2,7 @@ package com.hf.healthfriend.domain.post.dto.response;
 
 import lombok.Builder;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Builder
