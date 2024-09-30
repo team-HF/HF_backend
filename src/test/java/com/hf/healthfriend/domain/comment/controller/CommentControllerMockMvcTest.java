@@ -119,7 +119,7 @@ class CommentControllerMockMvcTest {
     @DisplayName("POST /posts/{postId}/comments - create a comment - 201 expected")
     @Test
     void createComment_success() throws Exception {
-        MockHttpServletResponse response = this.mockMvc.perform(post("/hr/posts/{postId}/comments", 10000L)
+        MockHttpServletResponse response = this.mockMvc.perform(post("/hf/posts/{postId}/comments", 10000L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -158,7 +158,7 @@ class CommentControllerMockMvcTest {
         CommentCreationResponseDto creationResult = this.commentService.createComment(10000L, requestDto);
 
 
-        this.mockMvc.perform(delete("/hr/comments/{commentId}", creationResult.commentId()))
+        this.mockMvc.perform(delete("/hf/comments/{commentId}", creationResult.commentId()))
                 .andExpect(status().isOk());
     }
 
@@ -168,7 +168,7 @@ class CommentControllerMockMvcTest {
     @DisplayName("GET /posts/{postId}/comments - 조회 성공")
     @Test
     void findCommentsOfSpecificPost() throws Exception {
-        String responseBodyAsString = this.mockMvc.perform(get("/hr/posts/{postId}/comments", 10000L)
+        String responseBodyAsString = this.mockMvc.perform(get("/hf/posts/{postId}/comments", 10000L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString();
 
@@ -185,7 +185,7 @@ class CommentControllerMockMvcTest {
     @DisplayName("GET /comments?writerId= - 조회 성공")
     @Test
     void findCommentsOfSpecificWriter() throws Exception {
-        String responseBodyAsString = this.mockMvc.perform(get("/hr/comments")
+        String responseBodyAsString = this.mockMvc.perform(get("/hf/comments")
                         .param("writerId", String.valueOf(10000))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString();

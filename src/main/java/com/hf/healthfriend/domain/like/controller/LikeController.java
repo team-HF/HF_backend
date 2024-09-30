@@ -22,7 +22,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/hr")
+@RequestMapping("/hf")
 public class LikeController {
     private final LikeService likeService;
 
