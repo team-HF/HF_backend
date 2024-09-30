@@ -11,7 +11,7 @@ public record PostListObject(
         String category,
         String title,
         String content,
-        String creationTime,
+        LocalDateTime creationTime,
         long viewCount,
         long likeCount,
         long commentCount,

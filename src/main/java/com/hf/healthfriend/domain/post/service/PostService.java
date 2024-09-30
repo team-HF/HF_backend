@@ -93,11 +93,11 @@ public class PostService {
                         .title(post.getTitle())
                         .category(post.getCategory().name())
                         .viewCount(post.getViewCount())
-                        .creationTime(PostListObject.calculateTimeAgo(post.getCreationTime()))
+                        .creationTime(post.getCreationTime())
                         .commentCount(commentJpaRepository.countByPost_PostId(post.getPostId()))
                         .content(post.getContent())
                         .fitnessLevel(post.getMember().getFitnessLevel().name())
-                        .likeCount(likeService.getLikeCountOfPost(post.getPostId()))
+                        .likeCount(post.getLikes().size())
                         .build());
         return postList.getContent();
     }
@@ -111,11 +111,11 @@ public class PostService {
                         .title(post.getTitle())
                         .category(post.getCategory().name())
                         .viewCount(post.getViewCount())
-                        .creationTime(PostListObject.calculateTimeAgo(post.getCreationTime()))
+                        .creationTime(post.getCreationTime())
                         .commentCount(commentJpaRepository.countByPost_PostId(post.getPostId()))
                         .content(getSentenceContainKeyword(keyword,post.getContent()))
                         .fitnessLevel(post.getMember().getFitnessLevel().name())
-                        .likeCount(likeService.getLikeCountOfPost(post.getPostId()))
+                        .likeCount(post.getLikes().size())
                         .build());
         return postList.getContent();
     }
