@@ -1,11 +1,16 @@
 package com.hf.healthfriend.domain.member.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hf.healthfriend.domain.member.constant.*;
+import com.hf.healthfriend.domain.member.dto.MemberDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exceptionhandler.MemberExceptionHandlerControllerAdvice;
 import com.hf.healthfriend.domain.member.service.MemberService;
+import com.hf.healthfriend.domain.spec.dto.SpecDto;
+import com.hf.healthfriend.global.spec.ApiBasicResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +26,9 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
@@ -48,6 +55,9 @@ class TestMemberController {
     @Autowired
     MemberService memberService;
 
+    @Autowired
+    ObjectMapper objectMapper;
+
     long createdMemberId;
 
     @BeforeEach
@@ -63,6 +73,7 @@ class TestMemberController {
                 .fitnessEagerness(FitnessEagerness.EAGER)
                 .fitnessObjective(FitnessObjective.BULK_UP)
                 .fitnessKind(FitnessKind.FUNCTIONAL)
+                .specs(getSampleSpecs())
                 .build();
 
         MemberCreationResponseDto responseDto = this.memberService.createMember(creationRequestDtoDuplicate);
@@ -71,6 +82,32 @@ class TestMemberController {
         this.mockMvc = MockMvcBuilders.standaloneSetup(new MemberController(this.memberService))
                 .setControllerAdvice(this.memberExceptionHandlerControllerAdvice)
                 .build();
+    }
+
+    private List<SpecDto> getSampleSpecs() {
+        return List.of(
+                new SpecDto(
+                        LocalDate.of(2014, 1, 2),
+                        LocalDate.of(2017, 2, 15),
+                        false,
+                        "sample-title",
+                        "sample-desc"
+                ),
+                new SpecDto(
+                        LocalDate.of(2015, 7, 2),
+                        null,
+                        true,
+                        "sample-title",
+                        "sample-desc"
+                ),
+                new SpecDto(
+                        LocalDate.of(2015, 7, 2),
+                        null,
+                        false,
+                        "sample-title",
+                        "sample-desc"
+                )
+        );
     }
 
     @DisplayName("POST /hr/members - success")
@@ -138,7 +175,7 @@ class TestMemberController {
     @Test
     void findMember_success() throws Exception {
         log.info("createdMemberId={}", this.createdMemberId);
-        this.mockMvc.perform(get("/hr/members/{memberId}", this.createdMemberId)
+        String responseBodyAsString = this.mockMvc.perform(get("/hr/members/{memberId}", this.createdMemberId)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(log())
                 .andDo(print())
@@ -157,7 +194,28 @@ class TestMemberController {
                                 "fitnessLevel": "BEGINNER"
                             }
                         }
-                        """));
+                        """))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        log.info("response={}", responseBodyAsString);
+        ApiBasicResponse<MemberDto> responseBody = this.objectMapper.readValue(responseBodyAsString, new TypeReference<>() {
+        });
+
+        List<SpecDto> responseSpecs = responseBody.getContent().getSpecs();
+        List<SpecDto> expected = getSampleSpecs();
+        assertThat(responseSpecs).size().isEqualTo(expected.size());
+        assertThat(responseSpecs.stream().map(SpecDto::getStartDate).toArray(LocalDate[]::new))
+                .containsExactlyInAnyOrder(expected.stream().map(SpecDto::getStartDate).toArray(LocalDate[]::new));
+        assertThat(responseSpecs.stream().map(SpecDto::getEndDate).toArray(LocalDate[]::new))
+                .containsExactlyInAnyOrder(expected.stream().map(SpecDto::getEndDate).toArray(LocalDate[]::new));
+        assertThat(responseSpecs.stream().map(SpecDto::getTitle).toArray(String[]::new))
+                .containsExactlyInAnyOrder(expected.stream().map(SpecDto::getTitle).toArray(String[]::new));
+        assertThat(responseSpecs.stream().map(SpecDto::getDescription).toArray(String[]::new))
+                .containsExactlyInAnyOrder(expected.stream().map(SpecDto::getDescription).toArray(String[]::new));
+        assertThat(responseSpecs.stream().map(SpecDto::isCurrent).toArray(Boolean[]::new))
+                .containsExactlyInAnyOrder(expected.stream().map(SpecDto::isCurrent).toArray(Boolean[]::new));
     }
 
     @DisplayName("GET /hr/members/{memberId} - Member not found")
