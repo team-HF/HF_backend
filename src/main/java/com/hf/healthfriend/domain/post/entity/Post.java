@@ -2,6 +2,7 @@ package com.hf.healthfriend.domain.post.entity;
 
 import com.hf.healthfriend.domain.BaseTimeEntity;
 import com.hf.healthfriend.domain.comment.entity.Comment;
+import com.hf.healthfriend.domain.like.entity.Like;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.post.constant.PostCategory;
 import jakarta.persistence.*;
@@ -44,6 +45,10 @@ public class Post extends BaseTimeEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Like> likes = new ArrayList<>();
 
     public void delete(){
         this.isDeleted=true;

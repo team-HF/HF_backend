@@ -1,5 +1,8 @@
 package com.hf.healthfriend.domain.post.service;
 import com.hf.healthfriend.domain.comment.entity.Comment;
+import com.hf.healthfriend.domain.comment.repository.CommentJpaRepository;
+import com.hf.healthfriend.domain.like.service.LikeService;
+import com.hf.healthfriend.domain.member.constant.FitnessLevel;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.post.constant.PostCategory;
 import com.hf.healthfriend.domain.post.dto.response.PostListObject;
@@ -15,16 +18,22 @@ import org.springframework.data.domain.*;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class PostServicePagingTest {
+class PostServiceTest {
 
     @Mock
     private PostRepository postRepository;
+
+    @Mock
+    private CommentJpaRepository commentJpaRepository;
 
     @InjectMocks
     private PostService postService;
@@ -35,12 +44,14 @@ class PostServicePagingTest {
         ArrayList<Post> posts = new ArrayList<>();
         for (int i = 1; i <= 20; i++) {
             Member writer = new Member("1212","1@naver.com","1111");
+            writer.setFitnessLevel(FitnessLevel.ADVANCED);
             Post post = Post.builder()
                     .postId((long) i)
                     .title("Post " + i)
                     .category(PostCategory.COUNSELING)
                     .viewCount((long) (i * 10))
                     .content("Content " + i)
+                    .member(writer)
                     .build();
             Comment comment = Comment.builder()
                     .post(post)
@@ -63,6 +74,7 @@ class PostServicePagingTest {
 
         // Mock 설정: postRepository.findAll(pageable) 호출 시 postPage를 반환
         when(postRepository.findAll(pageable)).thenReturn(postPage);
+        when(commentJpaRepository.countByPost_PostId(anyLong())).thenReturn(1L);
 
         // When
         List<PostListObject> result = postService.getList(2);

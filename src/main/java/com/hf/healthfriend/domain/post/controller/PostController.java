@@ -97,5 +97,15 @@ public class PostController {
         return ResponseEntity.ok(ApiBasicResponse.of(postService.getList(page),HttpStatus.OK));
     }
 
+    @Operation(summary = "검색 목록 조회", responses = {
+            @ApiResponse(responseCode = "200", description = "검색 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "검색 조회 실패")
+    })
+    @GetMapping("/list/search")
+    public ResponseEntity<ApiBasicResponse<List<PostListObject>>> getSearchList(
+            @RequestParam(value = "page", defaultValue = "1") int page,@RequestParam String keyword) {
+        return ResponseEntity.ok(ApiBasicResponse.of(postService.getsearchedList(page,keyword),HttpStatus.OK));
+    }
+
 
 }
