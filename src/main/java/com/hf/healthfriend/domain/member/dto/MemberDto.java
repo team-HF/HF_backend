@@ -2,6 +2,7 @@ package com.hf.healthfriend.domain.member.dto;
 
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.spec.dto.SpecDto;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -15,7 +16,10 @@ import java.util.List;
 @ToString
 public class MemberDto {
     private Long memberId;
+
+    @Schema(description = "로그인할 때 사용되는 ID. 소셜 로그인일 경우, 소셜 로그인 email")
     private String loginId;
+
     private Role role;
     private String email;
     private LocalDateTime creationTime;
@@ -29,5 +33,7 @@ public class MemberDto {
     private FitnessEagerness fitnessEagerness;
     private FitnessObjective fitnessObjective;
     private FitnessKind fitnessKind;
+
+    @Schema(description = "경력 및 수상 이력")
     private List<SpecDto> specs;
 }
