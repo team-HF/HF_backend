@@ -2,6 +2,7 @@ package com.hf.healthfriend.domain.member.entity;
 
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.post.entity.Post;
+import com.hf.healthfriend.domain.spec.entity.Spec;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -82,6 +83,9 @@ public class Member implements UserDetails {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Spec> specs = new ArrayList<>();
 
     public Member(long memberId) {
         this.id = memberId;
