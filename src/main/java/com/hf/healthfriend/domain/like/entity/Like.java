@@ -1,5 +1,7 @@
 package com.hf.healthfriend.domain.like.entity;
 
+import com.hf.healthfriend.domain.comment.entity.Comment;
+import com.hf.healthfriend.domain.like.constant.LikeType;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.post.entity.Post;
 import jakarta.persistence.*;
@@ -26,8 +28,16 @@ public class Like {
     private Member member;
 
     @ManyToOne(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id", nullable = false)
+    @JoinColumn(name = "post_id")
     private Post post;
+
+    @ManyToOne(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    @JoinColumn(name = "comment_id")
+    private Comment comment;
+
+    @Column(name = "like_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private LikeType likeType;
 
     @Column(name = "is_canceled", nullable = false)
     private boolean canceled = false;
@@ -36,9 +46,16 @@ public class Like {
         this.likeId = likeId;
     }
 
-    public Like(Member member, Post post) {
+    public Like(Member member, Post post, LikeType likeType) {
         this.member = member;
         this.post = post;
+        this.likeType = likeType;
+    }
+
+    public Like(Member member, Comment comment, LikeType likeType) {
+        this.member = member;
+        this.comment = comment;
+        this.likeType = likeType;
     }
 
     public void uncancel() {
