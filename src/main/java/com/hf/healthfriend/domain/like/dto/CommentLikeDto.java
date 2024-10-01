@@ -8,21 +8,21 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @ToString
-public class LikeDto {
+public class CommentLikeDto {
     private Long likeId;
 
     @NotNull
     private Long memberId;
 
     @NotNull
-    private Long postId;
+    private Long commentId;
 
-    public LikeDto(@NotNull Long memberId, @NotNull Long postId) {
+    public CommentLikeDto(@NotNull Long memberId, @NotNull Long commentId) {
         this.memberId = memberId;
-        this.postId = postId;
+        this.commentId = commentId;
     }
 
-    public static LikeDto of(Like like) {
-        return new LikeDto(like.getLikeId(), like.getMember().getId(), like.getPost().getPostId());
+    public static CommentLikeDto of(Like like) {
+        return new CommentLikeDto(like.getLikeId(), like.getMember().getId(), like.getComment().getCommentId());
     }
 }

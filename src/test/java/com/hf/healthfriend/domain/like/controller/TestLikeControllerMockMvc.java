@@ -2,7 +2,7 @@ package com.hf.healthfriend.domain.like.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hf.healthfriend.domain.like.dto.LikeDto;
+import com.hf.healthfriend.domain.like.dto.PostLikeDto;
 import com.hf.healthfriend.domain.like.exception.LikeErrorControllerAdvice;
 import com.hf.healthfriend.domain.like.service.LikeService;
 import com.hf.healthfriend.domain.member.constant.*;
@@ -201,14 +201,14 @@ class TestLikeControllerMockMvc {
                 MockMvcRequestBuilders.get("/hf/posts/{postId}/likes", this.samplePosts.get("post1").getPostId())
         ).andReturn().getResponse().getContentAsString();
 
-        ApiBasicResponse<List<LikeDto>> responseBody =
-                this.objectMapper.readValue(responseBodyAsString, new TypeReference<ApiBasicResponse<List<LikeDto>>>() {
+        ApiBasicResponse<List<PostLikeDto>> responseBody =
+                this.objectMapper.readValue(responseBodyAsString, new TypeReference<ApiBasicResponse<List<PostLikeDto>>>() {
                 });
 
         assertThat(
                 responseBody.getContent()
                         .stream()
-                        .map(LikeDto::getMemberId)
+                        .map(PostLikeDto::getMemberId)
                         .toList())
 
                 .containsExactlyInAnyOrder(
