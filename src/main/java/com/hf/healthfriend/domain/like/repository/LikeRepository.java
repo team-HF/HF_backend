@@ -48,11 +48,10 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
     @Query("""
             SELECT l FROM Like l
             WHERE l.member.id = :memberId
-                AND l.post.postId = :postId
+                AND l.likeType = 'POST'
                 AND l.canceled = FALSE
             """)
-    List<Like> findPostLikeByMemberId(@Param("memberId") Long memberId,
-                                      @Param("postId") Long postId);
+    List<Like> findPostLikeByMemberId(@Param("memberId") Long memberId);
 
     @Query("""
             SELECT l FROM Like l
