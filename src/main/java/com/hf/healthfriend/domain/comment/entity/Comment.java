@@ -1,6 +1,7 @@
 package com.hf.healthfriend.domain.comment.entity;
 
 import com.hf.healthfriend.domain.BaseTimeEntity;
+import com.hf.healthfriend.domain.like.entity.Like;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.post.entity.Post;
 import jakarta.persistence.*;
@@ -8,6 +9,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -30,6 +33,10 @@ public class Comment extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "writer_id")
     private Member writer;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Like> likes = new ArrayList<>();
 
     @Column(name = "content")
     private String content;
