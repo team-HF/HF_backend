@@ -135,8 +135,8 @@ public class LikeService {
         return this.likeRepository.countByCommentId(commentId);
     }
 
-    public List<PostLikeDto> getPostLikeOfMember(Long memberId, Long postId) {
-        return postEntityListToDtoList(this.likeRepository.findPostLikeByMemberId(memberId,postId));
+    public List<PostLikeDto> getPostLikeOfMember(Long memberId) {
+        return postEntityListToDtoList(this.likeRepository.findPostLikeByMemberId(memberId));
     }
 
     private List<PostLikeDto> postEntityListToDtoList(List<Like> entities) {

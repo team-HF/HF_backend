@@ -122,9 +122,8 @@ public class LikeController {
                     )
             }
     )
-    public ResponseEntity<ApiBasicResponse<List<PostLikeDto>>> getPostLikesOfSingleMember(@PathVariable("memberId") Long memberId,
-                                                                                          @PathVariable Long postId) {
-        List<PostLikeDto> responseDto = this.likeService.getPostLikeOfMember(memberId,postId);
+    public ResponseEntity<ApiBasicResponse<List<PostLikeDto>>> getPostLikesOfSingleMember(@PathVariable("memberId") Long memberId) {
+        List<PostLikeDto> responseDto = this.likeService.getPostLikeOfMember(memberId);
         return ResponseEntity.ok(
                 ApiBasicResponse.of(
                         responseDto,
