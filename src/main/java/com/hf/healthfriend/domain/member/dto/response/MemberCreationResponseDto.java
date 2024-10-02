@@ -48,10 +48,7 @@ public class MemberCreationResponseDto {
     @Schema(description = "주로 하고 있는 운동은? - 고강도 운동 위주 = HIGH_STRESS / 기능성 피트니스 위주 = FUNCTIONAL")
     private final FitnessKind fitnessKind;
 
-    @Schema(description = "등록된 경력 및 수상 이력의 자동 생성된 ID 리스트")
-    private final List<Long> specIds;
-
-    public static MemberCreationResponseDto of(Member member, List<Long> specIds) {
+    public static MemberCreationResponseDto of(Member member) {
         return MemberCreationResponseDto.builder()
                 .memberId(member.getId())
                 .loginId(member.getLoginId())
@@ -67,7 +64,6 @@ public class MemberCreationResponseDto {
                 .fitnessEagerness(member.getFitnessEagerness())
                 .fitnessObjective(member.getFitnessObjective())
                 .fitnessKind(member.getFitnessKind())
-                .specIds(specIds)
                 .build();
     }
 }

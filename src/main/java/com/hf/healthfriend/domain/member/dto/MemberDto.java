@@ -33,7 +33,4 @@ public class MemberDto {
     private FitnessEagerness fitnessEagerness;
     private FitnessObjective fitnessObjective;
     private FitnessKind fitnessKind;
-
-    @Schema(description = "경력 및 수상 이력")
-    private List<SpecDto> specs;
 }

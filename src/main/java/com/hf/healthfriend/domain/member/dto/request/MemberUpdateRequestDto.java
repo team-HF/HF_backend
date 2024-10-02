@@ -26,5 +26,4 @@ public class MemberUpdateRequestDto {
     private FitnessEagerness fitnessEagerness;
     private FitnessObjective fitnessObjective;
     private FitnessKind fitnessKind;
-    private List<SpecUpdateRequestDto> specUpdates;
 }

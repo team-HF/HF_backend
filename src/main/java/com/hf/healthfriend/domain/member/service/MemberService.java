@@ -66,8 +66,7 @@ public class MemberService {
         }
 
         Member saved = this.memberRepository.save(newMember);
-        List<Long> specIds = this.specService.addSpec(saved.getId(), dto.getSpecs());
-        return MemberCreationResponseDto.of(saved, specIds);
+        return MemberCreationResponseDto.of(saved);
     }
 
     public boolean isMemberExists(Long memberId) {
@@ -120,7 +119,6 @@ public class MemberService {
             }
         }
         Member updatedMember = this.memberRepository.update(memberId, updateDto);
-        SpecUpdateResponseDto specUpdateResult = this.specService.updateSpecsOfMember(memberId, requestDto.getSpecUpdates());
         return MemberUpdateResponseDto.builder()
                 .memberId(updatedMember.getId())
                 .loginId(updatedMember.getLoginId())
@@ -137,7 +135,6 @@ public class MemberService {
                 .fitnessEagerness(updatedMember.getFitnessEagerness())
                 .fitnessObjective(updatedMember.getFitnessObjective())
                 .fitnessKind(updatedMember.getFitnessKind())
-                .specUpdateResult(specUpdateResult)
                 .build();
     }
 
@@ -170,8 +167,7 @@ public class MemberService {
                 .companionStyle(member.getCompanionStyle())
                 .fitnessEagerness(member.getFitnessEagerness())
                 .fitnessObjective(member.getFitnessObjective())
-                .fitnessKind(member.getFitnessKind())
-                .specs(member.getSpecs().stream().map(SpecDto::of).toList()) // TODO: Eager Fetch를 해야 하는 게 더 나을지 고민해 보기
+                .fitnessKind(member.getFitnessKind()) // TODO: Eager Fetch를 해야 하는 게 더 나을지 고민해 보기
                 .build();
     }
 }

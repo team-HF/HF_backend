@@ -24,8 +24,6 @@ public record MemberUpdateResponseDto(
         CompanionStyle companionStyle,
         FitnessEagerness fitnessEagerness,
         FitnessObjective fitnessObjective,
-        FitnessKind fitnessKind,
-
-        SpecUpdateResponseDto specUpdateResult
+        FitnessKind fitnessKind
 ) {
 }

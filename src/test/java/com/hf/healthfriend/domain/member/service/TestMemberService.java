@@ -64,7 +64,6 @@ class TestMemberService {
                 .fitnessEagerness(FitnessEagerness.LAZY)
                 .fitnessObjective(FitnessObjective.RUNNING)
                 .fitnessKind(FitnessKind.FUNCTIONAL)
-                .specs(getSampleSpecs())
                 .build();
 
         log.info("requestDto={}", requestDto);
@@ -89,7 +88,6 @@ class TestMemberService {
         assertThat(responseDto.getFitnessEagerness()).isEqualTo(FitnessEagerness.LAZY);
         assertThat(responseDto.getFitnessObjective()).isEqualTo(FitnessObjective.RUNNING);
         assertThat(responseDto.getFitnessKind()).isEqualTo(FitnessKind.FUNCTIONAL);
-        assertThat(responseDto.getSpecIds()).size().isEqualTo(requestDto.getSpecs().size());
 
         Member member = this.memberJpaRepository.findByEmail("sample@gmail.com").orElseThrow();
 
@@ -233,7 +231,6 @@ class TestMemberService {
                 .fitnessEagerness(FitnessEagerness.LAZY)
                 .fitnessObjective(FitnessObjective.RUNNING)
                 .fitnessKind(FitnessKind.FUNCTIONAL)
-                .specs(getSampleSpecs())
                 .build();
 
         LocalDateTime beforeExecution = LocalDateTime.now();
@@ -255,7 +252,6 @@ class TestMemberService {
         assertThat(result.getFitnessEagerness()).isEqualTo(requestDto.getFitnessEagerness());
         assertThat(result.getFitnessObjective()).isEqualTo(requestDto.getFitnessObjective());
         assertThat(result.getFitnessKind()).isEqualTo(requestDto.getFitnessKind());
-        assertThat(result.getSpecs()).size().isEqualTo(requestDto.getSpecs().size());
     }
 
     @DisplayName("findMember - 찾으려는 Member가 없을 경우 MemberNotFoundException 발생")
