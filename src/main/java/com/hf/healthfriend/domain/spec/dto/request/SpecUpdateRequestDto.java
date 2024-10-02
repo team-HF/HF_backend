@@ -23,13 +23,15 @@ public class SpecUpdateRequestDto {
 
     @AssertTrue(message = "specUpdateType이 INSERT가 아닐 경우 specId는 Not Null")
     private boolean isSpecIdNotNullWhenSpecUpdateTimeIsNotINSERT() {
-        return this.specUpdateType != SpecUpdateType.INSERT
-                && this.specId != null;
+        System.out.println(this.specUpdateType);
+        System.out.println(this.specId);
+        return this.specUpdateType == SpecUpdateType.INSERT
+                || this.specId != null;
     }
 
     @AssertTrue(message = "specUpdateType이 Delete가 아닐 경우 spec은 Not Null")
     private boolean isSpecNotNullWhenspecUpdateTimeIsNotDELETE() {
-        return this.specUpdateType != SpecUpdateType.DELETE
-                && this.spec != null;
+        return this.specUpdateType == SpecUpdateType.DELETE
+                || this.spec != null;
     }
 }

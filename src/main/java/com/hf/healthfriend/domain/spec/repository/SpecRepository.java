@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface SpecRepository extends JpaRepository<Spec, Long> {
 
@@ -27,4 +28,12 @@ public interface SpecRepository extends JpaRepository<Spec, Long> {
                 ANd s.isDeleted = FALSE
             """)
     List<Spec> findByMemberId(@Param("memberId") Long memberId);
+
+    @Query("""
+            SELECT s
+            FROM Spec s
+            WHERE s.specId IN (:specIds)
+                AND s.isDeleted = FALSE
+            """)
+    List<Spec> findBySpecIdsIn(@Param("specIds") Set<Long> specIds);
 }
