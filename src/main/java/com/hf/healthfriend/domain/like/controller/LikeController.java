@@ -2,7 +2,8 @@ package com.hf.healthfriend.domain.like.controller;
 
 import com.hf.healthfriend.domain.like.controller.schema.LikeDtoListSchema;
 import com.hf.healthfriend.domain.like.controller.schema.LikeDtoSchema;
-import com.hf.healthfriend.domain.like.dto.LikeDto;
+import com.hf.healthfriend.domain.like.dto.CommentLikeDto;
+import com.hf.healthfriend.domain.like.dto.PostLikeDto;
 import com.hf.healthfriend.domain.like.service.LikeService;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
 import com.hf.healthfriend.global.spec.BasicErrorResponse;
@@ -28,10 +29,10 @@ public class LikeController {
 
     @PostMapping("/posts/{postId}/likes")
     @Operation(
-            summary = "좋아요 추가",
+            summary = "글 좋아요 추가",
             responses = {
                     @ApiResponse(
-                            description = "좋아요 추가 성공",
+                            description = "글 좋아요 추가 성공",
                             responseCode = "201",
                             content = @Content(schema = @Schema(implementation = LongTypeSchema.class))
                     ),
@@ -42,9 +43,9 @@ public class LikeController {
                     )
             }
     )
-    public ResponseEntity<ApiBasicResponse<Long>> addLike(@PathVariable("postId") Long postId,
+    public ResponseEntity<ApiBasicResponse<Long>> addPostLike(@PathVariable("postId") Long postId,
                                                           @RequestParam("memberId") Long memberId) {
-        Long generatedLikeId = this.likeService.addLike(memberId, postId);
+        Long generatedLikeId = this.likeService.addPostLike(memberId, postId);
         return new ResponseEntity<>(
                 ApiBasicResponse.of(generatedLikeId, HttpStatus.CREATED),
                 HttpStatus.CREATED
@@ -81,8 +82,8 @@ public class LikeController {
                     )
             }
     )
-    public ResponseEntity<ApiBasicResponse<List<LikeDto>>> getLikesOfSpecificPost(@PathVariable("postId") Long postId) {
-        List<LikeDto> responseBody = this.likeService.getLikeOfPost(postId);
+    public ResponseEntity<ApiBasicResponse<List<PostLikeDto>>> getLikesOfSpecificPost(@PathVariable("postId") Long postId) {
+        List<PostLikeDto> responseBody = this.likeService.getLikeOfPost(postId);
         return ResponseEntity.ok(
                 ApiBasicResponse.of(
                         responseBody,
@@ -111,9 +112,9 @@ public class LikeController {
         );
     }
 
-    @GetMapping("/members/{memberId}/likes")
+    @GetMapping("/members/{memberId}/{postId}/likes")
     @Operation(
-            summary = "특정 회원이 남긴 좋아요 조회",
+            summary = "특정 회원이 글에 남긴 좋아요 조회",
             responses = {
                     @ApiResponse(
                             description = "조회 성공",
@@ -121,8 +122,8 @@ public class LikeController {
                     )
             }
     )
-    public ResponseEntity<ApiBasicResponse<List<LikeDto>>> getLikesOfSingleMember(@PathVariable("memberId") Long memberId) {
-        List<LikeDto> responseDto = this.likeService.getLikeOfMember(memberId);
+    public ResponseEntity<ApiBasicResponse<List<PostLikeDto>>> getPostLikesOfSingleMember(@PathVariable("memberId") Long memberId) {
+        List<PostLikeDto> responseDto = this.likeService.getPostLikeOfMember(memberId);
         return ResponseEntity.ok(
                 ApiBasicResponse.of(
                         responseDto,
@@ -153,4 +154,52 @@ public class LikeController {
                 ApiBasicResponse.of(HttpStatus.OK)
         );
     }
+
+    @PostMapping("/comments/{commentId}/likes")
+    @Operation(
+            summary = "댓글 좋아요 추가",
+            responses = {
+                    @ApiResponse(
+                            description = "댓글 좋아요 추가 성공",
+                            responseCode = "201",
+                            content = @Content(schema = @Schema(implementation = LongTypeSchema.class))
+                    ),
+                    @ApiResponse(
+                            description = "commentId 혹은 memberId가 없을 경우/좋아요 충복 추가 시 400 응답",
+                            responseCode = "400",
+                            content = @Content(schema = @Schema(implementation = BasicErrorResponse.class))
+                    )
+            }
+    )
+    public ResponseEntity<ApiBasicResponse<Long>> addCommentLike(@PathVariable("commentId") Long commentId,
+                                                              @RequestParam("memberId") Long memberId) {
+        Long generatedLikeId = this.likeService.addCommentLike(memberId, commentId);
+        return new ResponseEntity<>(
+                ApiBasicResponse.of(generatedLikeId, HttpStatus.CREATED),
+                HttpStatus.CREATED
+        );
+    }
+
+    @GetMapping("/comments/{commentId}/likes")
+    @Operation(
+            summary = "특정 댓글에 남겨진 좋아요 조회",
+            responses = {
+                    @ApiResponse(
+                            description = "특정 댓글에 남겨진 좋아요 목록 조회 성공",
+                            responseCode = "200"
+//                            content = @Content(schema = @Schema(implementation = LikeDtoListSchema.class))
+                    )
+            }
+    )
+    public ResponseEntity<ApiBasicResponse<List<CommentLikeDto>>> getLikesOfSpecificComment(@PathVariable("commentId") Long commentId) {
+        List<CommentLikeDto> responseBody = this.likeService.getLikeOfComment(commentId);
+        return ResponseEntity.ok(
+                ApiBasicResponse.of(
+                        responseBody,
+                        HttpStatus.OK
+                )
+        );
+    }
+
+
 }

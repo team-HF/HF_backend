@@ -30,8 +30,8 @@ public class LikeErrorControllerAdvice {
         );
     }
 
-    @ExceptionHandler(DuplicateLikeException.class)
-    public ResponseEntity<BasicErrorResponse> duplicateLikeException(DuplicateLikeException e) {
+    @ExceptionHandler(DuplicatePostLikeException.class)
+    public ResponseEntity<BasicErrorResponse> duplicateLikeException(DuplicatePostLikeException e) {
         log.error("Duplicate like attemption to Post={} by Member{}", e.getPostId(), e.getMemberId());
         return new ResponseEntity<>(
                 BasicErrorResponse.builder()

@@ -2,7 +2,7 @@ package com.hf.healthfriend.domain.like.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hf.healthfriend.domain.like.dto.LikeDto;
+import com.hf.healthfriend.domain.like.dto.PostLikeDto;
 import com.hf.healthfriend.domain.like.exception.LikeErrorControllerAdvice;
 import com.hf.healthfriend.domain.like.service.LikeService;
 import com.hf.healthfriend.domain.member.constant.*;
@@ -107,7 +107,7 @@ class TestLikeControllerMockMvc {
 
     @DisplayName("POST /hr/posts/{postId}/likes - 좋아요 추가 성공")
     @Test
-    void addLike_success() throws Exception {
+    void addPostLike_success() throws Exception {
         String responseBodyAsString = this.mockMvc.perform(
                 MockMvcRequestBuilders.post("/hr/posts/{postId}/likes", this.samplePosts.get("post1").getPostId())
                         .queryParam("memberId", String.valueOf(this.sampleMembers.get("member3").getId()))
@@ -121,7 +121,7 @@ class TestLikeControllerMockMvc {
     @DisplayName("POST /hr/posts/{postId}/likes - 좋아요 중복 추가 시 400 Bad Request")
     @Test
     void addDuplicateLikes_expect400BadRequest() throws Exception {
-        this.likeService.addLike(this.sampleMembers.get("member1").getId(), this.samplePosts.get("post1").getPostId());
+        this.likeService.addPostLike(this.sampleMembers.get("member1").getId(), this.samplePosts.get("post1").getPostId());
 
         this.mockMvc.perform(
                 MockMvcRequestBuilders.post("/hr/posts/{postId}/likes", this.samplePosts.get("post1").getPostId())
@@ -163,7 +163,7 @@ class TestLikeControllerMockMvc {
     @DisplayName("GET /hr/posts/{postId}/likes - 회원이 해당 글에 좋아요를 남겼는지 여부 조회")
     @Test
     void doesMemberLikeThePost_success() throws Exception {
-        this.likeService.addLike(
+        this.likeService.addPostLike(
                 this.sampleMembers.get("member1").getId(),
                 this.samplePosts.get("post1").getPostId()
         );
@@ -183,15 +183,15 @@ class TestLikeControllerMockMvc {
     @Test
     void getLikesInAPost() throws Exception {
         // Given
-        this.likeService.addLike(
+        this.likeService.addPostLike(
                 this.sampleMembers.get("member1").getId(),
                 this.samplePosts.get("post1").getPostId()
         );
-        this.likeService.addLike(
+        this.likeService.addPostLike(
                 this.sampleMembers.get("member2").getId(),
                 this.samplePosts.get("post1").getPostId()
         );
-        this.likeService.addLike(
+        this.likeService.addPostLike(
                 this.sampleMembers.get("member3").getId(),
                 this.samplePosts.get("post1").getPostId()
         );
@@ -201,14 +201,14 @@ class TestLikeControllerMockMvc {
                 MockMvcRequestBuilders.get("/hr/posts/{postId}/likes", this.samplePosts.get("post1").getPostId())
         ).andReturn().getResponse().getContentAsString();
 
-        ApiBasicResponse<List<LikeDto>> responseBody =
-                this.objectMapper.readValue(responseBodyAsString, new TypeReference<ApiBasicResponse<List<LikeDto>>>() {
+        ApiBasicResponse<List<PostLikeDto>> responseBody =
+                this.objectMapper.readValue(responseBodyAsString, new TypeReference<ApiBasicResponse<List<PostLikeDto>>>() {
                 });
 
         assertThat(
                 responseBody.getContent()
                         .stream()
-                        .map(LikeDto::getMemberId)
+                        .map(PostLikeDto::getMemberId)
                         .toList())
 
                 .containsExactlyInAnyOrder(
@@ -223,15 +223,15 @@ class TestLikeControllerMockMvc {
     @Test
     void getLikesCount() throws Exception {
         // Given
-        this.likeService.addLike(
+        this.likeService.addPostLike(
                 this.sampleMembers.get("member1").getId(),
                 this.samplePosts.get("post1").getPostId()
         );
-        this.likeService.addLike(
+        this.likeService.addPostLike(
                 this.sampleMembers.get("member2").getId(),
                 this.samplePosts.get("post1").getPostId()
         );
-        this.likeService.addLike(
+        this.likeService.addPostLike(
                 this.sampleMembers.get("member3").getId(),
                 this.samplePosts.get("post1").getPostId()
         );
@@ -252,15 +252,15 @@ class TestLikeControllerMockMvc {
     @Test
     void getLikesOfSpecificMember() throws Exception {
         // Given
-        this.likeService.addLike(
+        this.likeService.addPostLike(
                 this.sampleMembers.get("member1").getId(),
                 this.samplePosts.get("post1").getPostId()
         );
-        this.likeService.addLike(
+        this.likeService.addPostLike(
                 this.sampleMembers.get("member2").getId(),
                 this.samplePosts.get("post1").getPostId()
         );
-        this.likeService.addLike(
+        this.likeService.addPostLike(
                 this.sampleMembers.get("member1").getId(),
                 this.samplePosts.get("post2").getPostId()
         );
@@ -293,7 +293,7 @@ class TestLikeControllerMockMvc {
     @DisplayName("DELETE /hr/likes/{likeId} - 좋아요 취소")
     @Test
     void cancelLike() throws Exception {
-        Long generatedId = this.likeService.addLike(
+        Long generatedId = this.likeService.addPostLike(
                 this.sampleMembers.get("member1").getId(),
                 this.samplePosts.get("post1").getPostId()
         );
