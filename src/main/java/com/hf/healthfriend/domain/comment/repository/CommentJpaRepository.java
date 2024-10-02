@@ -1,6 +1,7 @@
 package com.hf.healthfriend.domain.comment.repository;
 
 import com.hf.healthfriend.domain.comment.entity.Comment;
+import com.hf.healthfriend.domain.comment.repository.querydsl.CommentCustomRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -8,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface CommentJpaRepository extends JpaRepository<Comment, Long> {
+public interface CommentJpaRepository extends JpaRepository<Comment, Long>, CommentCustomRepository {
 
     @Query("""
             SELECT c

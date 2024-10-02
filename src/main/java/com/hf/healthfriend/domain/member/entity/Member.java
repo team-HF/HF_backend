@@ -17,6 +17,8 @@ import java.util.List;
 
 @Entity(name = "members")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
+@Builder
 @Setter
 @Getter
 @ToString

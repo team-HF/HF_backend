@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.comment.controller;
 
+import com.hf.healthfriend.domain.comment.constant.SortType;
 import com.hf.healthfriend.domain.comment.dto.CommentDto;
 import com.hf.healthfriend.domain.comment.dto.request.CommentCreationRequestDto;
 import com.hf.healthfriend.domain.comment.dto.response.CommentCreationResponseDto;
@@ -8,6 +9,7 @@ import com.hf.healthfriend.domain.comment.service.CommentService;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,8 +68,9 @@ public class CommentController {
                     @ApiResponse(responseCode = "404", description = "{postId}에 해당하는 댓글이 없을 경우")
             }
     )
-    public ResponseEntity<ApiBasicResponse<List<CommentDto>>> findCommentsOfSpecificPost(@PathVariable("postId") long postId) {
-        List<CommentDto> result = this.commentService.getCommentsOfPost(postId);
+    public ResponseEntity<ApiBasicResponse<List<CommentDto>>> findCommentsOfSpecificPost(@PathVariable("postId") long postId,
+                                                                                         @RequestParam @Nullable SortType sortType) {
+        List<CommentDto> result = this.commentService.getCommentsOfPost(postId,sortType);
         log.info("result={}", result);
         return ResponseEntity.ok(ApiBasicResponse.of(result, HttpStatus.OK));
     }
