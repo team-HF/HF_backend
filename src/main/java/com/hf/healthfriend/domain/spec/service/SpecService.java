@@ -68,6 +68,9 @@ public class SpecService {
     }
 
     public SpecUpdateResponseDto updateSpecsOfMember(Long memberId, @Valid List<SpecUpdateRequestDto> specUpdateRequestDtos) {
+        if (specUpdateRequestDtos == null) {
+            return new SpecUpdateResponseDto(List.of(), List.of(), List.of());
+        }
         List<Long> insertedSpecIds = addSpec(memberId, specUpdateRequestDtos.stream()
                 .filter((dto) -> dto.getSpecUpdateType() == SpecUpdateType.INSERT)
                 .map(SpecUpdateRequestDto::getSpec)
