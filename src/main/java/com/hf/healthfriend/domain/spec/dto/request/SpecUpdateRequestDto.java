@@ -23,8 +23,6 @@ public class SpecUpdateRequestDto {
 
     @AssertTrue(message = "specUpdateType이 INSERT가 아닐 경우 specId는 Not Null")
     private boolean isSpecIdNotNullWhenSpecUpdateTimeIsNotINSERT() {
-        System.out.println(this.specUpdateType);
-        System.out.println(this.specId);
         return this.specUpdateType == SpecUpdateType.INSERT
                 || this.specId != null;
     }

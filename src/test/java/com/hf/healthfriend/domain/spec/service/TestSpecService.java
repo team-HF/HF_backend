@@ -306,5 +306,12 @@ class TestSpecService {
         List<SpecDto> findSpecs = this.specService.getSpecsOfMember(this.member.getId());
 
         assertThat(findSpecs).size().isEqualTo(5);
+
+        assertThat(findSpecs.stream().map(SpecDto::getSpecId).toList())
+                .contains(result.insertedSpecIds().toArray(new Long[0]));
+        assertThat(findSpecs.stream().map(SpecDto::getSpecId).toList())
+                .contains(result.updatedSpecIds().toArray(new Long[0]));
+        assertThat(findSpecs.stream().map(SpecDto::getSpecId).toList())
+                .doesNotContain(result.deletedSpecIds().toArray(new Long[0]));
     }
 }
