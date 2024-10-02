@@ -25,7 +25,8 @@ public interface SpecRepository extends JpaRepository<Spec, Long> {
             SELECT s
             FROM Spec s
             WHERE s.member.id = :memberId
-                ANd s.isDeleted = FALSE
+                AND s.isDeleted = FALSE
+            ORDER BY s.startDate DESC, s.endDate DESC
             """)
     List<Spec> findByMemberId(@Param("memberId") Long memberId);
 
