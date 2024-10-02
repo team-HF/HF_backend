@@ -58,6 +58,15 @@ public class Like {
         this.likeType = likeType;
     }
 
+    public Like(Long likeId,Member member, Comment comment, LikeType likeType) {
+        this.likeId = likeId;
+        this.member = member;
+        this.comment = comment;
+        this.likeType = likeType;
+    }
+
+
+
     public void uncancel() {
         this.canceled = false;
     }

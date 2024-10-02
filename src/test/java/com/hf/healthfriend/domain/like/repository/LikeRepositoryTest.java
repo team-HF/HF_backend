@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.like.repository;
 
+import com.hf.healthfriend.domain.like.constant.LikeType;
 import com.hf.healthfriend.domain.like.entity.Like;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.entity.Member;
@@ -73,10 +74,10 @@ class LikeRepositoryTest {
         this.savedPost1 = this.postRepository.save(generateSamplePost(member1));
         this.savedPost2 = this.postRepository.save(generateSamplePost(member2));
 
-        this.likeMember1_Post1 = this.likeRepository.save(new Like(member1, this.savedPost1));
-        this.likeMember2_Post1 = this.likeRepository.save(new Like(member2, this.savedPost1));
-        this.likeMember3_Post1 = this.likeRepository.save(new Like(member3, this.savedPost1));
-        this.likeMember3_Post2 = this.likeRepository.save(new Like(member3, this.savedPost2));
+        this.likeMember1_Post1 = this.likeRepository.save(new Like(member1, this.savedPost1, LikeType.POST));
+        this.likeMember2_Post1 = this.likeRepository.save(new Like(member2, this.savedPost1,LikeType.POST));
+        this.likeMember3_Post1 = this.likeRepository.save(new Like(member3, this.savedPost1,LikeType.POST));
+        this.likeMember3_Post2 = this.likeRepository.save(new Like(member3, this.savedPost2,LikeType.POST));
     }
 
     private Member generateSampleMember(String email, String nickname) {
@@ -105,11 +106,11 @@ class LikeRepositoryTest {
     @DisplayName("findByMemberId - 결과가 있음")
     @Test
     void findByMemberId_hasResultMoreThanOne() {
-        List<Like> result = this.likeRepository.findByMemberId(member1.getId());
+        List<Like> result = this.likeRepository.findPostLikeByMemberId(member1.getId());
         assertThat(result).size().isEqualTo(1);
         assertThat(result.stream().map(Like::getLikeId).toList()).containsExactly(this.likeMember1_Post1.getLikeId());
 
-        List<Like> result2 = this.likeRepository.findByMemberId(member3.getId());
+        List<Like> result2 = this.likeRepository.findPostLikeByMemberId(member3.getId());
         assertThat(result2).size().isEqualTo(2);
         assertThat(result2.stream().map(Like::getLikeId).toList())
                 .containsExactlyInAnyOrder(this.likeMember3_Post1.getLikeId(), this.likeMember3_Post2.getLikeId());
@@ -120,7 +121,7 @@ class LikeRepositoryTest {
     void findByMemberId_ignoreCanceledLike() {
         this.likeMember3_Post1.cancel();
 
-        List<Like> result = this.likeRepository.findByMemberId(this.member3.getId());
+        List<Like> result = this.likeRepository.findPostLikeByMemberId(this.member3.getId());
         assertThat(result).size().isEqualTo(1);
         assertThat(result.stream().map(Like::getLikeId).toList())
                 .doesNotContain(likeMember3_Post1.getLikeId());
