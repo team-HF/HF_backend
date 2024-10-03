@@ -9,6 +9,7 @@ import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
 import com.hf.healthfriend.domain.spec.dto.SpecDto;
+import com.hf.healthfriend.testutil.SampleEntityGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,14 +25,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @Slf4j
 @SpringBootTest
@@ -264,14 +265,10 @@ class TestMemberService {
     static Stream<MemberUpdateRequestDto> updateMember_success() {
         return Stream.of(
                 MemberUpdateRequestDto.builder()
-                        .role(Role.ROLE_ADMIN)
+                        .location("서울시 구로구")
                         .build(),
                 MemberUpdateRequestDto.builder()
-                        .birthDate(LocalDate.of(1995, Month.APRIL, 17))
-                        .build(),
-                MemberUpdateRequestDto.builder()
-                        .nickname("으아아아아")
-                        .gender(Gender.FEMALE)
+                        .introduction("그하하하하")
                         .build(),
                 MemberUpdateRequestDto.builder()
                         .introduction("수정된 한 줄 소개")
@@ -280,10 +277,6 @@ class TestMemberService {
                 MemberUpdateRequestDto.builder()
                         .build(),
                 MemberUpdateRequestDto.builder()
-                        .role(Role.ROLE_ADMIN)
-                        .nickname("바뀐닉네임")
-                        .birthDate(LocalDate.of(2001, Month.AUGUST, 16))
-                        .gender(Gender.FEMALE)
                         .introduction("바뀐 소개")
                         .fitnessLevel(FitnessLevel.BEGINNER)
                         .companionStyle(CompanionStyle.SMALL)
@@ -292,16 +285,13 @@ class TestMemberService {
                         .fitnessKind(FitnessKind.HIGH_STRESS)
                         .build(),
                 MemberUpdateRequestDto.builder()
-                        .role(Role.ROLE_ADMIN)
-                        .nickname("샘플닉네임")
-                        .birthDate(LocalDate.now())
-                        .gender(Gender.MALE)
                         .introduction("안녕하세요. 뚱입니다.")
                         .fitnessLevel(FitnessLevel.ADVANCED)
                         .companionStyle(CompanionStyle.GROUP)
                         .fitnessEagerness(FitnessEagerness.LAZY)
                         .fitnessObjective(FitnessObjective.RUNNING)
                         .fitnessKind(FitnessKind.FUNCTIONAL)
+                        .phoneNumber("010-1234-1234")
                         .build()
         );
     }
@@ -310,20 +300,8 @@ class TestMemberService {
     @MethodSource
     @ParameterizedTest
     void updateMember_success(MemberUpdateRequestDto updateDto) {
-        MemberCreationRequestDto requestDto = MemberCreationRequestDto.builder()
-                .id("sample@gmail.com")
-                .nickname("샘플닉네임")
-                .birthDate(LocalDate.now())
-                .gender(Gender.MALE)
-                .introduction("안녕하세요. 뚱입니다.")
-                .fitnessLevel(FitnessLevel.ADVANCED)
-                .companionStyle(CompanionStyle.GROUP)
-                .fitnessEagerness(FitnessEagerness.LAZY)
-                .fitnessObjective(FitnessObjective.RUNNING)
-                .fitnessKind(FitnessKind.FUNCTIONAL)
-                .build();
-
-        MemberCreationResponseDto creationDto = this.memberService.createMember(requestDto);
+        Member sampleMember = SampleEntityGenerator.generateSampleMember("sample@gmail.com");
+        this.memberJpaRepository.save(sampleMember);
 
         Map<String, Object> updateValueMap = Arrays.stream(MemberUpdateRequestDto.class.getDeclaredMethods())
                 .filter((m) -> m.getName().startsWith("get"))
@@ -348,9 +326,13 @@ class TestMemberService {
 
         MemberDto beforeUpdate = this.memberService.findMemberByEmail("sample@gmail.com");
 
-        this.memberService.updateMember(creationDto.getMemberId(), updateDto);
+        this.memberService.updateMember(sampleMember.getId(), updateDto);
 
         MemberDto updatedMember = this.memberService.findMemberByEmail("sample@gmail.com");
+
+        log.info("updateDto={}", updateDto);
+        log.info("beforeUpdate={}", beforeUpdate);
+        log.info("updatedMember={}", updatedMember);
 
         for (Method getter : Arrays.stream(MemberDto.class.getDeclaredMethods()).filter((m) -> m.getName().startsWith("get")).toArray(Method[]::new)) {
             String fieldName = getterToFieldName(getter.getName());
