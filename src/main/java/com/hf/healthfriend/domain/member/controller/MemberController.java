@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -82,7 +83,7 @@ public class MemberController {
             )
     })
     public ResponseEntity<ApiBasicResponse<MemberCreationResponseDto>> createMember(
-            @ModelAttribute MemberCreationRequestDto requestBody) throws URISyntaxException {
+            @ModelAttribute @Valid MemberCreationRequestDto requestBody) throws URISyntaxException {
         log.info("Request Body:\n{}", requestBody);
 
         MemberCreationResponseDto result = this.memberService.createMember(requestBody);

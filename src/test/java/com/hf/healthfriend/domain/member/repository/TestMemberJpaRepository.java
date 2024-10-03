@@ -2,6 +2,7 @@ package com.hf.healthfriend.domain.member.repository;
 
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.entity.Member;
+import com.hf.healthfriend.testutil.SampleEntityGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,18 +28,16 @@ public class TestMemberJpaRepository {
     @DisplayName("save - 기본값만 가지고 제대로 Save 되는지 확인")
     @Test
     void save() {
-        Member member = new Member("sample-member", "sample@gmail.com", null);
-        setRequiredFieldsOfMemberWithWeirdData(member);
+        Member member = SampleEntityGenerator.generateSampleMember("sample@gmail.com");
         assertThatNoException().isThrownBy(() -> this.memberJpaRepository.save(member));
     }
 
     @DisplayName("findById - 성공 예상")
     @Test
     void findById_successExpected() {
-        String loginId = "sample-member";
+        String loginId = "sample@gmail.com";
 
-        Member member = new Member(loginId, "sample@gmail.com", null);
-        setRequiredFieldsOfMemberWithWeirdData(member);
+        Member member = SampleEntityGenerator.generateSampleMember(loginId);
         this.memberJpaRepository.save(member);
 
         Member findMember = this.memberJpaRepository.findByLoginId(loginId).orElseThrow(NoSuchElementException::new);
@@ -55,8 +54,7 @@ public class TestMemberJpaRepository {
     void findById_nothingWillBeFetched() {
         String loginId = "sample-member";
 
-        Member member = new Member(loginId, "sample@gmail.com", null);
-        setRequiredFieldsOfMemberWithWeirdData(member);
+        Member member = SampleEntityGenerator.generateSampleMember(loginId);
         this.memberJpaRepository.save(member);
 
         Optional<Member> findMemberOp = this.memberJpaRepository.findByLoginId(loginId + "SUFFIX");

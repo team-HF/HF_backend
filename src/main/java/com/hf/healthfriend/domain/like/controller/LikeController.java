@@ -112,7 +112,7 @@ public class LikeController {
         );
     }
 
-    @GetMapping("/members/{memberId}/{postId}/likes")
+    @GetMapping("/members/{memberId}/likes")
     @Operation(
             summary = "특정 회원이 글에 남긴 좋아요 조회",
             responses = {

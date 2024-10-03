@@ -10,6 +10,7 @@ import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -69,16 +70,9 @@ public class MemberExceptionHandlerControllerAdvice {
                 );
     }
 
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<BasicErrorResponse> validationException(ValidationException e) {
-        if (e instanceof ConstraintViolationException constraintViolationException) {
-            log.error("""
-                    ConstraintViolationException occurred.
-                    ConstraintViolations={}
-                    """, constraintViolationException.getConstraintViolations(), e);
-        } else {
-            log.error("ValidationException occurred", e);
-        }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<BasicErrorResponse> validationException(MethodArgumentNotValidException e) {
+        log.error("ValidationException occurred", e);
         return new ResponseEntity<>(
                 BasicErrorResponse.builder()
                         .errorCode(MemberErrorCode.MEMBER_CREATION_VALIDATION_ERROR.code())
