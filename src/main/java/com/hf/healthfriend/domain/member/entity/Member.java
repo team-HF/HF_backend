@@ -17,7 +17,7 @@ import java.util.List;
 
 @Entity(name = "members")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Setter
+@Setter // TODO: Setter를 없애고 엔티티 수정 코드는 udpate~ 메소드로 대체해야 함
 @Getter
 @ToString
 public class Member implements UserDetails {
@@ -34,6 +34,9 @@ public class Member implements UserDetails {
     @Column(name = "role")
     private Role role = Role.ROLE_MEMBER;
 
+    @Column(name = "name")
+    private String name;
+
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
@@ -47,8 +50,17 @@ public class Member implements UserDetails {
     @Column(name = "nickname")
     private String nickname;
 
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
+    @Column(name = "is_phone_authenticated")
+    private boolean isPhoneAuthenticated = false;
+
     @Column(name = "profile_url")
     private String profileImageUrl;
+
+    @Column(name = "location")
+    private String location;
 
     @Column(name = "birth_date")
     @Temporal(TemporalType.DATE)
@@ -80,6 +92,9 @@ public class Member implements UserDetails {
     @Column(name = "fitness_kind")
     @Enumerated(EnumType.STRING)
     private FitnessKind fitnessKind;
+
+    @Column(name = "is_deleted")
+    private boolean isDeleted = false;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
@@ -114,5 +129,9 @@ public class Member implements UserDetails {
     @Override
     public String getUsername() {
         return String.valueOf(this.id);
+    }
+
+    public void delete() {
+        this.isDeleted = true;
     }
 }
