@@ -87,27 +87,9 @@ public class PostService {
         post.delete();
     }
 
-    public List<PostListObject> getList(int pageNumber, FitnessLevel fitnessLevel, PostCategory postCategory) {
+    public List<PostListObject> getList(int pageNumber, FitnessLevel fitnessLevel, PostCategory postCategory, String keyword) {
         Pageable pageable = PageRequest.of(pageNumber - 1, 10);
-        return postRepository.getList(fitnessLevel, postCategory, pageable);
-    }
-
-    public List<PostListObject> getsearchedList(int pageNumber, String keyword) {
-        Pageable pageable = PageRequest.of(pageNumber-1, 10,
-                Sort.by("creationTime").descending());
-        Page<PostListObject> postList = postRepository.findByTitleOrContentContaining(keyword,pageable)
-                .map(post -> PostListObject.builder()
-                        .postId(post.getPostId())
-                        .title(post.getTitle())
-                        .category(post.getCategory().name())
-                        .viewCount(post.getViewCount())
-                        .creationTime(post.getCreationTime())
-                        .commentCount(commentJpaRepository.countByPost_PostId(post.getPostId()))
-                        .content(getSentenceContainKeyword(keyword,post.getContent()))
-                        .fitnessLevel(post.getMember().getFitnessLevel().name())
-                        .likeCount(post.getLikes().size())
-                        .build());
-        return postList.getContent();
+        return postRepository.getList(fitnessLevel, postCategory, keyword, pageable);
     }
 
     public String getSentenceContainKeyword(String keyword, String content){
