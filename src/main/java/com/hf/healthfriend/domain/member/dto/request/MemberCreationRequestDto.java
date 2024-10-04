@@ -48,7 +48,4 @@ public class MemberCreationRequestDto {
 
     @Schema(description = "주로 하고 있는 운동은? - 고강도 운동 위주 = HIGH_STRESS / 기능성 피트니스 위주 = FUNCTIONAL")
     private FitnessKind fitnessKind;
-
-    @Schema(description = "경력 및 수상이력 목록")
-    private List<SpecDto> specs;
 }

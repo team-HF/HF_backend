@@ -1,6 +1,7 @@
 package com.hf.healthfriend.domain.spec.entity;
 
 import com.hf.healthfriend.domain.member.entity.Member;
+import com.hf.healthfriend.domain.spec.dto.SpecDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -59,6 +60,14 @@ public class Spec {
         this.isCurrent = isCurrent;
         this.title = title;
         this.description = description;
+    }
+
+    public void update(SpecDto specDto) {
+        this.startDate = specDto.getStartDate();
+        this.endDate = specDto.getEndDate();
+        this.isCurrent = specDto.isCurrent();
+        this.title = specDto.getTitle();
+        this.description = specDto.getDescription();
     }
 
     public void update(LocalDate startDate, LocalDate endDate, boolean isCurrent, String title, String description) {

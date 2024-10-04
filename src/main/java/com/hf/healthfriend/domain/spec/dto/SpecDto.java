@@ -15,6 +15,7 @@ import java.time.LocalDate;
 @Getter
 @ToString
 public class SpecDto {
+    private Long specId;
 
     @NotNull
     @PastOrPresent
@@ -36,8 +37,17 @@ public class SpecDto {
     @Schema(description = "경력 혹은 수상 이력 내용. 빈 문자열일 수 있지만 null일 수는 없음")
     private String description;
 
+    public SpecDto(@NotNull LocalDate startDate, LocalDate endDate, boolean isCurrent, String title, @NotNull String description) {
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.isCurrent = isCurrent;
+        this.title = title;
+        this.description = description;
+    }
+
     public static SpecDto of(Spec entity) {
         return new SpecDto(
+                entity.getSpecId(),
                 entity.getStartDate(),
                 entity.getEndDate(),
                 entity.isCurrent(),

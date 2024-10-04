@@ -4,12 +4,14 @@ import com.hf.healthfriend.domain.member.dto.MemberDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
+import com.hf.healthfriend.domain.member.dto.response.MemberUpdateResponseDto;
 import com.hf.healthfriend.domain.member.service.MemberService;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
 import com.hf.healthfriend.global.spec.ApiErrorResponse;
 import com.hf.healthfriend.global.spec.schema.MemberCreationResponseSchema;
 import com.hf.healthfriend.global.spec.schema.MemberResponseSchema;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -119,12 +121,14 @@ public class MemberController {
     }
 
     @PatchMapping(value = "/{memberId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = "application/json")
-    @Operation(summary = "회원 업데이트")
+    @Operation(
+            summary = "회원 업데이트"
+    )
     @ApiResponses({
             @ApiResponse(
                     description = "회원 업데이트 성공",
                     responseCode = "200",
-                    content = @Content(schema = @Schema(implementation = MemberResponseSchema.class))
+                    content = @Content(schema = @Schema(implementation = MemberUpdateResponseDto.class))
             ),
             @ApiResponse(
                     description = "없는 회원 검색 / Error Code: 200",
@@ -143,9 +147,9 @@ public class MemberController {
                     )
             )
     })
-    public ResponseEntity<ApiBasicResponse<MemberDto>> updateMember(@PathVariable("memberId") Long memberId,
-                                                                    @ModelAttribute MemberUpdateRequestDto dto) {
-        MemberDto resultDto = this.memberService.updateMember(memberId, dto);
+    public ResponseEntity<ApiBasicResponse<MemberUpdateResponseDto>> updateMember(@PathVariable("memberId") Long memberId,
+                                                                                  @ModelAttribute MemberUpdateRequestDto dto) {
+        MemberUpdateResponseDto resultDto = this.memberService.updateMember(memberId, dto);
         return ResponseEntity.ok(ApiBasicResponse.of(resultDto, HttpStatus.OK));
     }
 }

@@ -4,12 +4,14 @@ import com.hf.healthfriend.domain.member.dto.MemberDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
+import com.hf.healthfriend.domain.member.dto.response.MemberUpdateResponseDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.DuplicateMemberCreationException;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
 import com.hf.healthfriend.domain.spec.dto.SpecDto;
+import com.hf.healthfriend.domain.spec.dto.response.SpecUpdateResponseDto;
 import com.hf.healthfriend.domain.spec.service.SpecService;
 import com.hf.healthfriend.global.util.file.FileUrlResolver;
 import com.hf.healthfriend.global.util.file.MultipartFileUploader;
@@ -64,8 +66,7 @@ public class MemberService {
         }
 
         Member saved = this.memberRepository.save(newMember);
-        List<Long> specIds = this.specService.addSpec(saved.getId(), dto.getSpecs());
-        return MemberCreationResponseDto.of(saved, specIds);
+        return MemberCreationResponseDto.of(saved);
     }
 
     public boolean isMemberExists(Long memberId) {
@@ -93,7 +94,7 @@ public class MemberService {
         return bindToDto(findMember);
     }
 
-    public MemberDto updateMember(Long memberId, MemberUpdateRequestDto requestDto) throws MemberNotFoundException {
+    public MemberUpdateResponseDto updateMember(Long memberId, MemberUpdateRequestDto requestDto) throws MemberNotFoundException {
         MemberUpdateDto updateDto = MemberUpdateDto.builder()
                 .role(requestDto.getRole())
                 .nickname(requestDto.getNickname())
@@ -118,7 +119,23 @@ public class MemberService {
             }
         }
         Member updatedMember = this.memberRepository.update(memberId, updateDto);
-        return bindToDto(updatedMember);
+        return MemberUpdateResponseDto.builder()
+                .memberId(updatedMember.getId())
+                .loginId(updatedMember.getLoginId())
+                .role(updatedMember.getRole())
+                .email(updatedMember.getEmail())
+                .creationTime(updatedMember.getCreationTime())
+                .nickname(updatedMember.getNickname())
+                .profileImageUrl(this.fileUrlResolver.resolveFileUrl(updatedMember.getProfileImageUrl()))
+                .birthDate(updatedMember.getBirthDate())
+                .gender(updatedMember.getGender())
+                .introduction(updatedMember.getIntroduction())
+                .fitnessLevel(updatedMember.getFitnessLevel())
+                .companionStyle(updatedMember.getCompanionStyle())
+                .fitnessEagerness(updatedMember.getFitnessEagerness())
+                .fitnessObjective(updatedMember.getFitnessObjective())
+                .fitnessKind(updatedMember.getFitnessKind())
+                .build();
     }
 
     private String storeProfileImage(MultipartFile profileImage) {
@@ -150,8 +167,7 @@ public class MemberService {
                 .companionStyle(member.getCompanionStyle())
                 .fitnessEagerness(member.getFitnessEagerness())
                 .fitnessObjective(member.getFitnessObjective())
-                .fitnessKind(member.getFitnessKind())
-                .specs(member.getSpecs().stream().map(SpecDto::of).toList()) // TODO: Eager Fetch를 해야 하는 게 더 나을지 고민해 보기
+                .fitnessKind(member.getFitnessKind()) // TODO: Eager Fetch를 해야 하는 게 더 나을지 고민해 보기
                 .build();
     }
 }
