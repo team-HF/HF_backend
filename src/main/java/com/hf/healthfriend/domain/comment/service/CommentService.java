@@ -1,10 +1,12 @@
 package com.hf.healthfriend.domain.comment.service;
 
+import com.hf.healthfriend.domain.comment.constant.SortType;
 import com.hf.healthfriend.domain.comment.dto.CommentDto;
 import com.hf.healthfriend.domain.comment.dto.request.CommentCreationRequestDto;
 import com.hf.healthfriend.domain.comment.dto.response.CommentCreationResponseDto;
 import com.hf.healthfriend.domain.comment.entity.Comment;
 import com.hf.healthfriend.domain.comment.exception.CommentNotFoundException;
+import com.hf.healthfriend.domain.comment.repository.CommentJpaRepository;
 import com.hf.healthfriend.domain.comment.repository.CommentRepository;
 import com.hf.healthfriend.domain.comment.repository.dto.CommentUpdateDto;
 import com.hf.healthfriend.domain.member.entity.Member;
@@ -23,6 +25,7 @@ import java.util.List;
 @Transactional
 public class CommentService {
     private final CommentRepository commentRepository;
+    private final CommentJpaRepository commentJpaRepository;
 
     public CommentCreationResponseDto createComment(Long postId, CommentCreationRequestDto requestDto)
             throws DataIntegrityViolationException {
@@ -47,8 +50,8 @@ public class CommentService {
         this.commentRepository.deleteById(commentId);
     }
 
-    public List<CommentDto> getCommentsOfPost(Long postId) { // TODO: postId에 해당하는 Post가 없을 경우 어떻게?
-        return this.commentRepository.findCommentsByPostId(postId)
+    public List<CommentDto> getCommentsOfPost(Long postId, SortType sortType) { // TODO: postId에 해당하는 Post가 없을 경우 어떻게?
+        return this.commentJpaRepository.findCommentsByPostIdWithSorting(postId,sortType)
                 .stream()
                 .map(CommentDto::of)
                 .toList();

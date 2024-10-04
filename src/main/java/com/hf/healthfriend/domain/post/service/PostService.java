@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.post.service;
 
+import com.hf.healthfriend.domain.comment.constant.SortType;
 import com.hf.healthfriend.domain.comment.dto.CommentDto;
 import com.hf.healthfriend.domain.comment.repository.CommentJpaRepository;
 import com.hf.healthfriend.domain.comment.service.CommentService;
@@ -55,7 +56,7 @@ public class PostService {
     }
 
 
-    public PostGetResponse get(Long postId,boolean canUpdateViewCount) {
+    public PostGetResponse get(Long postId, boolean canUpdateViewCount, SortType sortType) {
         Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
                 .orElseThrow(() -> new CustomException(PostErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
         if(canUpdateViewCount) {
@@ -64,7 +65,7 @@ public class PostService {
              */
             post.updateViewCount(post.getViewCount());
         }
-        List<CommentDto> commentList = commentService.getCommentsOfPost(postId);
+        List<CommentDto> commentList = commentService.getCommentsOfPost(postId,sortType);
         Long likeCount = likeService.getLikeCountOfPost(postId);
         return PostGetResponse.builder()
                 .postId(post.getPostId())
