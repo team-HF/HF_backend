@@ -1,6 +1,8 @@
 package com.hf.healthfriend.domain.post.controller;
 
 import com.hf.healthfriend.domain.comment.constant.SortType;
+import com.hf.healthfriend.domain.member.constant.FitnessLevel;
+import com.hf.healthfriend.domain.post.constant.PostCategory;
 import com.hf.healthfriend.domain.post.dto.request.PostWriteRequest;
 import com.hf.healthfriend.domain.post.dto.response.PostGetResponse;
 import com.hf.healthfriend.domain.post.dto.response.PostListObject;
@@ -98,17 +100,18 @@ public class PostController {
     })
     @GetMapping("/list")
     public ResponseEntity<ApiBasicResponse<List<PostListObject>>> getList(
-            @RequestParam(value = "page", defaultValue = "1") int page) {
-        return ResponseEntity.ok(ApiBasicResponse.of(postService.getList(page),HttpStatus.OK));
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam @Nullable FitnessLevel fitnessLevel,
+            @RequestParam @Nullable PostCategory postCategory) {
+        return ResponseEntity.ok(ApiBasicResponse.of(postService.getList(page,fitnessLevel,postCategory),HttpStatus.OK));
     }
 
-    @Operation(summary = "검색 목록 조회", responses = {
+    @Operation(summary = "커뮤니티 검색 목록 조회", responses = {
             @ApiResponse(responseCode = "200", description = "검색 조회 성공"),
             @ApiResponse(responseCode = "400", description = "검색 조회 실패")
     })
     @GetMapping("/list/search")
-    public ResponseEntity<ApiBasicResponse<List<PostListObject>>> getSearchList(
-            @RequestParam(value = "page", defaultValue = "1") int page,@RequestParam String keyword) {
+    public ResponseEntity<ApiBasicResponse<List<PostListObject>>> getSearchList(@RequestParam(value = "page", defaultValue = "1") int page,@RequestParam String keyword) {
         return ResponseEntity.ok(ApiBasicResponse.of(postService.getsearchedList(page,keyword),HttpStatus.OK));
     }
 

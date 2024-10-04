@@ -5,6 +5,7 @@ import com.hf.healthfriend.domain.comment.dto.CommentDto;
 import com.hf.healthfriend.domain.comment.repository.CommentJpaRepository;
 import com.hf.healthfriend.domain.comment.service.CommentService;
 import com.hf.healthfriend.domain.like.service.LikeService;
+import com.hf.healthfriend.domain.member.constant.FitnessLevel;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
@@ -16,6 +17,7 @@ import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.exception.CustomException;
 import com.hf.healthfriend.domain.post.exception.PostErrorCode;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
+import com.hf.healthfriend.domain.post.repository.querydsl.PostCustomRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -85,22 +87,9 @@ public class PostService {
         post.delete();
     }
 
-    public List<PostListObject> getList(int pageNumber) {
-        Pageable pageable = PageRequest.of(pageNumber-1, 10,
-                Sort.by("creationTime").descending());
-        Page<PostListObject> postList = postRepository.findAll(pageable)
-                .map(post -> PostListObject.builder()
-                        .postId(post.getPostId())
-                        .title(post.getTitle())
-                        .category(post.getCategory().name())
-                        .viewCount(post.getViewCount())
-                        .creationTime(post.getCreationTime())
-                        .commentCount(commentJpaRepository.countByPost_PostId(post.getPostId()))
-                        .content(post.getContent())
-                        .fitnessLevel(post.getMember().getFitnessLevel().name())
-                        .likeCount(post.getLikes().size())
-                        .build());
-        return postList.getContent();
+    public List<PostListObject> getList(int pageNumber, FitnessLevel fitnessLevel, PostCategory postCategory) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, 10);
+        return postRepository.getList(fitnessLevel, postCategory, pageable);
     }
 
     public List<PostListObject> getsearchedList(int pageNumber, String keyword) {
