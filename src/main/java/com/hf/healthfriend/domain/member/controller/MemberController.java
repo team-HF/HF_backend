@@ -29,7 +29,7 @@ import java.net.URISyntaxException;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/hr/members")
+@RequestMapping("/hf/members")
 public class MemberController {
 
     private final MemberService memberService;

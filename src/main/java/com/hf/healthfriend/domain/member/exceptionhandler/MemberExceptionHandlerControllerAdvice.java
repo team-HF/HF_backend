@@ -1,8 +1,12 @@
 package com.hf.healthfriend.domain.member.exceptionhandler;
 
 import com.hf.healthfriend.domain.member.exception.DuplicateMemberCreationException;
+import com.hf.healthfriend.domain.member.exception.MemberErrorCode;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.global.spec.ApiErrorResponse;
+import com.hf.healthfriend.global.spec.BasicErrorResponse;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,11 +23,11 @@ public class MemberExceptionHandlerControllerAdvice {
     @ExceptionHandler(MemberNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> noSuchElementException(MemberNotFoundException e) {
         log.error("""
-                MemberNotFoundException
-                Error Code: {}
-                HTTP Status: {}
-                message: {}
-                """,
+                        MemberNotFoundException
+                        Error Code: {}
+                        HTTP Status: {}
+                        message: {}
+                        """,
                 MEMBER_OF_THE_MEMBER_ID_NOT_FOUND.code(),
                 HttpStatus.NOT_FOUND.value(),
                 MEMBER_OF_THE_MEMBER_ID_NOT_FOUND.message(),
@@ -44,11 +48,11 @@ public class MemberExceptionHandlerControllerAdvice {
     @ExceptionHandler(DuplicateMemberCreationException.class)
     public ResponseEntity<ApiErrorResponse> duplicateMemberCreationException(DuplicateMemberCreationException e) {
         log.error("""
-                DuplicateMemberCreationException
-                Error Code: {}
-                HTTP Status: {}
-                message: {}
-                """,
+                        DuplicateMemberCreationException
+                        Error Code: {}
+                        HTTP Status: {}
+                        message: {}
+                        """,
                 MEMBER_ALREADY_EXISTS.code(),
                 HttpStatus.BAD_REQUEST.value(),
                 MEMBER_ALREADY_EXISTS.message(),
@@ -63,5 +67,27 @@ public class MemberExceptionHandlerControllerAdvice {
                                 .message(MEMBER_ALREADY_EXISTS.message())
                                 .build()
                 );
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<BasicErrorResponse> validationException(ValidationException e) {
+        if (e instanceof ConstraintViolationException constraintViolationException) {
+            log.error("""
+                    ConstraintViolationException occurred.
+                    ConstraintViolations={}
+                    """, constraintViolationException.getConstraintViolations(), e);
+        } else {
+            log.error("ValidationException occurred", e);
+        }
+        return new ResponseEntity<>(
+                BasicErrorResponse.builder()
+                        .errorCode(MemberErrorCode.MEMBER_CREATION_VALIDATION_ERROR.code())
+                        .errorName(MemberErrorCode.MEMBER_CREATION_VALIDATION_ERROR.name())
+                        .message(MemberErrorCode.MEMBER_CREATION_VALIDATION_ERROR.message())
+                        .statusCodeSeries(4)
+                        .statusCode(MemberErrorCode.MEMBER_CREATION_VALIDATION_ERROR.status())
+                        .build(),
+                HttpStatus.BAD_REQUEST
+        );
     }
 }

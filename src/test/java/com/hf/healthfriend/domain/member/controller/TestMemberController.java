@@ -1,11 +1,16 @@
 package com.hf.healthfriend.domain.member.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hf.healthfriend.domain.member.constant.*;
+import com.hf.healthfriend.domain.member.dto.MemberDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exceptionhandler.MemberExceptionHandlerControllerAdvice;
 import com.hf.healthfriend.domain.member.service.MemberService;
+import com.hf.healthfriend.domain.spec.dto.SpecDto;
+import com.hf.healthfriend.global.spec.ApiBasicResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +26,9 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
@@ -48,6 +55,9 @@ class TestMemberController {
     @Autowired
     MemberService memberService;
 
+    @Autowired
+    ObjectMapper objectMapper;
+
     long createdMemberId;
 
     @BeforeEach
@@ -63,6 +73,7 @@ class TestMemberController {
                 .fitnessEagerness(FitnessEagerness.EAGER)
                 .fitnessObjective(FitnessObjective.BULK_UP)
                 .fitnessKind(FitnessKind.FUNCTIONAL)
+                .specs(getSampleSpecs())
                 .build();
 
         MemberCreationResponseDto responseDto = this.memberService.createMember(creationRequestDtoDuplicate);
@@ -73,10 +84,36 @@ class TestMemberController {
                 .build();
     }
 
-    @DisplayName("POST /hr/members - success")
+    private List<SpecDto> getSampleSpecs() {
+        return List.of(
+                new SpecDto(
+                        LocalDate.of(2014, 1, 2),
+                        LocalDate.of(2017, 2, 15),
+                        false,
+                        "sample-title",
+                        "sample-desc"
+                ),
+                new SpecDto(
+                        LocalDate.of(2015, 7, 2),
+                        null,
+                        true,
+                        "sample-title",
+                        "sample-desc"
+                ),
+                new SpecDto(
+                        LocalDate.of(2015, 7, 2),
+                        null,
+                        false,
+                        "sample-title",
+                        "sample-desc"
+                )
+        );
+    }
+
+    @DisplayName("POST /hf/members - success")
     @Test
     void memberCreation_success() throws Exception {
-        this.mockMvc.perform(multipart("/hr/members")
+        this.mockMvc.perform(multipart("/hf/members")
                         .param("id", "new@gmail.com")
                         .param("nickname", "새로운인간")
                         .param("birthDate", "1997-09-16")
@@ -107,10 +144,10 @@ class TestMemberController {
 
     }
 
-    @DisplayName("POST /hr/members - failure")
+    @DisplayName("POST /hf/members - failure")
     @Test
     void memberCreation_failure() throws Exception {
-        this.mockMvc.perform(multipart("/hr/members")
+        this.mockMvc.perform(multipart("/hf/members")
                         .param("id", "sample@gmail.com")
                         .param("nickname", "샘플닉네임")
                         .param("birthDate", "1997-09-16")
@@ -134,11 +171,11 @@ class TestMemberController {
                         """));
     }
 
-    @DisplayName("GET /hr/members/{memberId} - succeess to find member")
+    @DisplayName("GET /hf/members/{memberId} - succeess to find member")
     @Test
     void findMember_success() throws Exception {
         log.info("createdMemberId={}", this.createdMemberId);
-        this.mockMvc.perform(get("/hr/members/{memberId}", this.createdMemberId)
+        String responseBodyAsString = this.mockMvc.perform(get("/hf/members/{memberId}", this.createdMemberId)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(log())
                 .andDo(print())
@@ -157,13 +194,34 @@ class TestMemberController {
                                 "fitnessLevel": "BEGINNER"
                             }
                         }
-                        """));
+                        """))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        log.info("response={}", responseBodyAsString);
+        ApiBasicResponse<MemberDto> responseBody = this.objectMapper.readValue(responseBodyAsString, new TypeReference<>() {
+        });
+
+        List<SpecDto> responseSpecs = responseBody.getContent().getSpecs();
+        List<SpecDto> expected = getSampleSpecs();
+        assertThat(responseSpecs).size().isEqualTo(expected.size());
+        assertThat(responseSpecs.stream().map(SpecDto::getStartDate).toArray(LocalDate[]::new))
+                .containsExactlyInAnyOrder(expected.stream().map(SpecDto::getStartDate).toArray(LocalDate[]::new));
+        assertThat(responseSpecs.stream().map(SpecDto::getEndDate).toArray(LocalDate[]::new))
+                .containsExactlyInAnyOrder(expected.stream().map(SpecDto::getEndDate).toArray(LocalDate[]::new));
+        assertThat(responseSpecs.stream().map(SpecDto::getTitle).toArray(String[]::new))
+                .containsExactlyInAnyOrder(expected.stream().map(SpecDto::getTitle).toArray(String[]::new));
+        assertThat(responseSpecs.stream().map(SpecDto::getDescription).toArray(String[]::new))
+                .containsExactlyInAnyOrder(expected.stream().map(SpecDto::getDescription).toArray(String[]::new));
+        assertThat(responseSpecs.stream().map(SpecDto::isCurrent).toArray(Boolean[]::new))
+                .containsExactlyInAnyOrder(expected.stream().map(SpecDto::isCurrent).toArray(Boolean[]::new));
     }
 
-    @DisplayName("GET /hr/members/{memberId} - Member not found")
+    @DisplayName("GET /hf/members/{memberId} - Member not found")
     @Test
     void findMember_memberNotFound() throws Exception {
-        this.mockMvc.perform(get("/hr/members/{memberId}", this.createdMemberId + 1)
+        this.mockMvc.perform(get("/hf/members/{memberId}", this.createdMemberId + 1)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(log())
                 .andDo(print())
@@ -178,10 +236,10 @@ class TestMemberController {
                         """));
     }
 
-    @DisplayName("PATCH /hr/members/{memberId} - success")
+    @DisplayName("PATCH /hf/members/{memberId} - success")
     @Test
     void updateMember_success() throws Exception {
-        this.mockMvc.perform(patch("/hr/members/{memberId}", this.createdMemberId)
+        this.mockMvc.perform(patch("/hf/members/{memberId}", this.createdMemberId)
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .accept(MediaType.APPLICATION_JSON)
                         .content("{}"))
@@ -196,10 +254,10 @@ class TestMemberController {
                         """));
     }
 
-    @DisplayName("PATCH /hr/members/{memberId} - Member not found")
+    @DisplayName("PATCH /hf/members/{memberId} - Member not found")
     @Test
     void updateMember_memberNotFound() throws Exception {
-        this.mockMvc.perform(patch("/hr/members/{memberId}", this.createdMemberId + 1)
+        this.mockMvc.perform(patch("/hf/members/{memberId}", this.createdMemberId + 1)
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .accept(MediaType.APPLICATION_JSON)
                         .content("{}"))

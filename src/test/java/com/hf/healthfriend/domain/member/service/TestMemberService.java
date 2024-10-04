@@ -8,6 +8,7 @@ import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
+import com.hf.healthfriend.domain.spec.dto.SpecDto;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -62,6 +64,7 @@ class TestMemberService {
                 .fitnessEagerness(FitnessEagerness.LAZY)
                 .fitnessObjective(FitnessObjective.RUNNING)
                 .fitnessKind(FitnessKind.FUNCTIONAL)
+                .specs(getSampleSpecs())
                 .build();
 
         log.info("requestDto={}", requestDto);
@@ -86,6 +89,7 @@ class TestMemberService {
         assertThat(responseDto.getFitnessEagerness()).isEqualTo(FitnessEagerness.LAZY);
         assertThat(responseDto.getFitnessObjective()).isEqualTo(FitnessObjective.RUNNING);
         assertThat(responseDto.getFitnessKind()).isEqualTo(FitnessKind.FUNCTIONAL);
+        assertThat(responseDto.getSpecIds()).size().isEqualTo(requestDto.getSpecs().size());
 
         Member member = this.memberJpaRepository.findByEmail("sample@gmail.com").orElseThrow();
 
@@ -94,6 +98,32 @@ class TestMemberService {
         assertThat(member).isNotNull();
         assertThat(member.getLoginId()).isEqualTo("sample@gmail.com");
         assertThat(member.getEmail()).isEqualTo("sample@gmail.com");
+    }
+
+    private List<SpecDto> getSampleSpecs() {
+        return List.of(
+                new SpecDto(
+                        LocalDate.of(2014, 1, 2),
+                        LocalDate.of(2017, 2, 15),
+                        false,
+                        "sample-title",
+                        "sample-desc"
+                ),
+                new SpecDto(
+                        LocalDate.of(2015, 7, 2),
+                        null,
+                        true,
+                        "sample-title",
+                        "sample-desc"
+                ),
+                new SpecDto(
+                        LocalDate.of(2015, 7, 2),
+                        null,
+                        false,
+                        "sample-title",
+                        "sample-desc"
+                )
+        );
     }
 
     @DisplayName("createMember - id가 빠지면 안 됨")
@@ -203,6 +233,7 @@ class TestMemberService {
                 .fitnessEagerness(FitnessEagerness.LAZY)
                 .fitnessObjective(FitnessObjective.RUNNING)
                 .fitnessKind(FitnessKind.FUNCTIONAL)
+                .specs(getSampleSpecs())
                 .build();
 
         LocalDateTime beforeExecution = LocalDateTime.now();
@@ -224,6 +255,7 @@ class TestMemberService {
         assertThat(result.getFitnessEagerness()).isEqualTo(requestDto.getFitnessEagerness());
         assertThat(result.getFitnessObjective()).isEqualTo(requestDto.getFitnessObjective());
         assertThat(result.getFitnessKind()).isEqualTo(requestDto.getFitnessKind());
+        assertThat(result.getSpecs()).size().isEqualTo(requestDto.getSpecs().size());
     }
 
     @DisplayName("findMember - 찾으려는 Member가 없을 경우 MemberNotFoundException 발생")

@@ -105,11 +105,11 @@ class TestLikeControllerMockMvc {
                 .build();
     }
 
-    @DisplayName("POST /hr/posts/{postId}/likes - 좋아요 추가 성공")
+    @DisplayName("POST /hf/posts/{postId}/likes - 좋아요 추가 성공")
     @Test
     void addPostLike_success() throws Exception {
         String responseBodyAsString = this.mockMvc.perform(
-                MockMvcRequestBuilders.post("/hr/posts/{postId}/likes", this.samplePosts.get("post1").getPostId())
+                MockMvcRequestBuilders.post("/hf/posts/{postId}/likes", this.samplePosts.get("post1").getPostId())
                         .queryParam("memberId", String.valueOf(this.sampleMembers.get("member3").getId()))
         ).andExpect(MockMvcResultMatchers.status().isCreated()).andReturn().getResponse().getContentAsString();
         ApiBasicResponse<Long> responseBody = this.objectMapper.readValue(responseBodyAsString, new TypeReference<ApiBasicResponse<Long>>() {
@@ -118,24 +118,24 @@ class TestLikeControllerMockMvc {
         assertThat(responseBody.getContent()).isNotNull();
     }
 
-    @DisplayName("POST /hr/posts/{postId}/likes - 좋아요 중복 추가 시 400 Bad Request")
+    @DisplayName("POST /hf/posts/{postId}/likes - 좋아요 중복 추가 시 400 Bad Request")
     @Test
     void addDuplicateLikes_expect400BadRequest() throws Exception {
         this.likeService.addPostLike(this.sampleMembers.get("member1").getId(), this.samplePosts.get("post1").getPostId());
 
         this.mockMvc.perform(
-                MockMvcRequestBuilders.post("/hr/posts/{postId}/likes", this.samplePosts.get("post1").getPostId())
+                MockMvcRequestBuilders.post("/hf/posts/{postId}/likes", this.samplePosts.get("post1").getPostId())
                         .queryParam("memberId", String.valueOf(this.sampleMembers.get("member1").getId()))
         ).andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
-    @DisplayName("POST /hr/posts/{postId}/likes - 해당 회원이나 글이 존재하지 않을 경우 400 Bad Request")
+    @DisplayName("POST /hf/posts/{postId}/likes - 해당 회원이나 글이 존재하지 않을 경우 400 Bad Request")
     @Test
     void addDuplicateLikes_noMemberOrPost_expect400BadRequest() throws Exception {
         Long notExistsPostId = findNotExistsPostId();
         Long notExistsMemberId = findNotExistsMemberId();
         this.mockMvc.perform(
-                MockMvcRequestBuilders.post("/hr/posts/{postId}/likes", notExistsPostId)
+                MockMvcRequestBuilders.post("/hf/posts/{postId}/likes", notExistsPostId)
                         .queryParam("memberId", String.valueOf(notExistsMemberId))
         ).andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
@@ -160,7 +160,7 @@ class TestLikeControllerMockMvc {
         return id;
     }
 
-    @DisplayName("GET /hr/posts/{postId}/likes - 회원이 해당 글에 좋아요를 남겼는지 여부 조회")
+    @DisplayName("GET /hf/posts/{postId}/likes - 회원이 해당 글에 좋아요를 남겼는지 여부 조회")
     @Test
     void doesMemberLikeThePost_success() throws Exception {
         this.likeService.addPostLike(
@@ -169,7 +169,7 @@ class TestLikeControllerMockMvc {
         );
 
         this.mockMvc.perform(
-                        MockMvcRequestBuilders.get("/hr/posts/{postId}/likes", this.samplePosts.get("post1").getPostId())
+                        MockMvcRequestBuilders.get("/hf/posts/{postId}/likes", this.samplePosts.get("post1").getPostId())
                                 .param("memberId", String.valueOf(this.sampleMembers.get("member1").getId()))
                 ).andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().json(String.format("""
@@ -179,7 +179,7 @@ class TestLikeControllerMockMvc {
                         """, this.samplePosts.get("post1").getPostId(), this.sampleMembers.get("member1").getId())));
     }
 
-    @DisplayName("GET /hr/posts/{postId}/likes - 특정 글에 남긴 좋아요 조회")
+    @DisplayName("GET /hf/posts/{postId}/likes - 특정 글에 남긴 좋아요 조회")
     @Test
     void getLikesInAPost() throws Exception {
         // Given
@@ -198,7 +198,7 @@ class TestLikeControllerMockMvc {
 
         // Then
         String responseBodyAsString = this.mockMvc.perform(
-                MockMvcRequestBuilders.get("/hr/posts/{postId}/likes", this.samplePosts.get("post1").getPostId())
+                MockMvcRequestBuilders.get("/hf/posts/{postId}/likes", this.samplePosts.get("post1").getPostId())
         ).andReturn().getResponse().getContentAsString();
 
         ApiBasicResponse<List<PostLikeDto>> responseBody =
@@ -219,7 +219,7 @@ class TestLikeControllerMockMvc {
                 );
     }
 
-    @DisplayName("GET /hr/posts/{postId}/likes/count - 특정 글에 남긴 좋아요 개수 조회")
+    @DisplayName("GET /hf/posts/{postId}/likes/count - 특정 글에 남긴 좋아요 개수 조회")
     @Test
     void getLikesCount() throws Exception {
         // Given
@@ -238,7 +238,7 @@ class TestLikeControllerMockMvc {
 
         // Then
         this.mockMvc.perform(
-                MockMvcRequestBuilders.get("/hr/posts/{postId}/likes/count", this.samplePosts.get("post1").getPostId())
+                MockMvcRequestBuilders.get("/hf/posts/{postId}/likes/count", this.samplePosts.get("post1").getPostId())
         ).andExpect(
                 MockMvcResultMatchers.content().json("""
                         {
@@ -248,7 +248,7 @@ class TestLikeControllerMockMvc {
         );
     }
 
-    @DisplayName("GET /hr/members/{memberId}/likes - 특정 회원이 남긴 좋아요 목록 조회")
+    @DisplayName("GET /hf/members/{memberId}/likes - 특정 회원이 남긴 좋아요 목록 조회")
     @Test
     void getLikesOfSpecificMember() throws Exception {
         // Given
@@ -271,7 +271,7 @@ class TestLikeControllerMockMvc {
 
         // Then
         this.mockMvc.perform(
-                MockMvcRequestBuilders.get("/hr/members/{memberId}/likes", member1Id)
+                MockMvcRequestBuilders.get("/hf/members/{memberId}/likes", member1Id)
         ).andExpect(
                 MockMvcResultMatchers.content().json(String.format("""
                         {
@@ -290,7 +290,7 @@ class TestLikeControllerMockMvc {
         );
     }
 
-    @DisplayName("DELETE /hr/likes/{likeId} - 좋아요 취소")
+    @DisplayName("DELETE /hf/likes/{likeId} - 좋아요 취소")
     @Test
     void cancelLike() throws Exception {
         Long generatedId = this.likeService.addPostLike(
@@ -299,18 +299,18 @@ class TestLikeControllerMockMvc {
         );
 
         this.mockMvc.perform(
-                MockMvcRequestBuilders.delete("/hr/likes/{likeId}", generatedId)
+                MockMvcRequestBuilders.delete("/hf/likes/{likeId}", generatedId)
         ).andExpect(MockMvcResultMatchers.status().isOk());
 
         assertThatExceptionOfType(NoSuchElementException.class)
                 .isThrownBy(() -> this.likeService.getLike(generatedId));
     }
 
-    @DisplayName("DELETE /hr/likes/{likeId} - 좋아요 취소 - 존재하지 않는 좋아요 취소 시도 때문에 404")
+    @DisplayName("DELETE /hf/likes/{likeId} - 좋아요 취소 - 존재하지 않는 좋아요 취소 시도 때문에 404")
     @Test
     void cancelLike_404NotFoundExpected() throws Exception {
         this.mockMvc.perform(
-                MockMvcRequestBuilders.delete("/hr/likes/{likeId}", 15134124L)
+                MockMvcRequestBuilders.delete("/hf/likes/{likeId}", 15134124L)
         ).andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 }

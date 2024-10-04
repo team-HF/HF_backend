@@ -24,7 +24,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/hr")
+@RequestMapping("/hf")
 public class CommentController {
     private final CommentService commentService;
 

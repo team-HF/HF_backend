@@ -53,6 +53,7 @@ public class Spec {
                 String title,
                 String description) {
         this.member = member;
+        member.getSpecs().add(this);
         this.startDate = startDate;
         this.endDate = endDate;
         this.isCurrent = isCurrent;

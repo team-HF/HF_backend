@@ -9,6 +9,8 @@ import com.hf.healthfriend.domain.member.exception.DuplicateMemberCreationExcept
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
+import com.hf.healthfriend.domain.spec.dto.SpecDto;
+import com.hf.healthfriend.domain.spec.service.SpecService;
 import com.hf.healthfriend.global.util.file.FileUrlResolver;
 import com.hf.healthfriend.global.util.file.MultipartFileUploader;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -26,6 +29,7 @@ import java.io.IOException;
 @Transactional
 public class MemberService {
     private final MemberRepository memberRepository;
+    private final SpecService specService;
     private final FileUrlResolver fileUrlResolver;
     private final MultipartFileUploader multipartFileUploader;
 
@@ -60,7 +64,8 @@ public class MemberService {
         }
 
         Member saved = this.memberRepository.save(newMember);
-        return MemberCreationResponseDto.of(saved);
+        List<Long> specIds = this.specService.addSpec(saved.getId(), dto.getSpecs());
+        return MemberCreationResponseDto.of(saved, specIds);
     }
 
     public boolean isMemberExists(Long memberId) {
@@ -146,6 +151,7 @@ public class MemberService {
                 .fitnessEagerness(member.getFitnessEagerness())
                 .fitnessObjective(member.getFitnessObjective())
                 .fitnessKind(member.getFitnessKind())
+                .specs(member.getSpecs().stream().map(SpecDto::of).toList()) // TODO: Eager Fetch를 해야 하는 게 더 나을지 고민해 보기
                 .build();
     }
 }
