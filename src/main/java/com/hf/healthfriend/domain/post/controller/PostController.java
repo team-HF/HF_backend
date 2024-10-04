@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.post.controller;
 
+import com.hf.healthfriend.domain.comment.constant.SortType;
 import com.hf.healthfriend.domain.post.dto.request.PostWriteRequest;
 import com.hf.healthfriend.domain.post.dto.response.PostGetResponse;
 import com.hf.healthfriend.domain.post.dto.response.PostListObject;
@@ -9,6 +10,7 @@ import com.hf.healthfriend.global.spec.ApiBasicResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -53,7 +55,10 @@ public class PostController {
             @ApiResponse(responseCode = "400", description = "조회 실패")
     })
     @GetMapping("/posts/{postId}")
-    public ResponseEntity<ApiBasicResponse<PostGetResponse>> get(@PathVariable Long postId, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<ApiBasicResponse<PostGetResponse>> get(@PathVariable Long postId,
+                                                                 HttpServletRequest request,
+                                                                 HttpServletResponse response,
+                                                                 @RequestParam @Nullable SortType sortType) {
         Cookie[] cookies = request.getCookies();
         String visitCookieValue = null;
         if (cookies != null) {
@@ -73,7 +78,7 @@ public class PostController {
             newCookie.setHttpOnly(true);
             response.addCookie(newCookie);
         }
-        PostGetResponse postGetResponse = postService.get(postId,canUpdateViewCount);
+        PostGetResponse postGetResponse = postService.get(postId,canUpdateViewCount,sortType);
         return ResponseEntity.ok(ApiBasicResponse.of(postGetResponse, HttpStatus.OK));
     }
 

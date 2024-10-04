@@ -17,6 +17,8 @@ import java.util.List;
 
 @Entity(name = "members")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
+@Builder
 @Setter // TODO: Setter를 없애고 엔티티 수정 코드는 udpate~ 메소드로 대체해야 함
 @Getter
 @ToString

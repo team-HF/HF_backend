@@ -2,6 +2,7 @@ package com.hf.healthfriend.domain.comment.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hf.healthfriend.domain.comment.constant.SortType;
 import com.hf.healthfriend.domain.comment.dto.CommentDto;
 import com.hf.healthfriend.domain.comment.dto.request.CommentCreationRequestDto;
 import com.hf.healthfriend.domain.comment.dto.response.CommentCreationResponseDto;
@@ -62,7 +63,7 @@ class CommentControllerMockMvcTest {
                                 .content("sample-content")
                                 .build()
                 );
-        when(this.commentService.getCommentsOfPost(10000L))
+        when(this.commentService.getCommentsOfPost(10000L, SortType.LATEST))
                 .thenReturn(
                         List.of(
                                 CommentDto.builder()
