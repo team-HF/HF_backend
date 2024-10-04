@@ -6,6 +6,7 @@ import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.entity.Member;
+import com.hf.healthfriend.domain.member.exception.FitnessLevelUpdateException;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
 import com.hf.healthfriend.domain.spec.dto.SpecDto;
@@ -278,7 +279,6 @@ class TestMemberService {
                         .build(),
                 MemberUpdateRequestDto.builder()
                         .introduction("바뀐 소개")
-                        .fitnessLevel(FitnessLevel.BEGINNER)
                         .companionStyle(CompanionStyle.SMALL)
                         .fitnessEagerness(FitnessEagerness.EAGER)
                         .fitnessObjective(FitnessObjective.BULK_UP)
@@ -286,7 +286,6 @@ class TestMemberService {
                         .build(),
                 MemberUpdateRequestDto.builder()
                         .introduction("안녕하세요. 뚱입니다.")
-                        .fitnessLevel(FitnessLevel.ADVANCED)
                         .companionStyle(CompanionStyle.GROUP)
                         .fitnessEagerness(FitnessEagerness.LAZY)
                         .fitnessObjective(FitnessObjective.RUNNING)
@@ -357,6 +356,21 @@ class TestMemberService {
         }
         getterName = getterName.substring(3);
         return Character.toLowerCase(getterName.charAt(0)) + getterName.substring(1);
+    }
+
+    @DisplayName("updateMember - 운동 레벨을 \"고수\"에서 \"새싹\"으로 바꿀 경우 예외 발생 - FitnessLevelUpdateException")
+    @Test
+    void updateMember_updateFitnessLevelNotAllowed_FitnessLevelUpdateException() {
+        Member sampleMember = SampleEntityGenerator.generateSampleMember("sample@gmail.com");
+        sampleMember.setFitnessLevel(FitnessLevel.ADVANCED);
+        this.memberJpaRepository.save(sampleMember);
+
+        MemberUpdateRequestDto updateDto = MemberUpdateRequestDto.builder()
+                .fitnessLevel(FitnessLevel.BEGINNER)
+                .build();
+
+        assertThatExceptionOfType(FitnessLevelUpdateException.class)
+                .isThrownBy(() -> this.memberService.updateMember(sampleMember.getId(), updateDto));
     }
 
     @DisplayName("updateMember - 없는 회원일 경우 MemberNotFoundException 발생")

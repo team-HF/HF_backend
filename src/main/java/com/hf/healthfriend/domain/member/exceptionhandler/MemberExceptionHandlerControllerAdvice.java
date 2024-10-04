@@ -1,6 +1,7 @@
 package com.hf.healthfriend.domain.member.exceptionhandler;
 
 import com.hf.healthfriend.domain.member.exception.DuplicateMemberCreationException;
+import com.hf.healthfriend.domain.member.exception.FitnessLevelUpdateException;
 import com.hf.healthfriend.domain.member.exception.MemberErrorCode;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.global.spec.ApiErrorResponse;
@@ -80,6 +81,21 @@ public class MemberExceptionHandlerControllerAdvice {
                         .message(MemberErrorCode.MEMBER_CREATION_VALIDATION_ERROR.message())
                         .statusCodeSeries(4)
                         .statusCode(MemberErrorCode.MEMBER_CREATION_VALIDATION_ERROR.status())
+                        .build(),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(FitnessLevelUpdateException.class)
+    public ResponseEntity<BasicErrorResponse> fitnessLevelUpdateException(FitnessLevelUpdateException e) {
+        log.error("회원 업데이트 중 예외 발생", e);
+        return new ResponseEntity<>(
+                BasicErrorResponse.builder()
+                        .statusCode(MemberErrorCode.FITNESS_LEVEL_UPDATE_NOT_ALLOWED.status())
+                        .statusCodeSeries(4)
+                        .errorCode(MemberErrorCode.FITNESS_LEVEL_UPDATE_NOT_ALLOWED.code())
+                        .errorName(MemberErrorCode.FITNESS_LEVEL_UPDATE_NOT_ALLOWED.name())
+                        .message(MemberErrorCode.MEMBER_CREATION_VALIDATION_ERROR.message())
                         .build(),
                 HttpStatus.BAD_REQUEST
         );

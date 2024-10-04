@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.member.service;
 
+import com.hf.healthfriend.domain.member.constant.FitnessLevel;
 import com.hf.healthfriend.domain.member.dto.MemberDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
@@ -7,6 +8,7 @@ import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberUpdateResponseDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.DuplicateMemberCreationException;
+import com.hf.healthfriend.domain.member.exception.FitnessLevelUpdateException;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
@@ -92,6 +94,7 @@ public class MemberService {
     }
 
     public MemberUpdateResponseDto updateMember(Long memberId, MemberUpdateRequestDto requestDto) throws MemberNotFoundException {
+        validateUpdateRequest(memberId, requestDto);
         MemberUpdateDto updateDto = this.beanMapper.generateBean(requestDto, MemberUpdateDto.class);
         if (requestDto.getProfileImage() != null) {
             String filePath = storeProfileImage(requestDto.getProfileImage());
@@ -115,6 +118,19 @@ public class MemberService {
                 .fitnessObjective(updatedMember.getFitnessObjective())
                 .fitnessKind(updatedMember.getFitnessKind())
                 .build();
+    }
+
+    private void validateUpdateRequest(Long memberId, MemberUpdateRequestDto requestDto) {
+        if (requestDto.getFitnessLevel() == null) {
+            return;
+        }
+        switch (requestDto.getFitnessLevel()) {
+            case ADVANCED -> {
+                // TODO: 매칭 횟수 10번 미만일 경우 validation 에러
+            }
+            case BEGINNER ->
+                throw new FitnessLevelUpdateException("고수에서 새싹으로 변경 불가");
+        }
     }
 
     private String storeProfileImage(MultipartFile profileImage) {
