@@ -20,7 +20,6 @@ public class SampleEntityGenerator {
         member.setNickname(nickname);
         member.setBirthDate(LocalDate.of(1997, 9, 16));
         member.setName("김샘플");
-        member.setPhoneNumber(phoneNumber);
         member.setLocation("서울시 영등포구");
         member.setGender(Gender.MALE);
         member.setIntroduction("");

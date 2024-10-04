@@ -61,7 +61,6 @@ class TestMemberController {
                 .name("김샘플")
                 .nickname("샘플닉네임")
                 .location("서울시 동작구")
-                .phoneNumber("010-1234-1234")
                 .birthDate(LocalDate.of(1997, Month.SEPTEMBER, 16))
                 .gender(Gender.MALE)
                 .introduction("안녕하세요")

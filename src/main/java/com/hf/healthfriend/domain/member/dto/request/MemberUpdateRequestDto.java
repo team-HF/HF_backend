@@ -18,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 @BeanMapping(MemberUpdateDto.class)
 public class MemberUpdateRequestDto {
     private MultipartFile profileImage;
-    private String phoneNumber;
 
     @Schema(description = "회원의 현재 위치 - OO시 OOO구까지")
     private String location;

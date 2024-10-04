@@ -290,7 +290,6 @@ class TestMemberService {
                         .fitnessEagerness(FitnessEagerness.LAZY)
                         .fitnessObjective(FitnessObjective.RUNNING)
                         .fitnessKind(FitnessKind.FUNCTIONAL)
-                        .phoneNumber("010-1234-1234")
                         .build()
         );
     }

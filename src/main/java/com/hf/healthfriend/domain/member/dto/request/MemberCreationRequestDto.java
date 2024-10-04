@@ -35,10 +35,6 @@ public class MemberCreationRequestDto {
     @NotNull
     private String nickname;
 
-    @Pattern(regexp = "^((011|016|017|018|019)-\\d{3,4}-\\d{4}|010-\\d{4}-\\d{4})$")
-    @NotNull
-    private String phoneNumber;
-
     @Schema(description = "회원 프로필 이미지")
     private MultipartFile profileImage;
 

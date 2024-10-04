@@ -50,12 +50,6 @@ public class Member implements UserDetails {
     @Column(name = "nickname", nullable = false)
     private String nickname;
 
-    @Column(name = "phone_number", nullable = false)
-    private String phoneNumber;
-
-    @Column(name = "is_phone_authenticated")
-    private boolean isPhoneAuthenticated = false;
-
     @Column(name = "profile_url")
     private String profileImageUrl;
 
