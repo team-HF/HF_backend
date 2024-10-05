@@ -1,5 +1,7 @@
 package com.hf.healthfriend.global.util.mapping;
 
+import com.hf.healthfriend.global.util.mapping.exception.MappingException;
+import com.hf.healthfriend.global.util.mapping.exception.MappingNotExistsException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -33,9 +35,16 @@ public class BeanMapper {
         Set<BeanDefinition> candidateComponents = scanner.findCandidateComponents(BASE_PACKAGE);
         for (BeanDefinition beanDefinition : candidateComponents) {
             Class<?> mappingClass = Class.forName(beanDefinition.getBeanClassName());
-            Class<?> targetClass = mappingClass.getAnnotation(BeanMapping.class).value();
+            BeanMapping beanMapping = mappingClass.getAnnotation(BeanMapping.class);
+            Class<?> targetClass = beanMapping.value();
 
-            classMapping.put(mappingClass, targetClass);
+            if (mappingClass == targetClass) {
+                throw new MappingException(String.format("""
+                        Mapping Class와 Target Class가 같습니다.
+                        Mapping Class: %s
+                        Target Class: %s
+                        """, mappingClass, targetClass));
+            }
 
             Map<String, Field> targetFieldsByName = Arrays.stream(targetClass.getDeclaredFields())
                     .collect(Collectors.toMap(
@@ -44,27 +53,42 @@ public class BeanMapper {
                             (f1, f2) -> f2
                     ));
 
+            boolean isIncludeReverseMapping = beanMapping.includeReverseMapping();
             Map<Field, Field> targetFieldsByMappingField = new HashMap<>();
+            Map<Field, Field> mappingFieldsByTargetField = new HashMap<>();
             for (Field mappingField : mappingClass.getDeclaredFields()) {
                 String targetFieldName;
                 boolean setNull;
+                boolean reverseSetNull;
                 if (mappingField.getAnnotation(MappingAttribute.class) != null) {
                     MappingAttribute mappingAttributeAnnotation = mappingField.getAnnotation(MappingAttribute.class);
                     targetFieldName = mappingAttributeAnnotation.target();
                     setNull = mappingAttributeAnnotation.setNull();
+                    reverseSetNull = mappingAttributeAnnotation.reverseSetNull();
                 } else {
                     targetFieldName = mappingField.getName();
                     setNull = true;
+                    reverseSetNull = true;
                 }
 
                 if (targetFieldsByName.containsKey(targetFieldName)) {
-                    targetFieldsByMappingField.put(mappingField, targetFieldsByName.get(targetFieldName));
+                    Field targetField = targetFieldsByName.get(targetFieldName);
+                    targetFieldsByMappingField.put(mappingField, targetField);
                     setNullMap.put(mappingField, setNull);
+                    if (isIncludeReverseMapping) {
+                        mappingFieldsByTargetField.put(targetField, mappingField);
+                        setNullMap.put(targetField, reverseSetNull);
+                    }
                 } else {
                     log.debug("Mapping attribute에 해당하는 Target attribute가 없음");
                 }
             }
             mappingTable.put(mappingClass, targetFieldsByMappingField);
+            classMapping.put(mappingClass, targetClass);
+            if (isIncludeReverseMapping) {
+                mappingTable.put(targetClass, mappingFieldsByTargetField);
+                classMapping.put(targetClass, mappingClass);
+            }
         }
 
         if (log.isTraceEnabled()) {
@@ -81,14 +105,14 @@ public class BeanMapper {
         }
     }
 
-    public <M> Object generateBean(M from) {
+    public <S> Object generateBean(S from) {
         Class<?> mappingClass = from.getClass();
         Class<?> targetClass = classMapping.get(mappingClass);
         return generateBean(from, targetClass);
     }
 
-    public <M, T> T generateBean(M from, Class<? extends T> targetClass) {
-        Map<Field, Field> fieldMappings = mappingTable.get(from.getClass());
+    public <S, T> T generateBean(S from, Class<? extends T> targetClass) {
+        Map<Field, Field> fieldMappings = getFieldMappings(from.getClass(), targetClass);
 
         try {
             Constructor<? extends T> targetConstructor = targetClass.getDeclaredConstructor();
@@ -101,6 +125,9 @@ public class BeanMapper {
                 mappingField.setAccessible(true);
                 targetField.setAccessible(true);
 
+                System.out.println("asdf=" + mappingField.get(from));
+                System.out.println("targetField=" + targetField);
+
                 targetField.set(targetInstance, mappingField.get(from));
 
                 mappingField.setAccessible(false);
@@ -108,12 +135,12 @@ public class BeanMapper {
             }
             return targetInstance;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new MappingException(e);
         }
     }
 
     public <S, T> void copyProperties(S source, T target) {
-        Map<Field, Field> fieldMappings = mappingTable.get(source.getClass());
+        Map<Field, Field> fieldMappings = getFieldMappings(source.getClass(), target.getClass());
 
         try {
             for (Map.Entry<Field, Field> entry : fieldMappings.entrySet()) {
@@ -133,5 +160,15 @@ public class BeanMapper {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private <S, T> Map<Field, Field> getFieldMappings(Class<? extends S> sourceClass, Class<? extends T> targetClass) {
+        Map<Field, Field> fieldMappings = mappingTable.get(sourceClass);
+        if (fieldMappings == null || targetClass == null || classMapping.get(sourceClass) != targetClass) {
+            throw new MappingNotExistsException(
+                    "매핑이 존재하지 않습니다; source class=" + sourceClass + ", target class=" + targetClass
+            );
+        }
+        return fieldMappings;
     }
 }

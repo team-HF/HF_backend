@@ -63,6 +63,19 @@ class TestBeanMapper {
         assertThat(result.getFieldSetNullFalse()).isNull();
     }
 
+    @DisplayName("generateBean - 역매핑")
+    @Test
+    void generateBean_reverseMapping() {
+        SampleTargetClass targetClass = new SampleTargetClass("f1", 10, "f3", "true", "false");
+        SampleSourceClass sourceClass = this.beanMapper.generateBean(targetClass, SampleSourceClass.class);
+
+        assertThat(sourceClass.getField1()).isEqualTo("f1");
+        assertThat(sourceClass.getField2()).isEqualTo(10);
+        assertThat(sourceClass.getField3()).isEqualTo("f3");
+        assertThat(sourceClass.getField4()).isEqualTo("true");
+        assertThat(sourceClass.getField5()).isEqualTo("false");
+    }
+
     @DisplayName("copyProperties")
     @Test
     void copyProperties() {

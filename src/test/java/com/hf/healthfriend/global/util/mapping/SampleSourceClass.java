@@ -1,12 +1,10 @@
 package com.hf.healthfriend.global.util.mapping;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@Getter
 @BeanMapping(SampleTargetClass.class)
 @ToString
 public class SampleSourceClass {
