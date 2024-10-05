@@ -1,12 +1,13 @@
 package com.hf.healthfriend.domain.member.dto.request;
 
 import com.hf.healthfriend.domain.member.constant.*;
-import com.hf.healthfriend.domain.spec.dto.request.SpecUpdateRequestDto;
+import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
+import com.hf.healthfriend.global.util.mapping.BeanMapping;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -14,13 +15,16 @@ import java.util.List;
 @Setter
 @Getter
 @ToString
+@BeanMapping(MemberUpdateDto.class)
 public class MemberUpdateRequestDto {
-    private Role role;
-    private String nickname;
     private MultipartFile profileImage;
-    private LocalDate birthDate;
-    private Gender gender;
+
+    @Schema(description = "회원의 현재 위치 - OO시 OOO구까지")
+    private String location;
+
+    @Length(max = 500)
     private String introduction;
+
     private FitnessLevel fitnessLevel;
     private CompanionStyle companionStyle;
     private FitnessEagerness fitnessEagerness;
