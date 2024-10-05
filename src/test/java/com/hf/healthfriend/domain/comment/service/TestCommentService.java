@@ -9,6 +9,7 @@ import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.post.constant.PostCategory;
 import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
+import com.hf.healthfriend.testutil.SampleEntityGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,10 +49,8 @@ class TestCommentService {
     @Test
     void createComment_succeededToCreate() {
         // Given
-        Member postWriter = new Member("sample@post.writer");
-        setNecessaryFieldOfMemberToSampleData(postWriter, "샘플닉네임1");
-        Member commentWriter = new Member("sample@comment.writer");
-        setNecessaryFieldOfMemberToSampleData(commentWriter, "샘플닉네임2");
+        Member postWriter = SampleEntityGenerator.generateSampleMember("sample@post.writer", "샘플닉네임1");
+        Member commentWriter = SampleEntityGenerator.generateSampleMember("sample@comment.writer", "샘플닉네임2");
 
         this.memberRepository.save(commentWriter);
         this.memberRepository.save(postWriter);
@@ -88,8 +87,7 @@ class TestCommentService {
     @Test
     void createComment_fail_sincePostIsNull_DataIntegrityViolationException() {
         // Given
-        Member commentWriter = new Member("comment@writer.com");
-        setNecessaryFieldOfMemberToSampleData(commentWriter, "샘플닉네임");
+        Member commentWriter = SampleEntityGenerator.generateSampleMember("comment@writer.com", "샘플닉네임");
         this.memberRepository.save(commentWriter);
 
         // When
@@ -107,8 +105,7 @@ class TestCommentService {
     @Test
     void createComment_fail_sinceTransientMember_DataIntegrityViolationException() {
         // Given
-        Member postWriter = new Member("sample@post.writer");
-        setNecessaryFieldOfMemberToSampleData(postWriter, "샘플닉네임");
+        Member postWriter = SampleEntityGenerator.generateSampleMember("sample@post.writer", "샘플닉네임");
         this.memberRepository.save(postWriter);
 
         Post post = Post.builder()
@@ -147,10 +144,8 @@ class TestCommentService {
     @Test
     void deleteComment_success() {
         // Given
-        Member postWriter = new Member("sample@post.writer");
-        setNecessaryFieldOfMemberToSampleData(postWriter, "샘플닉네임1");
-        Member commentWriter = new Member("sample@comment.writer");
-        setNecessaryFieldOfMemberToSampleData(commentWriter, "샘플닉네임2");
+        Member postWriter = SampleEntityGenerator.generateSampleMember("sample@post.writer", "샘플닉네임1");
+        Member commentWriter = SampleEntityGenerator.generateSampleMember("sample@comment.writer", "샘플닉네임2");
 
         this.memberRepository.save(commentWriter);
         this.memberRepository.save(postWriter);

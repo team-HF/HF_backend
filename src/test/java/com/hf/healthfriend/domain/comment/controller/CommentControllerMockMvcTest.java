@@ -170,6 +170,7 @@ class CommentControllerMockMvcTest {
     @Test
     void findCommentsOfSpecificPost() throws Exception {
         String responseBodyAsString = this.mockMvc.perform(get("/hf/posts/{postId}/comments", 10000L)
+                        .param("sortType", "LATEST")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString();
 

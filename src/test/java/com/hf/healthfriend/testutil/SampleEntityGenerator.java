@@ -15,12 +15,14 @@ public class SampleEntityGenerator {
         return generateSampleMember(email, nickname, "010-1234-1234");
     }
 
+    @Deprecated
     public static Member generateSampleMember(String email, String nickname, String phoneNumber) {
         Member member = new Member(email);
         member.setNickname(nickname);
         member.setBirthDate(LocalDate.of(1997, 9, 16));
         member.setName("김샘플");
-        member.setLocation("서울시 영등포구");
+        member.setCity("서울시");
+        member.setDistrict("영등포구");
         member.setGender(Gender.MALE);
         member.setIntroduction("");
         member.setFitnessLevel(FitnessLevel.BEGINNER);
