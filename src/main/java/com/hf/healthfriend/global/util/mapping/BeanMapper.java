@@ -12,18 +12,15 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class BeanMapper {
     private static final String BASE_PACKAGE = "com.hf.healthfriend";
-    private static final Map<Class<?>, Map<Field, Field>> mappingTable = new HashMap<>();
-    private static final Map<Class<?>, Class<?>> classMapping = new HashMap<>();
+    private static final Map<Class<?>, Map<Class<?>, Map<Field, Field>>> mappingTable = new HashMap<>();
+    private static final Map<Class<?>, List<Class<?>>> classMapping = new HashMap<>();
     private static final Map<Field, Boolean> setNullMap = new HashMap<>();
 
     @EventListener(ApplicationReadyEvent.class)
@@ -36,78 +33,100 @@ public class BeanMapper {
         for (BeanDefinition beanDefinition : candidateComponents) {
             Class<?> mappingClass = Class.forName(beanDefinition.getBeanClassName());
             BeanMapping beanMapping = mappingClass.getAnnotation(BeanMapping.class);
-            Class<?> targetClass = beanMapping.value();
-
-            if (mappingClass == targetClass) {
-                throw new MappingException(String.format("""
+            Class<?>[] targetClasses = beanMapping.value();
+            for (Class<?> targetClass : targetClasses) {
+                if (mappingClass == targetClass) {
+                    throw new MappingException(String.format("""
                         Mapping Class와 Target Class가 같습니다.
                         Mapping Class: %s
                         Target Class: %s
                         """, mappingClass, targetClass));
-            }
-
-            Map<String, Field> targetFieldsByName = Arrays.stream(targetClass.getDeclaredFields())
-                    .collect(Collectors.toMap(
-                            Field::getName,
-                            (field) -> field,
-                            (f1, f2) -> f2
-                    ));
-
-            boolean isIncludeReverseMapping = beanMapping.includeReverseMapping();
-            Map<Field, Field> targetFieldsByMappingField = new HashMap<>();
-            Map<Field, Field> mappingFieldsByTargetField = new HashMap<>();
-            for (Field mappingField : mappingClass.getDeclaredFields()) {
-                String targetFieldName;
-                boolean setNull;
-                boolean reverseSetNull;
-                if (mappingField.getAnnotation(MappingAttribute.class) != null) {
-                    MappingAttribute mappingAttributeAnnotation = mappingField.getAnnotation(MappingAttribute.class);
-                    targetFieldName = mappingAttributeAnnotation.target();
-                    setNull = mappingAttributeAnnotation.setNull();
-                    reverseSetNull = mappingAttributeAnnotation.reverseSetNull();
-                } else {
-                    targetFieldName = mappingField.getName();
-                    setNull = true;
-                    reverseSetNull = true;
                 }
 
-                if (targetFieldsByName.containsKey(targetFieldName)) {
-                    Field targetField = targetFieldsByName.get(targetFieldName);
-                    targetFieldsByMappingField.put(mappingField, targetField);
-                    setNullMap.put(mappingField, setNull);
-                    if (isIncludeReverseMapping) {
-                        mappingFieldsByTargetField.put(targetField, mappingField);
-                        setNullMap.put(targetField, reverseSetNull);
+                Map<String, Field> targetFieldsByName = Arrays.stream(targetClass.getDeclaredFields())
+                        .collect(Collectors.toMap(
+                                Field::getName,
+                                (field) -> field,
+                                (f1, f2) -> f2
+                        ));
+
+                boolean isIncludeReverseMapping = beanMapping.includeReverseMapping();
+                Map<Field, Field> targetFieldsByMappingField = new HashMap<>();
+                Map<Field, Field> mappingFieldsByTargetField = new HashMap<>();
+                for (Field mappingField : mappingClass.getDeclaredFields()) {
+                    String targetFieldName;
+                    boolean setNull;
+                    boolean reverseSetNull;
+                    if (mappingField.getAnnotation(MappingAttribute.class) != null) {
+                        MappingAttribute mappingAttributeAnnotation = mappingField.getAnnotation(MappingAttribute.class);
+                        targetFieldName = mappingAttributeAnnotation.target();
+                        setNull = mappingAttributeAnnotation.setNull();
+                        reverseSetNull = mappingAttributeAnnotation.reverseSetNull();
+                    } else {
+                        targetFieldName = mappingField.getName();
+                        setNull = true;
+                        reverseSetNull = true;
                     }
-                } else {
-                    log.debug("Mapping attribute에 해당하는 Target attribute가 없음");
+
+                    if (targetFieldsByName.containsKey(targetFieldName)) {
+                        Field targetField = targetFieldsByName.get(targetFieldName);
+                        targetFieldsByMappingField.put(mappingField, targetField);
+                        setNullMap.put(mappingField, setNull);
+                        if (isIncludeReverseMapping) {
+                            mappingFieldsByTargetField.put(targetField, mappingField);
+                            setNullMap.put(targetField, reverseSetNull);
+                        }
+                    } else {
+                        log.debug("Mapping attribute에 해당하는 Target attribute가 없음; mappingClass={}, targetClass={}, fieldName={}",
+                                mappingClass, targetClass, targetFieldName);
+                    }
                 }
-            }
-            mappingTable.put(mappingClass, targetFieldsByMappingField);
-            classMapping.put(mappingClass, targetClass);
-            if (isIncludeReverseMapping) {
-                mappingTable.put(targetClass, mappingFieldsByTargetField);
-                classMapping.put(targetClass, mappingClass);
+
+                log.debug("mappingClass={}, isIncludeReverseMapping={}", mappingClass, isIncludeReverseMapping);
+
+                put(targetClass, mappingClass, targetFieldsByMappingField);
+                if (isIncludeReverseMapping) {
+                    put(mappingClass, targetClass, mappingFieldsByTargetField);
+                }
             }
         }
 
         if (log.isTraceEnabled()) {
             log.trace("Mapping 정보");
-            for (Map.Entry<Class<?>, Map<Field, Field>> entry : mappingTable.entrySet()) {
-                System.out.println("Mapping class=" + entry.getKey());
-                System.out.println("Target class=" + classMapping.get(entry.getKey()));
-                for (Map.Entry<Field, Field> fieldEntry : entry.getValue().entrySet()) {
-                    System.out.println(fieldEntry.getKey().getType().getSimpleName() + " " + fieldEntry.getKey().getName()
-                            + " ====>> " + fieldEntry.getValue().getType().getSimpleName() + " " + fieldEntry.getValue().getName());
+            for (Map.Entry<Class<?>, Map<Class<?>, Map<Field, Field>>> mappedTo : mappingTable.entrySet()) {
+                for (Map.Entry<Class<?>, Map<Field, Field>> entry : mappedTo.getValue().entrySet()) {
+                    System.out.println("Mapping class=" + mappedTo.getKey());
+                    System.out.println("Target class=" + entry.getKey());
+                    for (Map.Entry<Field, Field> fieldEntry : entry.getValue().entrySet()) {
+                        System.out.println(fieldEntry.getKey().getType().getSimpleName() + " " + fieldEntry.getKey().getName()
+                                + " ====>> " + fieldEntry.getValue().getType().getSimpleName() + " " + fieldEntry.getValue().getName());
+                    }
                 }
                 System.out.println("--------------------------");
             }
         }
     }
 
+    private void put(Class<?> mappingClass, Class<?> targetClass, Map<Field, Field> mappingFieldsByTargetField) {
+        if (mappingTable.containsKey(targetClass)) {
+            mappingTable.get(targetClass).put(mappingClass, mappingFieldsByTargetField);
+        } else {
+            Map<Class<?>, Map<Field, Field>> map = new HashMap<>();
+            map.put(mappingClass, mappingFieldsByTargetField);
+            mappingTable.put(targetClass, map);
+        }
+        if (classMapping.containsKey(targetClass)) {
+            classMapping.get(targetClass).add(mappingClass);
+        } else {
+            List<Class<?>> targets = new ArrayList<>();
+            targets.add(mappingClass);
+            classMapping.put(targetClass, targets);
+        }
+    }
+
     public <S> Object generateBean(S from) {
         Class<?> mappingClass = from.getClass();
-        Class<?> targetClass = classMapping.get(mappingClass);
+        Class<?> targetClass = classMapping.get(mappingClass).get(0);
         return generateBean(from, targetClass);
     }
 
@@ -163,8 +182,8 @@ public class BeanMapper {
     }
 
     private <S, T> Map<Field, Field> getFieldMappings(Class<? extends S> sourceClass, Class<? extends T> targetClass) {
-        Map<Field, Field> fieldMappings = mappingTable.get(sourceClass);
-        if (fieldMappings == null || targetClass == null || classMapping.get(sourceClass) != targetClass) {
+        Map<Field, Field> fieldMappings = mappingTable.get(sourceClass).get(targetClass);
+        if (fieldMappings == null || targetClass == null || !classMapping.get(sourceClass).contains(targetClass)) {
             throw new MappingNotExistsException(
                     "매핑이 존재하지 않습니다; source class=" + sourceClass + ", target class=" + targetClass
             );
