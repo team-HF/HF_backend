@@ -1,7 +1,7 @@
 spring:
   profiles:
     active:
-#      - no-auth
+      - no-auth
       - secret
       - constants
       - priv # 각각 개발 환경에 따라 개별 설정이 필요할 수 있으므로
@@ -59,7 +59,7 @@ server:
 spring:
   config:
     activate:
-      on-profile: local-dev
+      on-profile: no-auth
 
   jpa:
     hibernate:

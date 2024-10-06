@@ -12,6 +12,7 @@ import com.hf.healthfriend.domain.like.exception.PostOrMemberNotExistsException;
 import com.hf.healthfriend.domain.like.repository.LikeRepository;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.post.entity.Post;
+import com.hf.healthfriend.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import java.util.Optional;
 @Transactional
 public class LikeService {
     private final LikeRepository likeRepository;
+    private final PostRepository postRepository;
 
     /**
      * 좋아요를 추가한다.
@@ -48,6 +50,7 @@ public class LikeService {
             );
             try {
                 Like savedLike = this.likeRepository.save(like);
+                postRepository.incrementLikeCount(postId);
                 return savedLike.getLikeId();
             } catch (DataIntegrityViolationException e) {
                 throw new PostOrMemberNotExistsException(e, memberId, postId);
@@ -131,10 +134,6 @@ public class LikeService {
         return this.likeRepository.countByPostId(postId);
     }
 
-    public Long getLikeCountOfComment(Long commentId) {
-        return this.likeRepository.countByCommentId(commentId);
-    }
-
     public List<PostLikeDto> getPostLikeOfMember(Long memberId) {
         return postEntityListToDtoList(this.likeRepository.findPostLikeByMemberId(memberId));
     }
@@ -150,5 +149,7 @@ public class LikeService {
     public void cancelLike(Long likeIdToCancel) throws NoSuchElementException {
         Like likeEntity = this.likeRepository.findById(likeIdToCancel).orElseThrow(NoSuchElementException::new);// TODO: 메시지?
         likeEntity.cancel();
+        postRepository.decrementLikeCountByLikeId(likeIdToCancel);
+
     }
 }

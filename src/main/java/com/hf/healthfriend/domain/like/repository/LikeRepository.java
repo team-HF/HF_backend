@@ -4,6 +4,7 @@ import com.hf.healthfriend.domain.like.entity.Like;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.post.entity.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -84,4 +85,8 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
     Long countByCommentId(@Param("commentId") Long commentId);
 
     boolean existsByPostAndMember(Post post, Member member);
+
+    @Modifying
+    @Query(value = "UPDATE likes SET canceled = true WHERE post_id = :postId", nativeQuery = true)
+    void deleteLikeByPostId(@Param("postId") Long postId);
 }

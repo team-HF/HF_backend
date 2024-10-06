@@ -4,6 +4,8 @@ import com.hf.healthfriend.domain.comment.constant.SortType;
 import com.hf.healthfriend.domain.comment.dto.CommentDto;
 import com.hf.healthfriend.domain.comment.repository.CommentJpaRepository;
 import com.hf.healthfriend.domain.comment.service.CommentService;
+import com.hf.healthfriend.domain.like.entity.Like;
+import com.hf.healthfriend.domain.like.repository.LikeRepository;
 import com.hf.healthfriend.domain.like.service.LikeService;
 import com.hf.healthfriend.domain.member.constant.FitnessLevel;
 import com.hf.healthfriend.domain.member.entity.Member;
@@ -17,13 +19,10 @@ import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.exception.CustomException;
 import com.hf.healthfriend.domain.post.exception.PostErrorCode;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
-import com.hf.healthfriend.domain.post.repository.querydsl.PostCustomRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.PageRequest;
@@ -41,6 +40,7 @@ public class PostService {
     private final CommentJpaRepository commentJpaRepository;
     private final CommentService commentService;
     private final LikeService likeService;
+    private final LikeRepository likeRepository;
 
     public Long save(PostWriteRequest postWriteRequest) {
         Long memberId = postWriteRequest.getWriterId();
@@ -68,7 +68,6 @@ public class PostService {
             post.updateViewCount(post.getViewCount());
         }
         List<CommentDto> commentList = commentService.getCommentsOfPost(postId,sortType);
-        Long likeCount = likeService.getLikeCountOfPost(postId);
         return PostGetResponse.builder()
                 .postId(post.getPostId())
                 .title(post.getTitle())
@@ -77,7 +76,7 @@ public class PostService {
                 .viewCount(post.getViewCount())
                 .comments(commentList)
                 .createDate(post.getCreationTime())
-                .likeCount(likeCount)
+                .likeCount(post.getLikesCount())
                 .build();
     }
 
@@ -85,22 +84,14 @@ public class PostService {
         Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
                 .orElseThrow(() -> new CustomException(PostErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
         post.delete();
+        likeRepository.deleteLikeByPostId(postId);
     }
 
     public List<PostListObject> getList(int pageNumber, FitnessLevel fitnessLevel, PostCategory postCategory, String keyword) {
         Pageable pageable = PageRequest.of(pageNumber - 1, 10);
         return postRepository.getList(fitnessLevel, postCategory, keyword, pageable);
     }
-
-    public String getSentenceContainKeyword(String keyword, String content){
-        String[] sentences = content.split("(?<=[.!?])");
-        for (String sentence : sentences) {
-            if (sentence.contains(keyword)) {
-                return sentence.trim();
-            }
-        }
-        return null;
-    }
+    
 
 
 }
