@@ -110,7 +110,8 @@ public class MemberService {
         Member updatedMember = this.memberRepository.update(memberId, updateDto);
         return MemberUpdateResponseDto.builder()
                 .profileImageUrl(this.fileUrlResolver.resolveFileUrl(updatedMember.getProfileImageUrl()))
-                .location(updatedMember.getLocation())
+                .city(updatedMember.getCity())
+                .district(updatedMember.getDistrict())
                 .introduction(updatedMember.getIntroduction())
                 .fitnessLevel(updatedMember.getFitnessLevel())
                 .companionStyle(updatedMember.getCompanionStyle())
@@ -147,22 +148,9 @@ public class MemberService {
     }
 
     private MemberDto bindToDto(Member member) {
-        return MemberDto.builder()
-                .memberId(member.getId())
-                .loginId(member.getLoginId())
-                .role(member.getRole())
-                .email(member.getEmail())
-                .creationTime(member.getCreationTime())
-                .nickname(member.getNickname())
+        MemberDto memberDto = this.beanMapper.generateBean(member, MemberDto.class);
+        return memberDto.toBuilder()
                 .profileImageUrl(this.fileUrlResolver.resolveFileUrl(member.getProfileImageUrl()))
-                .birthDate(member.getBirthDate())
-                .gender(member.getGender())
-                .introduction(member.getIntroduction())
-                .fitnessLevel(member.getFitnessLevel())
-                .companionStyle(member.getCompanionStyle())
-                .fitnessEagerness(member.getFitnessEagerness())
-                .fitnessObjective(member.getFitnessObjective())
-                .fitnessKind(member.getFitnessKind()) // TODO: Eager Fetch를 해야 하는 게 더 나을지 고민해 보기
                 .build();
     }
 }

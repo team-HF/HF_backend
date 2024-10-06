@@ -8,6 +8,7 @@ import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.post.constant.PostCategory;
 import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
+import com.hf.healthfriend.testutil.SampleEntityGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -57,9 +58,9 @@ class LikeRepositoryTest {
 
     @BeforeEach
     void beforeEach() {
-        this.member1 = generateSampleMember("sample1@gmail.com", "nick1");
-        this.member2 = generateSampleMember("sample2@gmail.com", "nick2");
-        this.member3 = generateSampleMember("sample3@gmail.com", "nick3");
+        this.member1 = SampleEntityGenerator.generateSampleMember("sample1@gmail.com", "nick1");
+        this.member2 = SampleEntityGenerator.generateSampleMember("sample2@gmail.com", "nick2");
+        this.member3 = SampleEntityGenerator.generateSampleMember("sample3@gmail.com", "nick3");
 
         this.memberRepository.save(member1);
         this.memberRepository.save(member2);
@@ -78,20 +79,6 @@ class LikeRepositoryTest {
         this.likeMember2_Post1 = this.likeRepository.save(new Like(member2, this.savedPost1,LikeType.POST));
         this.likeMember3_Post1 = this.likeRepository.save(new Like(member3, this.savedPost1,LikeType.POST));
         this.likeMember3_Post2 = this.likeRepository.save(new Like(member3, this.savedPost2,LikeType.POST));
-    }
-
-    private Member generateSampleMember(String email, String nickname) {
-        Member member = new Member(email);
-        member.setNickname(nickname);
-        member.setBirthDate(LocalDate.of(1997, 9, 16));
-        member.setGender(Gender.MALE);
-        member.setIntroduction("");
-        member.setFitnessLevel(FitnessLevel.BEGINNER);
-        member.setCompanionStyle(CompanionStyle.GROUP);
-        member.setFitnessEagerness(FitnessEagerness.EAGER);
-        member.setFitnessObjective(FitnessObjective.BULK_UP);
-        member.setFitnessKind(FitnessKind.FUNCTIONAL);
-        return member;
     }
 
     private Post generateSamplePost(Member member) {

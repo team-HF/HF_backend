@@ -12,5 +12,7 @@ import java.lang.annotation.*;
 @Documented
 public @interface BeanMapping {
 
-    Class<?> value();
+    Class<?>[] value();
+
+    boolean includeReverseMapping() default true;
 }

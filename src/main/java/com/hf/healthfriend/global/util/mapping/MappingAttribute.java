@@ -10,4 +10,6 @@ public @interface MappingAttribute {
     String target();
 
     boolean setNull() default true;
+
+    boolean reverseSetNull() default true;
 }

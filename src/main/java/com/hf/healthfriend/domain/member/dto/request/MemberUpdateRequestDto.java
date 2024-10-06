@@ -19,8 +19,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class MemberUpdateRequestDto {
     private MultipartFile profileImage;
 
-    @Schema(description = "회원의 현재 위치 - OO시 OOO구까지")
-    private String location;
+    @Schema(description = "회원이 현재 위치한 시")
+    private String city;
+
+    @Schema(description = "회원이 현재 위치한 구")
+    private String district;
 
     @Length(max = 500)
     private String introduction;

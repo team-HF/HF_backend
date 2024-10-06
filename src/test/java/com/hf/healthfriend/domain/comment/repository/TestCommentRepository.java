@@ -9,6 +9,7 @@ import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.post.constant.PostCategory;
 import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
+import com.hf.healthfriend.testutil.SampleEntityGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -58,20 +59,16 @@ class TestCommentRepository {
     @BeforeEach
     void beforeEach() {
         // Insert sample members
-        Member postWriter = new Member("post@writer.com");
-        setNecessaryFieldOfMemberToSampleData(postWriter, "샘플포스터");
+        Member postWriter = SampleEntityGenerator.generateSampleMember("post@writer.com", "샘플포스터");
 
         this.postWriterId = this.memberRepository.save(postWriter).getId();
 
         List<Member> commentWriters = List.of(
-                new Member("comment1@writer.com"),
-                new Member("comment2@writer.com"),
-                new Member("comment3@writer.com")
+                SampleEntityGenerator.generateSampleMember("comment1@writer.com"),
+                SampleEntityGenerator.generateSampleMember("comment2@writer.com"),
+                SampleEntityGenerator.generateSampleMember("comment3@writer.com")
         );
-        commentWriters.forEach((e) -> {
-            setNecessaryFieldOfMemberToSampleData(e, e.getLoginId().substring(0, 8));
-            this.memberRepository.save(e);
-        });
+        commentWriters.forEach((e) -> this.memberRepository.save(e));
 
         this.commentWriterIds = commentWriters.stream().map(Member::getId).toList();
 
@@ -86,18 +83,6 @@ class TestCommentRepository {
         this.postRepository.save(post);
 
         this.postId = post.getPostId();
-    }
-
-    private void setNecessaryFieldOfMemberToSampleData(Member entity, String sampleNickname) {
-        entity.setNickname(sampleNickname);
-        entity.setBirthDate(LocalDate.of(1997, 9, 16));
-        entity.setGender(Gender.MALE);
-        entity.setIntroduction("");
-        entity.setFitnessLevel(FitnessLevel.ADVANCED);
-        entity.setCompanionStyle(CompanionStyle.SMALL);
-        entity.setFitnessEagerness(FitnessEagerness.EAGER);
-        entity.setFitnessObjective(FitnessObjective.BULK_UP);
-        entity.setFitnessKind(FitnessKind.FUNCTIONAL);
     }
 
     @DisplayName("findById - 삭제된 레코드는 가져오지 않음")

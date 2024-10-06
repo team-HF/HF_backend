@@ -55,8 +55,11 @@ public class Member implements UserDetails {
     @Column(name = "profile_url")
     private String profileImageUrl;
 
-    @Column(name = "location", nullable = false)
-    private String location;
+    @Column(name = "city", nullable = false)
+    private String city;
+
+    @Column(name = "district", nullable = false)
+    private String district;
 
     @Column(name = "birth_date", nullable = false)
     @Temporal(TemporalType.DATE)
