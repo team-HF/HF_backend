@@ -19,7 +19,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Builder
-@Setter
+@Setter // TODO: Setter를 없애고 엔티티 수정 코드는 udpate~ 메소드로 대체해야 함
 @Getter
 @ToString
 public class Member implements UserDetails {
@@ -33,8 +33,11 @@ public class Member implements UserDetails {
     private String loginId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role")
+    @Column(name = "role", nullable = false)
     private Role role = Role.ROLE_MEMBER;
+
+    @Column(name = "name", nullable = false)
+    private String name;
 
     @Column(name = "email", unique = true, nullable = false)
     private String email;
@@ -46,42 +49,48 @@ public class Member implements UserDetails {
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime creationTime = LocalDateTime.now();
 
-    @Column(name = "nickname")
+    @Column(name = "nickname", nullable = false)
     private String nickname;
 
     @Column(name = "profile_url")
     private String profileImageUrl;
 
-    @Column(name = "birth_date")
+    @Column(name = "location", nullable = false)
+    private String location;
+
+    @Column(name = "birth_date", nullable = false)
     @Temporal(TemporalType.DATE)
     private LocalDate birthDate;
 
-    @Column(name = "gender")
+    @Column(name = "gender", nullable = false)
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Column(name = "introduction")
+    @Column(name = "introduction", nullable = false)
     private String introduction;
 
-    @Column(name = "fitness_level")
+    @Column(name = "fitness_level", nullable = false)
     @Enumerated(EnumType.STRING)
     private FitnessLevel fitnessLevel;
 
-    @Column(name = "companion_style")
+    @Column(name = "companion_style", nullable = false)
     @Enumerated(EnumType.STRING)
     private CompanionStyle companionStyle;
 
-    @Column(name = "fitness_eagerness")
+    @Column(name = "fitness_eagerness", nullable = false)
     @Enumerated(EnumType.STRING)
     private FitnessEagerness fitnessEagerness;
 
-    @Column(name = "fitness_objective")
+    @Column(name = "fitness_objective", nullable = false)
     @Enumerated(EnumType.STRING)
     private FitnessObjective fitnessObjective;
 
-    @Column(name = "fitness_kind")
+    @Column(name = "fitness_kind", nullable = false)
     @Enumerated(EnumType.STRING)
     private FitnessKind fitnessKind;
+
+    @Column(name = "is_deleted")
+    private boolean isDeleted = false;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
@@ -93,9 +102,15 @@ public class Member implements UserDetails {
         this.id = memberId;
     }
 
-    public Member(String email) {
-        this.loginId = email;
-        this.email = email;
+    public Member(String loginId) {
+        this.loginId = loginId;
+        this.email = loginId;
+    }
+
+    public Member(String loginId, String password) {
+        this.loginId = loginId;
+        this.email = loginId;
+        this.password = password;
     }
 
     public Member(String loginId, String email, String password) {
@@ -116,5 +131,9 @@ public class Member implements UserDetails {
     @Override
     public String getUsername() {
         return String.valueOf(this.id);
+    }
+
+    public void delete() {
+        this.isDeleted = true;
     }
 }

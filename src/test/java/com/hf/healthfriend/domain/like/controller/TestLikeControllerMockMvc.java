@@ -12,6 +12,7 @@ import com.hf.healthfriend.domain.post.constant.PostCategory;
 import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
+import com.hf.healthfriend.testutil.SampleEntityGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -68,9 +69,9 @@ class TestLikeControllerMockMvc {
                 .build();
 
         this.sampleMembers = Map.of(
-                "member1", generateSampleMember("sample1@gmail.com", "nick1"),
-                "member2", generateSampleMember("sample2@gmail.com", "nick2"),
-                "member3", generateSampleMember("sample3@gmail.com", "nick3")
+                "member1", SampleEntityGenerator.generateSampleMember("sample1@gmail.com", "nick1", "010-1234-1234"),
+                "member2", SampleEntityGenerator.generateSampleMember("sample2@gmail.com", "nick2", "010-1234-1235"),
+                "member3", SampleEntityGenerator.generateSampleMember("sample3@gmail.com", "nick3", "010-1234-1236")
         );
 
         this.samplePosts = Map.of(

@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.member.service;
 
+import com.hf.healthfriend.domain.member.constant.FitnessLevel;
 import com.hf.healthfriend.domain.member.dto.MemberDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
@@ -7,14 +8,13 @@ import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberUpdateResponseDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.DuplicateMemberCreationException;
+import com.hf.healthfriend.domain.member.exception.FitnessLevelUpdateException;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
-import com.hf.healthfriend.domain.spec.dto.SpecDto;
-import com.hf.healthfriend.domain.spec.dto.response.SpecUpdateResponseDto;
-import com.hf.healthfriend.domain.spec.service.SpecService;
 import com.hf.healthfriend.global.util.file.FileUrlResolver;
 import com.hf.healthfriend.global.util.file.MultipartFileUploader;
+import com.hf.healthfriend.global.util.mapping.BeanMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -31,9 +30,9 @@ import java.util.List;
 @Transactional
 public class MemberService {
     private final MemberRepository memberRepository;
-    private final SpecService specService;
     private final FileUrlResolver fileUrlResolver;
     private final MultipartFileUploader multipartFileUploader;
+    private final BeanMapper beanMapper;
 
     /**
      * MemberCreationRequestDto에 있는 데이터를 가지고 새로운 Member를 생성한다.
@@ -95,18 +94,8 @@ public class MemberService {
     }
 
     public MemberUpdateResponseDto updateMember(Long memberId, MemberUpdateRequestDto requestDto) throws MemberNotFoundException {
-        MemberUpdateDto updateDto = MemberUpdateDto.builder()
-                .role(requestDto.getRole())
-                .nickname(requestDto.getNickname())
-                .birthDate(requestDto.getBirthDate())
-                .gender(requestDto.getGender())
-                .introduction(requestDto.getIntroduction())
-                .fitnessLevel(requestDto.getFitnessLevel())
-                .companionStyle(requestDto.getCompanionStyle())
-                .fitnessEagerness(requestDto.getFitnessEagerness())
-                .fitnessObjective(requestDto.getFitnessObjective())
-                .fitnessKind(requestDto.getFitnessKind())
-                .build();
+        validateUpdateRequest(memberId, requestDto);
+        MemberUpdateDto updateDto = this.beanMapper.generateBean(requestDto, MemberUpdateDto.class);
         if (requestDto.getProfileImage() != null) {
             String filePath = storeProfileImage(requestDto.getProfileImage());
             if (filePath != null) {
@@ -120,15 +109,8 @@ public class MemberService {
         }
         Member updatedMember = this.memberRepository.update(memberId, updateDto);
         return MemberUpdateResponseDto.builder()
-                .memberId(updatedMember.getId())
-                .loginId(updatedMember.getLoginId())
-                .role(updatedMember.getRole())
-                .email(updatedMember.getEmail())
-                .creationTime(updatedMember.getCreationTime())
-                .nickname(updatedMember.getNickname())
                 .profileImageUrl(this.fileUrlResolver.resolveFileUrl(updatedMember.getProfileImageUrl()))
-                .birthDate(updatedMember.getBirthDate())
-                .gender(updatedMember.getGender())
+                .location(updatedMember.getLocation())
                 .introduction(updatedMember.getIntroduction())
                 .fitnessLevel(updatedMember.getFitnessLevel())
                 .companionStyle(updatedMember.getCompanionStyle())
@@ -136,6 +118,19 @@ public class MemberService {
                 .fitnessObjective(updatedMember.getFitnessObjective())
                 .fitnessKind(updatedMember.getFitnessKind())
                 .build();
+    }
+
+    private void validateUpdateRequest(Long memberId, MemberUpdateRequestDto requestDto) {
+        if (requestDto.getFitnessLevel() == null) {
+            return;
+        }
+        switch (requestDto.getFitnessLevel()) {
+            case ADVANCED -> {
+                // TODO: 매칭 횟수 10번 미만일 경우 validation 에러
+            }
+            case BEGINNER ->
+                throw new FitnessLevelUpdateException("고수에서 새싹으로 변경 불가");
+        }
     }
 
     private String storeProfileImage(MultipartFile profileImage) {
