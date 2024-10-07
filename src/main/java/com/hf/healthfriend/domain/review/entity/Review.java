@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.review.entity;
 
+import com.hf.healthfriend.domain.matching.entity.Matching;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.review.constants.EvaluationType;
 import jakarta.persistence.*;
@@ -19,16 +20,13 @@ public class Review {
     @Column(name = "review_id")
     private Long reviewId;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reviewer_id", nullable = false)
     private Member reviewer;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "reviewee_id", nullable = false)
-    private Member reviewee;
-
-    @Column(name = "matching_id") // TODO Matching 엔티티가 정의되면 JoinColumn으로 변경
-    private Long matchingId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "matching_id")
+    private Matching matching;
 
     @Column(name = "description", nullable = false)
     private String description;
@@ -53,29 +51,25 @@ public class Review {
     }
 
     public Review(Member reviewer,
-                  Member reviewee,
-                  Long matchingId, // TODO
+                  Matching matching,
                   String description,
                   Integer score,
                   EvaluationType evaluationType) {
         this.reviewer = reviewer;
-        this.reviewee = reviewee;
-        this.matchingId = matchingId; // TODO
+        this.matching = matching;
         this.description = description;
         this.score = score;
         this.evaluationType = evaluationType;
     }
 
     public Review(Member reviewer,
-                  Member reviewee,
-                  Long matchingId, // TODO
+                  Matching matching,
                   String description,
                   LocalDateTime creationTime,
                   Integer score,
                   EvaluationType evaluationType) {
         this.reviewer = reviewer;
-        this.reviewee = reviewee;
-        this.matchingId = matchingId; // TODO
+        this.matching = matching;
         this.description = description;
         this.creationTime = creationTime;
         this.score = score;
