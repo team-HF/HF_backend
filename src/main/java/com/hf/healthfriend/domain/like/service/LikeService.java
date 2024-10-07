@@ -12,8 +12,14 @@ import com.hf.healthfriend.domain.like.exception.PostOrMemberNotExistsException;
 import com.hf.healthfriend.domain.like.repository.LikeRepository;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.post.entity.Post;
+import com.hf.healthfriend.domain.post.exception.CustomException;
+import com.hf.healthfriend.domain.post.exception.PostErrorCode;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RMap;
+import org.redisson.api.RScoredSortedSet;
+import org.redisson.api.RedissonClient;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,13 +27,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @Transactional
 public class LikeService {
     private final LikeRepository likeRepository;
     private final PostRepository postRepository;
+    private final RedissonClient redissonClient;
 
     /**
      * 좋아요를 추가한다.
@@ -50,7 +59,9 @@ public class LikeService {
             );
             try {
                 Like savedLike = this.likeRepository.save(like);
+                // TODO 동시성 처리 필요
                 postRepository.incrementLikeCount(postId);
+                savePopularPost(postId);
                 return savedLike.getLikeId();
             } catch (DataIntegrityViolationException e) {
                 throw new PostOrMemberNotExistsException(e, memberId, postId);
@@ -64,10 +75,16 @@ public class LikeService {
         }
 
         like.uncancel();
+        // TODO 동시성 처리 필요
+        postRepository.incrementLikeCount(postId);
+        savePopularPost(postId);
 
         return like.getLikeId();
     }
 
+    /**
+     * Comment 도 likeCount를 도입할지 고려해봐야 한다. (아마 해야될듯..)
+     */
     public Long addCommentLike(Long memberId, Long commentId) throws DuplicatePostLikeException {
         Optional<Like> likeOp = this.likeRepository.findByMemberIdAndCommentId(memberId, commentId);
         if (likeOp.isEmpty()) {
@@ -150,6 +167,36 @@ public class LikeService {
         Like likeEntity = this.likeRepository.findById(likeIdToCancel).orElseThrow(NoSuchElementException::new);// TODO: 메시지?
         likeEntity.cancel();
         postRepository.decrementLikeCountByLikeId(likeIdToCancel);
+
+        long postId = likeRepository.findPostIdByLikeId(likeIdToCancel);
+        // TODO 동시성 처리 필요
+        deletePopularPost(postId);
+
+    }
+
+    public void savePopularPost(Long postId) {
+        Long likeCount = this.likeRepository.countByPostId(postId);
+        if(likeCount>=5) {
+            String postKey = "post:" + postId;
+            RScoredSortedSet<Long> sortedSet = redissonClient.getScoredSortedSet("popular_posts");
+            sortedSet.add((double)likeCount, postId);
+            log.info("popularPost sortedSet 좋아요 수 증가");
+        }
+    }
+
+    public void deletePopularPost(Long postId) {
+        Long likeCount = this.likeRepository.countByPostId(postId);
+        RScoredSortedSet<Long> sortedSet = redissonClient.getScoredSortedSet("popular_posts");
+        if (likeCount<5){
+            sortedSet.remove(postId);
+            log.info("popularPost sortedSet 제거 완료 ");
+        }
+        else {
+            sortedSet.add((double)likeCount, postId);
+            log.info("popularPost sortedSet 좋아요 수 감소");
+        }
+        // 주간 TOP 인기글이니까 일주일 뒤엔 만료
+        redissonClient.getKeys().expire("popular_posts", 7, TimeUnit.DAYS); // TTL 설정
 
     }
 }
