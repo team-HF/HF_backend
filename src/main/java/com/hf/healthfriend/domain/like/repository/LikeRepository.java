@@ -89,4 +89,7 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
     @Modifying
     @Query(value = "UPDATE likes SET canceled = true WHERE post_id = :postId", nativeQuery = true)
     void deleteLikeByPostId(@Param("postId") Long postId);
+
+    @Query("SELECT l.post.postId FROM Like l WHERE l.likeId=:likeId ")
+    Long findPostIdByLikeId(@Param("likeId") Long likeId);
 }
