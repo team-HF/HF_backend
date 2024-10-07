@@ -62,8 +62,8 @@ spring:
       on-profile: local-dev
 
   jpa:
-    hibernate:
-      ddl-auto: update
+#    hibernate:
+#      ddl-auto: update
     properties:
       hibernate:
         show_sql: true
