@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -92,7 +93,7 @@ public class ReviewController {
                     )
             }
     )
-    public ResponseEntity<ApiBasicResponse<Long>> addReview(@RequestBody ReviewCreationRequestDto dto) {
+    public ResponseEntity<ApiBasicResponse<Long>> addReview(@RequestBody @Valid ReviewCreationRequestDto dto) {
         Long generatedReviewId = this.reviewService.addReview(dto);
         return new ResponseEntity<>(
                 ApiBasicResponse.of(generatedReviewId, HttpStatus.CREATED, "리뷰 생성 성공"),
