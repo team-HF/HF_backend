@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -40,11 +42,11 @@ public class Review {
     @Column(name = "score", nullable = false)
     private Integer score;
 
-    @Column(name = "evaluation_type", nullable = false)
-    private EvaluationType evaluationType;
-
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
+
+    @OneToMany(mappedBy = "review", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ReviewEvaluation> reviewEvaluations = new ArrayList<>();
 
     public Review(Long reviewId) {
         this.reviewId = reviewId;
@@ -54,12 +56,8 @@ public class Review {
                   Matching matching,
                   String description,
                   Integer score,
-                  EvaluationType evaluationType) {
-        this.reviewer = reviewer;
-        this.matching = matching;
-        this.description = description;
-        this.score = score;
-        this.evaluationType = evaluationType;
+                  List<ReviewEvaluation> reviewEvaluations) {
+        this(reviewer, matching, description, LocalDateTime.now(), score, reviewEvaluations);
     }
 
     public Review(Member reviewer,
@@ -67,13 +65,14 @@ public class Review {
                   String description,
                   LocalDateTime creationTime,
                   Integer score,
-                  EvaluationType evaluationType) {
+                  List<ReviewEvaluation> reviewEvaluations) {
         this.reviewer = reviewer;
         this.matching = matching;
         this.description = description;
         this.creationTime = creationTime;
         this.score = score;
-        this.evaluationType = evaluationType;
+        reviewEvaluations.forEach((re) -> re.setReview(this));
+        this.reviewEvaluations = reviewEvaluations;
     }
 
     public void updateDescription(String description) {
@@ -84,11 +83,6 @@ public class Review {
     public void updateScore(Integer score) {
         this.lastModified = LocalDateTime.now();
         this.score = score;
-    }
-
-    public void updateEvaluationType(EvaluationType evaluationType) {
-        this.lastModified = LocalDateTime.now();
-        this.evaluationType = evaluationType;
     }
 
     public void delete() {

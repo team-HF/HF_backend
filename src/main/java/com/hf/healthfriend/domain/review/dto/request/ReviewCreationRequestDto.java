@@ -1,7 +1,8 @@
 package com.hf.healthfriend.domain.review.dto.request;
 
-import com.hf.healthfriend.domain.review.constants.EvaluationType;
 import lombok.*;
+
+import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -13,5 +14,5 @@ public class ReviewCreationRequestDto {
     private Long reviewerId;
     private String description;
     private Integer score;
-    private EvaluationType evaluationType;
+    private List<ReviewEvaluationDto> evaluations;
 }
