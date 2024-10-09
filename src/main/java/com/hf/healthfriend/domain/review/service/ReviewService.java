@@ -7,12 +7,15 @@ import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.review.dto.request.ReviewCreationRequestDto;
 import com.hf.healthfriend.domain.review.entity.Review;
+import com.hf.healthfriend.domain.review.entity.ReviewEvaluation;
 import com.hf.healthfriend.domain.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -37,9 +40,13 @@ public class ReviewService {
         Review newReview = new Review(
                 new Member(dto.getReviewerId()),
                 targetMatching,
-                dto.getDescription(),
                 dto.getScore(),
-                dto.getEvaluationType()
+                dto.getEvaluations() == null
+                        ? List.of()
+                        : dto.getEvaluations()
+                        .stream()
+                        .map((e) -> new ReviewEvaluation(e.getEvaluationType(), e.getEvaluationDetailId()))
+                        .toList()
         );
 
         try {
