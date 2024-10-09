@@ -30,9 +30,6 @@ public class Review {
     @JoinColumn(name = "matching_id")
     private Matching matching;
 
-    @Column(name = "description", nullable = false)
-    private String description;
-
     @Column(name = "creation_time")
     private LocalDateTime creationTime = LocalDateTime.now();
 
@@ -54,30 +51,22 @@ public class Review {
 
     public Review(Member reviewer,
                   Matching matching,
-                  String description,
                   Integer score,
                   List<ReviewEvaluation> reviewEvaluations) {
-        this(reviewer, matching, description, LocalDateTime.now(), score, reviewEvaluations);
+        this(reviewer, matching, LocalDateTime.now(), score, reviewEvaluations);
     }
 
     public Review(Member reviewer,
                   Matching matching,
-                  String description,
                   LocalDateTime creationTime,
                   Integer score,
                   List<ReviewEvaluation> reviewEvaluations) {
         this.reviewer = reviewer;
         this.matching = matching;
-        this.description = description;
         this.creationTime = creationTime;
         this.score = score;
         reviewEvaluations.forEach((re) -> re.setReview(this));
         this.reviewEvaluations = reviewEvaluations;
-    }
-
-    public void updateDescription(String description) {
-        this.lastModified = LocalDateTime.now();
-        this.description = description;
     }
 
     public void updateScore(Integer score) {
