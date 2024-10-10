@@ -114,4 +114,22 @@ class TestReviewRepository {
         assertThat(onlyNotGood.get(0).getEvaluationDetailId()).isEqualTo(1);
         assertThat(onlyNotGood.get(0).getEvaluationDetailCount()).isEqualTo(2);
     }
+
+    @DisplayName("calculateAverageScoreByRevieweeId - success")
+    @Test
+    void calculateAverageScoreByRevieweeId_success() {
+        // Given
+        Review review1 = SampleEntityGenerator.generateSampleReview(this.sampleMatching1, this.sampleBeginner1, 3);
+        review1 = this.reviewRepository.save(review1);
+        Review review2 = SampleEntityGenerator.generateSampleReview(this.sampleMatching2, this.sampleBeginner2, 4);
+        review2 = this.reviewRepository.save(review2);
+
+        // When
+        double result = this.reviewRepository.calculateAverageScoreByRevieweeId(this.sampleAdvanced.getId());
+
+        log.info("result={}", result);
+
+        // Then
+        assertThat(result).isEqualTo(((double)review1.getScore() + review2.getScore()) / 2);
+    }
 }

@@ -46,6 +46,10 @@ public class SampleEntityGenerator {
         return generateSampleReview(matching, reviewer, 3, evaluations);
     }
 
+    public static Review generateSampleReview(Matching matching, Member reviewer, Integer score) {
+        return generateSampleReview(matching, reviewer, score, generateSampleReviewEvaluation());
+    }
+
     public static Review generateSampleReview(Matching matching, Member reviewer, Integer score, List<ReviewEvaluation> evaluations) {
         return new Review(
                 reviewer,
