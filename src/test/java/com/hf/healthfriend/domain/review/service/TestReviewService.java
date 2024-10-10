@@ -6,33 +6,57 @@ import com.hf.healthfriend.domain.matching.repository.MatchingRepository;
 import com.hf.healthfriend.domain.member.constant.FitnessLevel;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
-import com.hf.healthfriend.domain.member.repository.MemberRepository;
+import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
 import com.hf.healthfriend.domain.review.constants.EvaluationType;
 import com.hf.healthfriend.domain.review.dto.request.ReviewCreationRequestDto;
 import com.hf.healthfriend.domain.review.dto.request.ReviewEvaluationDto;
+import com.hf.healthfriend.domain.review.dto.response.RevieweeResponseDto;
+import com.hf.healthfriend.domain.review.repository.ReviewRepository;
 import com.hf.healthfriend.testutil.SampleEntityGenerator;
+import com.hf.healthfriend.testutil.TestConfig;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
+import java.util.Map;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-@SpringBootTest
-@Transactional
+@Slf4j
+@DataJpaTest
+@ActiveProfiles({
+        "local-dev",
+        "secret",
+        "priv",
+        "constants"
+})
+@Import(TestConfig.class)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class TestReviewService {
 
-    @Autowired
     ReviewService reviewService;
+
+    @Autowired
+    ReviewRepository reviewRepository;
 
     @Autowired
     MatchingRepository matchingRepository;
 
     @Autowired
-    MemberRepository memberRepository;
+    MemberJpaRepository memberRepository;
+
+    @BeforeEach
+    void beforeEach() {
+        this.reviewService = new ReviewService(this.reviewRepository, this.matchingRepository);
+    }
 
     @DisplayName("addReview - success")
     @Test
@@ -108,5 +132,81 @@ class TestReviewService {
         return new Object[]{
                 member1, member2, savedMatching
         };
+    }
+
+    @DisplayName("getRevieweeInfo - success")
+    @Test
+    void getRevieweeInfo_success() {
+        // Given
+        Member beginner1 = SampleEntityGenerator.generateSampleMember("beginner1@gmail.com", "nick1");
+        beginner1.setFitnessLevel(FitnessLevel.BEGINNER);
+        Member beginner2 = SampleEntityGenerator.generateSampleMember("beginner2@gmail.com", "nick2");
+        beginner2.setFitnessLevel(FitnessLevel.BEGINNER);
+        Member advanced = SampleEntityGenerator.generateSampleMember("advanced@gmail.com", "nick3");
+        advanced.setFitnessLevel(FitnessLevel.ADVANCED);
+
+        beginner1 = this.memberRepository.save(beginner1);
+        beginner2 = this.memberRepository.save(beginner2);
+        advanced = this.memberRepository.save(advanced);
+
+        Matching matching1 = new Matching(beginner1, advanced);
+        Matching matching2 = new Matching(beginner2, advanced);
+        matching1 = this.matchingRepository.save(matching1);
+        matching2 = this.matchingRepository.save(matching2);
+
+        ReviewCreationRequestDto requestDto1 = ReviewCreationRequestDto.builder()
+                .reviewerId(beginner1.getId())
+                .matchingId(matching1.getMatchingId())
+                .score(3)
+                .evaluations(List.of(
+                        new ReviewEvaluationDto(EvaluationType.GOOD, 1),
+                        new ReviewEvaluationDto(EvaluationType.GOOD, 2),
+                        new ReviewEvaluationDto(EvaluationType.NOT_GOOD, 1)
+                ))
+                .build();
+        ReviewCreationRequestDto requestDto2 = ReviewCreationRequestDto.builder()
+                .reviewerId(beginner2.getId())
+                .matchingId(matching2.getMatchingId())
+                .score(4)
+                .evaluations(List.of(
+                        new ReviewEvaluationDto(EvaluationType.GOOD, 1),
+                        new ReviewEvaluationDto(EvaluationType.NOT_GOOD, 1),
+                        new ReviewEvaluationDto(EvaluationType.NOT_GOOD, 2)
+                ))
+                .build();
+
+        this.reviewService.addReview(requestDto1);
+        this.reviewService.addReview(requestDto2);
+
+        Map<EvaluationType, Map<Integer, Long>> expectedMap = Map.of(
+                EvaluationType.GOOD,
+                Map.of(
+                        1, 2L,
+                        2, 1L
+                ),
+                EvaluationType.NOT_GOOD,
+                Map.of(
+                        1, 2L,
+                        2, 1L
+                )
+        );
+
+        // When
+        RevieweeResponseDto result = this.reviewService.getRevieweeInfo(advanced.getId());
+
+        // Then
+        log.info("result={}", result);
+
+        assertThat(result.averageScore()).isEqualTo(3.5);
+        assertThat(result.memberId()).isEqualTo(advanced.getId());
+        result.reviewDetails().forEach((re) -> {
+            Map<Integer, Long> counts = expectedMap.get(re.evaluationType());
+            assertThat(counts).isNotNull();
+            counts.forEach((k, v) -> {
+                Long expectedCount = counts.get(k);
+                assertThat(expectedCount).isNotNull();
+                assertThat(expectedCount).isEqualTo(v);
+            });
+        });
     }
 }
