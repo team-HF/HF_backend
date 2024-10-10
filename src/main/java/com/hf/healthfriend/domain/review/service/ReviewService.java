@@ -5,6 +5,7 @@ import com.hf.healthfriend.domain.matching.exception.MatchingNotFoundException;
 import com.hf.healthfriend.domain.matching.repository.MatchingRepository;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
+import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.review.constants.EvaluationType;
 import com.hf.healthfriend.domain.review.dto.request.ReviewCreationRequestDto;
 import com.hf.healthfriend.domain.review.dto.response.RevieweeResponseDto;
@@ -27,6 +28,7 @@ import java.util.*;
 public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final MatchingRepository matchingRepository;
+    private final MemberRepository memberRepository;
 
     /**
      * 리뷰를 추가한다.
@@ -67,6 +69,10 @@ public class ReviewService {
      * @return revieweeId에 해당하는 회원에게 달린 리뷰 정보가 담긴 DTO
      */
     public RevieweeResponseDto getRevieweeInfo(Long revieweeId) {
+        if (!this.memberRepository.existsById(revieweeId)) {
+            throw new MemberNotFoundException(revieweeId);
+        }
+
         // TODO: 이 두 개의 쿼리를 어떻게든 하나로 묶는 게 나을까?
         List<RevieweeStatisticsMapping> statistics = this.reviewRepository.getRevieweeStatistics(revieweeId);
         double averageScore = this.reviewRepository.calculateAverageScoreByRevieweeId(revieweeId);
