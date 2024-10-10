@@ -12,6 +12,7 @@ public record RevieweeResponseDto(
 
     public record ReviewDto(
             EvaluationType evaluationType,
+            Long totalCountPerEvaluationType,
             List<ReviewDetailPerEvaluationType> reviewDetailsPerEvaluationType
     ) {
     }

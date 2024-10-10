@@ -129,6 +129,7 @@ public class ReviewController {
                                                     "reviewDetails": [
                                                         {
                                                             "evaluationType": "GOOD",
+                                                            "totalCountPerEvaluationType": 71,
                                                             "reviewDetailsPerEvaluationType": [
                                                                 {
                                                                     "reviewDetailId": 3,
@@ -146,6 +147,7 @@ public class ReviewController {
                                                         },
                                                         {
                                                             "evaluationType": "NOT_GOOD",
+                                                            "totalCountPerEvaluationType": 15,
                                                             "reviewDetailsPerEvaluationType": [
                                                                 {
                                                                     "reviewDetailId": 2,

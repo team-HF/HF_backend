@@ -90,12 +90,20 @@ public class ReviewService {
         List<RevieweeResponseDto.ReviewDto> reviewDtos = new ArrayList<>();
         for (Map.Entry<EvaluationType, Map<Integer, Long>> entry1 : evaluationDetailCountsByEvaluationType.entrySet()) {
             List<RevieweeResponseDto.ReviewDetailPerEvaluationType> reviewDetailsPerEvaluationType = new ArrayList<>();
+            long totalCountPerEvaluationType = 0L;
             for (Map.Entry<Integer, Long> entry2 : entry1.getValue().entrySet()) {
                 reviewDetailsPerEvaluationType.add(new RevieweeResponseDto.ReviewDetailPerEvaluationType(
                         entry2.getKey(), entry2.getValue()
                 ));
+                totalCountPerEvaluationType += entry2.getValue();
             }
-            reviewDtos.add(new RevieweeResponseDto.ReviewDto(entry1.getKey(), reviewDetailsPerEvaluationType));
+            reviewDtos.add(
+                    new RevieweeResponseDto.ReviewDto(
+                            entry1.getKey(),
+                            totalCountPerEvaluationType,
+                            reviewDetailsPerEvaluationType
+                    )
+            );
         }
         return new RevieweeResponseDto(revieweeId, averageScore, reviewDtos);
     }

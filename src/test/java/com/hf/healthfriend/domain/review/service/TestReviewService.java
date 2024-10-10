@@ -6,23 +6,21 @@ import com.hf.healthfriend.domain.matching.repository.MatchingRepository;
 import com.hf.healthfriend.domain.member.constant.FitnessLevel;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
-import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
+import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.review.constants.EvaluationType;
 import com.hf.healthfriend.domain.review.dto.request.ReviewCreationRequestDto;
 import com.hf.healthfriend.domain.review.dto.request.ReviewEvaluationDto;
 import com.hf.healthfriend.domain.review.dto.response.RevieweeResponseDto;
 import com.hf.healthfriend.domain.review.repository.ReviewRepository;
 import com.hf.healthfriend.testutil.SampleEntityGenerator;
-import com.hf.healthfriend.testutil.TestConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -31,15 +29,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @Slf4j
-@DataJpaTest
 @ActiveProfiles({
         "local-dev",
         "secret",
         "priv",
         "constants"
 })
-@Import(TestConfig.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@SpringBootTest
+@Transactional
 class TestReviewService {
 
     ReviewService reviewService;
@@ -51,11 +48,11 @@ class TestReviewService {
     MatchingRepository matchingRepository;
 
     @Autowired
-    MemberJpaRepository memberRepository;
+    MemberRepository memberRepository;
 
     @BeforeEach
     void beforeEach() {
-        this.reviewService = new ReviewService(this.reviewRepository, this.matchingRepository);
+        this.reviewService = new ReviewService(this.reviewRepository, this.matchingRepository, this.memberRepository);
     }
 
     @DisplayName("addReview - success")
@@ -200,6 +197,7 @@ class TestReviewService {
         assertThat(result.averageScore()).isEqualTo(3.5);
         assertThat(result.memberId()).isEqualTo(advanced.getId());
         result.reviewDetails().forEach((re) -> {
+            assertThat(re.totalCountPerEvaluationType()).isEqualTo(3L);
             Map<Integer, Long> counts = expectedMap.get(re.evaluationType());
             assertThat(counts).isNotNull();
             counts.forEach((k, v) -> {
