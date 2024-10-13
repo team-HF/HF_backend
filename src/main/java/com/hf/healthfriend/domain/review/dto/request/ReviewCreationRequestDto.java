@@ -24,26 +24,4 @@ public class ReviewCreationRequestDto {
     private Integer score;
 
     private List<ReviewEvaluationDto> evaluations;
-
-    @AssertTrue
-    private boolean isDuplicateEvaluationPresent() {
-        // TODO: iteration 때문에 성능상 약간 좀 안 좋을 수 있음 - 이걸 DB에서 검증하도록 하는 게 나을까?
-        Map<EvaluationType, Set<Integer>> evaluationIdsByEvaluationType = new HashMap<>();
-        for (ReviewEvaluationDto evaluationDto : this.evaluations) {
-            EvaluationType evaluationType = evaluationDto.getEvaluationType();
-            Integer evaluationId = evaluationDto.getEvaluationDetailId();
-            if (evaluationIdsByEvaluationType.containsKey(evaluationType)) {
-                Set<Integer> ids = evaluationIdsByEvaluationType.get(evaluationType);
-                if (ids.contains(evaluationId)) {
-                    return false;
-                }
-                ids.add(evaluationId);
-            } else {
-                Set<Integer> idSet = new HashSet<>();
-                idSet.add(evaluationId);
-                evaluationIdsByEvaluationType.put(evaluationType, idSet);
-            }
-        }
-        return true;
-    }
 }
