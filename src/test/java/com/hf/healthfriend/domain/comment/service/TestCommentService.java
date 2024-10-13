@@ -1,10 +1,12 @@
 package com.hf.healthfriend.domain.comment.service;
 
+import com.hf.healthfriend.domain.comment.constant.SortType;
 import com.hf.healthfriend.domain.comment.dto.request.CommentCreationRequestDto;
 import com.hf.healthfriend.domain.comment.dto.response.CommentCreationResponseDto;
 import com.hf.healthfriend.domain.comment.exception.CommentNotFoundException;
-import com.hf.healthfriend.domain.member.constant.*;
+import com.hf.healthfriend.domain.comment.exception.PostNotFoundException;
 import com.hf.healthfriend.domain.member.entity.Member;
+import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.post.constant.PostCategory;
 import com.hf.healthfriend.domain.post.entity.Post;
@@ -20,7 +22,6 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.*;
@@ -128,16 +129,18 @@ class TestCommentService {
                 .isThrownBy(() -> this.commentService.createComment(post.getPostId(), requestDto));
     }
 
-    private void setNecessaryFieldOfMemberToSampleData(Member entity, String sampleNickname) {
-        entity.setNickname(sampleNickname);
-        entity.setBirthDate(LocalDate.of(1997, 9, 16));
-        entity.setGender(Gender.MALE);
-        entity.setIntroduction("");
-        entity.setFitnessLevel(FitnessLevel.ADVANCED);
-        entity.setCompanionStyle(CompanionStyle.SMALL);
-        entity.setFitnessEagerness(FitnessEagerness.EAGER);
-        entity.setFitnessObjective(FitnessObjective.BULK_UP);
-        entity.setFitnessKind(FitnessKind.FUNCTIONAL);
+    @DisplayName("getCommentsOfPost - 존재하지 않는 글의 댓글을 조회하려고 할 때 PostNotFoundException 발생")
+    @Test
+    void getCommentsOfPost_failure_PostNotFoundException() {
+        assertThatExceptionOfType(PostNotFoundException.class)
+                .isThrownBy(() -> this.commentService.getCommentsOfPost(1111L, SortType.LATEST));
+    }
+
+    @DisplayName("getCommentsOfWriter - 존재하지 않는 회원의 댓글을 조회하려 할 때 MemberNotFoundException 발생")
+    @Test
+    void getCommentsOfWriter_failure_MemberNotFoundException() {
+        assertThatExceptionOfType(MemberNotFoundException.class)
+                .isThrownBy(() -> this.commentService.getCommentsOfWriter(11111L));
     }
 
     @DisplayName("deleteComment - 성공")
