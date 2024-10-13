@@ -43,9 +43,6 @@ public class Review {
     @Column(name = "score", nullable = false)
     private Integer score;
 
-    @Column(name = "is_deleted", nullable = false)
-    private boolean isDeleted = false;
-
     @OneToMany(mappedBy = "review", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<ReviewEvaluation> reviewEvaluations = new ArrayList<>();
 
@@ -79,10 +76,5 @@ public class Review {
     public void updateScore(Integer score) {
         this.lastModified = LocalDateTime.now();
         this.score = score;
-    }
-
-    public void delete() {
-        this.lastModified = LocalDateTime.now();
-        this.isDeleted = true;
     }
 }
