@@ -75,13 +75,13 @@ class TestReviewRepository {
     @Test
     void findByRevieweeId_success() {
         // Given
-        Review review1 = SampleEntityGenerator.generateSampleReview(this.sampleMatching1, this.sampleBeginner1, List.of(
+        Review review1 = SampleEntityGenerator.generateSampleReview(this.sampleMatching1, this.sampleBeginner1, this.sampleAdvanced, List.of(
                 new ReviewEvaluation(EvaluationType.GOOD, 1),
                 new ReviewEvaluation(EvaluationType.GOOD, 2),
                 new ReviewEvaluation(EvaluationType.NOT_GOOD, 1)
         ));
         this.reviewRepository.save(review1);
-        Review review2 = SampleEntityGenerator.generateSampleReview(this.sampleMatching2, this.sampleBeginner2, List.of(
+        Review review2 = SampleEntityGenerator.generateSampleReview(this.sampleMatching2, this.sampleBeginner2, this.sampleAdvanced, List.of(
                 new ReviewEvaluation(EvaluationType.GOOD, 1),
                 new ReviewEvaluation(EvaluationType.NOT_GOOD, 1)
         ));
@@ -119,9 +119,9 @@ class TestReviewRepository {
     @Test
     void calculateAverageScoreByRevieweeId_success() {
         // Given
-        Review review1 = SampleEntityGenerator.generateSampleReview(this.sampleMatching1, this.sampleBeginner1, 3);
+        Review review1 = SampleEntityGenerator.generateSampleReview(this.sampleMatching1, this.sampleBeginner1, this.sampleAdvanced, 3);
         review1 = this.reviewRepository.save(review1);
-        Review review2 = SampleEntityGenerator.generateSampleReview(this.sampleMatching2, this.sampleBeginner2, 4);
+        Review review2 = SampleEntityGenerator.generateSampleReview(this.sampleMatching2, this.sampleBeginner2, this.sampleAdvanced, 4);
         review2 = this.reviewRepository.save(review2);
 
         // When

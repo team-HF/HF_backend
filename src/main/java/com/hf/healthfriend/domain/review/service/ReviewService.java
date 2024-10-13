@@ -44,6 +44,7 @@ public class ReviewService {
                 .orElseThrow(() -> new MatchingNotFoundException(dto.getMatchingId()));
         Review newReview = new Review(
                 new Member(dto.getReviewerId()),
+                new Member(dto.getRevieweeId()),
                 targetMatching,
                 dto.getScore(),
                 dto.getEvaluations() == null

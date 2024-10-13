@@ -27,6 +27,10 @@ public class Review {
     private Member reviewer;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reviewee_id", nullable = false)
+    private Member reviewee;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "matching_id")
     private Matching matching;
 
@@ -50,18 +54,21 @@ public class Review {
     }
 
     public Review(Member reviewer,
+                  Member reviewee,
                   Matching matching,
                   Integer score,
                   List<ReviewEvaluation> reviewEvaluations) {
-        this(reviewer, matching, LocalDateTime.now(), score, reviewEvaluations);
+        this(reviewer, reviewee, matching, LocalDateTime.now(), score, reviewEvaluations);
     }
 
     public Review(Member reviewer,
+                  Member reviewee,
                   Matching matching,
                   LocalDateTime creationTime,
                   Integer score,
                   List<ReviewEvaluation> reviewEvaluations) {
         this.reviewer = reviewer;
+        this.reviewee = reviewee;
         this.matching = matching;
         this.creationTime = creationTime;
         this.score = score;

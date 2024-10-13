@@ -38,21 +38,22 @@ public class SampleEntityGenerator {
         return member;
     }
 
-    public static Review generateSampleReview(Matching matching, Member reviewer) {
-        return generateSampleReview(matching, reviewer, generateSampleReviewEvaluation());
+    public static Review generateSampleReview(Matching matching, Member reviewer, Member reviewee) {
+        return generateSampleReview(matching, reviewer, reviewee, generateSampleReviewEvaluation());
     }
 
-    public static Review generateSampleReview(Matching matching, Member reviewer, List<ReviewEvaluation> evaluations) {
-        return generateSampleReview(matching, reviewer, 3, evaluations);
+    public static Review generateSampleReview(Matching matching, Member reviewer, Member reviewee, List<ReviewEvaluation> evaluations) {
+        return generateSampleReview(matching, reviewer, reviewee, 3, evaluations);
     }
 
-    public static Review generateSampleReview(Matching matching, Member reviewer, Integer score) {
-        return generateSampleReview(matching, reviewer, score, generateSampleReviewEvaluation());
+    public static Review generateSampleReview(Matching matching, Member reviewer, Member reviewee, Integer score) {
+        return generateSampleReview(matching, reviewer, reviewee, score, generateSampleReviewEvaluation());
     }
 
-    public static Review generateSampleReview(Matching matching, Member reviewer, Integer score, List<ReviewEvaluation> evaluations) {
+    public static Review generateSampleReview(Matching matching, Member reviewer, Member reviewee, Integer score, List<ReviewEvaluation> evaluations) {
         return new Review(
                 reviewer,
+                reviewee,
                 matching,
                 score,
                 evaluations
