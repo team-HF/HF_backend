@@ -8,6 +8,8 @@ import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.review.constants.EvaluationType;
 import com.hf.healthfriend.domain.review.dto.request.ReviewCreationRequestDto;
+import com.hf.healthfriend.domain.review.dto.response.ReviewDetailPerEvaluationType;
+import com.hf.healthfriend.domain.review.dto.response.ReviewResponseDto;
 import com.hf.healthfriend.domain.review.dto.response.RevieweeResponseDto;
 import com.hf.healthfriend.domain.review.entity.Review;
 import com.hf.healthfriend.domain.review.entity.ReviewEvaluation;
@@ -88,24 +90,24 @@ public class ReviewService {
             countByEvaluationId.put(mapping.getEvaluationDetailId(), mapping.getEvaluationDetailCount());
         }
 
-        List<RevieweeResponseDto.ReviewDto> reviewDtos = new ArrayList<>();
+        List<ReviewResponseDto> reviewResponseDtos = new ArrayList<>();
         for (Map.Entry<EvaluationType, Map<Integer, Long>> entry1 : evaluationDetailCountsByEvaluationType.entrySet()) {
-            List<RevieweeResponseDto.ReviewDetailPerEvaluationType> reviewDetailsPerEvaluationType = new ArrayList<>();
+            List<ReviewDetailPerEvaluationType> reviewDetailsPerEvaluationType = new ArrayList<>();
             long totalCountPerEvaluationType = 0L;
             for (Map.Entry<Integer, Long> entry2 : entry1.getValue().entrySet()) {
-                reviewDetailsPerEvaluationType.add(new RevieweeResponseDto.ReviewDetailPerEvaluationType(
+                reviewDetailsPerEvaluationType.add(new ReviewDetailPerEvaluationType(
                         entry2.getKey(), entry2.getValue()
                 ));
                 totalCountPerEvaluationType += entry2.getValue();
             }
-            reviewDtos.add(
-                    new RevieweeResponseDto.ReviewDto(
+            reviewResponseDtos.add(
+                    new ReviewResponseDto(
                             entry1.getKey(),
                             totalCountPerEvaluationType,
                             reviewDetailsPerEvaluationType
                     )
             );
         }
-        return new RevieweeResponseDto(revieweeId, averageScore, reviewDtos);
+        return new RevieweeResponseDto(revieweeId, averageScore, reviewResponseDtos);
     }
 }
