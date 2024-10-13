@@ -33,7 +33,6 @@ public class Post extends BaseTimeEntity {
 
     private Long viewCount;
 
-
     @Description("삭제한 post")
     @Builder.Default
     private Boolean isDeleted = false;
@@ -49,6 +48,9 @@ public class Post extends BaseTimeEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Like> likes = new ArrayList<>();
+
+    @Builder.Default
+    private Long likesCount = 0L;
 
     public void delete(){
         this.isDeleted=true;

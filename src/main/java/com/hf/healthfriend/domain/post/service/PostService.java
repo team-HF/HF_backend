@@ -2,9 +2,8 @@ package com.hf.healthfriend.domain.post.service;
 
 import com.hf.healthfriend.domain.comment.constant.SortType;
 import com.hf.healthfriend.domain.comment.dto.CommentDto;
-import com.hf.healthfriend.domain.comment.repository.CommentJpaRepository;
 import com.hf.healthfriend.domain.comment.service.CommentService;
-import com.hf.healthfriend.domain.like.service.LikeService;
+import com.hf.healthfriend.domain.like.repository.LikeRepository;
 import com.hf.healthfriend.domain.member.constant.FitnessLevel;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
@@ -17,18 +16,20 @@ import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.exception.CustomException;
 import com.hf.healthfriend.domain.post.exception.PostErrorCode;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
-import com.hf.healthfriend.domain.post.repository.querydsl.PostCustomRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
+import org.redisson.api.RScoredSortedSet;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -38,9 +39,9 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
-    private final CommentJpaRepository commentJpaRepository;
     private final CommentService commentService;
-    private final LikeService likeService;
+    private final LikeRepository likeRepository;
+    private final RedissonClient redissonClient;
 
     public Long save(PostWriteRequest postWriteRequest) {
         Long memberId = postWriteRequest.getWriterId();
@@ -57,34 +58,21 @@ public class PostService {
         return post.getPostId();
     }
 
-
     public PostGetResponse get(Long postId, boolean canUpdateViewCount, SortType sortType) {
         Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
                 .orElseThrow(() -> new CustomException(PostErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
         if(canUpdateViewCount) {
-            /**
-             * TODO : 동시성 처리 필요
-             */
             post.updateViewCount(post.getViewCount());
         }
         List<CommentDto> commentList = commentService.getCommentsOfPost(postId,sortType);
-        Long likeCount = likeService.getLikeCountOfPost(postId);
-        return PostGetResponse.builder()
-                .postId(post.getPostId())
-                .title(post.getTitle())
-                .content(post.getContent())
-                .postCategory(post.getCategory().name())
-                .viewCount(post.getViewCount())
-                .comments(commentList)
-                .createDate(post.getCreationTime())
-                .likeCount(likeCount)
-                .build();
+        return PostGetResponse.of(post, commentList);
     }
 
     public void delete(Long postId) {
         Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
                 .orElseThrow(() -> new CustomException(PostErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
         post.delete();
+        likeRepository.deleteLikeByPostId(postId);
     }
 
     public List<PostListObject> getList(int pageNumber, FitnessLevel fitnessLevel, PostCategory postCategory, String keyword) {
@@ -92,14 +80,12 @@ public class PostService {
         return postRepository.getList(fitnessLevel, postCategory, keyword, pageable);
     }
 
-    public String getSentenceContainKeyword(String keyword, String content){
-        String[] sentences = content.split("(?<=[.!?])");
-        for (String sentence : sentences) {
-            if (sentence.contains(keyword)) {
-                return sentence.trim();
-            }
-        }
-        return null;
+    public List<PostListObject> getPopularList(int pageNumber, FitnessLevel fitnessLevel, String keyword) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, 10);
+        RScoredSortedSet<Long> sortedSet = redissonClient.getScoredSortedSet("popular_posts");
+        List<Long> postIdList = new ArrayList<>( sortedSet.readAll().stream().toList());
+        Collections.reverse(postIdList);
+        return postRepository.getPopularList(postIdList,fitnessLevel,keyword,pageable);
     }
 
 
