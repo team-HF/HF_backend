@@ -1,9 +1,14 @@
 package com.hf.healthfriend.testutil;
 
+import com.hf.healthfriend.domain.matching.entity.Matching;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.entity.Member;
+import com.hf.healthfriend.domain.review.constants.EvaluationType;
+import com.hf.healthfriend.domain.review.entity.Review;
+import com.hf.healthfriend.domain.review.entity.ReviewEvaluation;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class SampleEntityGenerator {
 
@@ -31,5 +36,36 @@ public class SampleEntityGenerator {
         member.setFitnessObjective(FitnessObjective.BULK_UP);
         member.setFitnessKind(FitnessKind.FUNCTIONAL);
         return member;
+    }
+
+    public static Review generateSampleReview(Matching matching, Member reviewer, Member reviewee) {
+        return generateSampleReview(matching, reviewer, reviewee, generateSampleReviewEvaluation());
+    }
+
+    public static Review generateSampleReview(Matching matching, Member reviewer, Member reviewee, List<ReviewEvaluation> evaluations) {
+        return generateSampleReview(matching, reviewer, reviewee, 3, evaluations);
+    }
+
+    public static Review generateSampleReview(Matching matching, Member reviewer, Member reviewee, Integer score) {
+        return generateSampleReview(matching, reviewer, reviewee, score, generateSampleReviewEvaluation());
+    }
+
+    public static Review generateSampleReview(Matching matching, Member reviewer, Member reviewee, Integer score, List<ReviewEvaluation> evaluations) {
+        return new Review(
+                reviewer,
+                reviewee,
+                matching,
+                score,
+                evaluations
+        );
+    }
+
+    public static List<ReviewEvaluation> generateSampleReviewEvaluation() {
+        return List.of(
+                new ReviewEvaluation(EvaluationType.GOOD, 1),
+                new ReviewEvaluation(EvaluationType.GOOD, 2),
+                new ReviewEvaluation(EvaluationType.NOT_GOOD, 1),
+                new ReviewEvaluation(EvaluationType.NOT_GOOD, 2)
+        );
     }
 }

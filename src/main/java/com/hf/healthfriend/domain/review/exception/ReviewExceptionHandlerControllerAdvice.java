@@ -8,8 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import static com.hf.healthfriend.domain.review.exception.ReviewErrorCode.MATCHING_NOT_FOUND;
-import static com.hf.healthfriend.domain.review.exception.ReviewErrorCode.MEMBER_NOT_FOUND;
+import static com.hf.healthfriend.domain.review.exception.ReviewErrorCode.*;
 
 @RestControllerAdvice
 public class ReviewExceptionHandlerControllerAdvice {
@@ -37,6 +36,20 @@ public class ReviewExceptionHandlerControllerAdvice {
                         .errorName(MATCHING_NOT_FOUND.name())
                         .errorCode(MATCHING_NOT_FOUND.code())
                         .message(MATCHING_NOT_FOUND.message() + "- matchingId=" + e.getMatchingId())
+                        .build(),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(InvalidEvaluationsException.class)
+    public ResponseEntity<BasicErrorResponse> invalidEvaluationException(InvalidEvaluationsException e) {
+        return new ResponseEntity<>(
+                BasicErrorResponse.builder()
+                        .statusCodeSeries(4)
+                        .statusCode(INVALID_EVALUATIONS.status())
+                        .errorCode(INVALID_EVALUATIONS.code())
+                        .message(INVALID_EVALUATIONS.message())
+                        .errorName(INVALID_EVALUATIONS.name())
                         .build(),
                 HttpStatus.BAD_REQUEST
         );
