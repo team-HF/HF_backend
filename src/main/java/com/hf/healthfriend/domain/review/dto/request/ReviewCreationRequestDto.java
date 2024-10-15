@@ -19,6 +19,9 @@ public class ReviewCreationRequestDto {
     @NotNull
     private Long reviewerId;
 
+    @NotNull
+    private Long revieweeId;
+
     @Min(1)
     @Max(5)
     private Integer score;

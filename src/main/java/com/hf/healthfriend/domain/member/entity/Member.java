@@ -1,7 +1,9 @@
 package com.hf.healthfriend.domain.member.entity;
 
+import com.hf.healthfriend.domain.matching.entity.Matching;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.post.entity.Post;
+import com.hf.healthfriend.domain.review.entity.Review;
 import com.hf.healthfriend.domain.spec.entity.Spec;
 import jakarta.persistence.*;
 import lombok.*;
@@ -100,6 +102,18 @@ public class Member implements UserDetails {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Spec> specs = new ArrayList<>();
+
+    @OneToMany(mappedBy = "beginner", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Matching> matchingsAsBeginner = new ArrayList<>();
+
+    @OneToMany(mappedBy = "advanced", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Matching> matchingsAsAdvanced = new ArrayList<>();
+
+    @OneToMany(mappedBy = "reviewer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviewsWrote = new ArrayList<>();
+
+    @OneToMany(mappedBy = "reviewee", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviewsReceived = new ArrayList<>();
 
     public Member(long memberId) {
         this.id = memberId;
