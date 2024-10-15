@@ -1,6 +1,6 @@
 package com.hf.healthfriend.domain.post.service;
 
-import com.hf.healthfriend.domain.comment.constant.SortType;
+import com.hf.healthfriend.domain.comment.constant.CommentSortType;
 import com.hf.healthfriend.domain.comment.dto.CommentDto;
 import com.hf.healthfriend.domain.comment.service.CommentService;
 import com.hf.healthfriend.domain.like.repository.LikeRepository;
@@ -29,7 +29,6 @@ import org.springframework.data.domain.PageRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -58,7 +57,7 @@ public class PostService {
         return post.getPostId();
     }
 
-    public PostGetResponse get(Long postId, boolean canUpdateViewCount, SortType sortType) {
+    public PostGetResponse get(Long postId, boolean canUpdateViewCount, CommentSortType sortType) {
         Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
                 .orElseThrow(() -> new CustomException(PostErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
         if(canUpdateViewCount) {
