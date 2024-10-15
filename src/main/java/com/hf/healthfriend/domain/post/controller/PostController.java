@@ -107,5 +107,17 @@ public class PostController {
         return ResponseEntity.ok(ApiBasicResponse.of(postService.getList(page,fitnessLevel,postCategory,keyword),HttpStatus.OK));
     }
 
+    @Operation(summary = "인기글 검색 및 목록 조회", responses = {
+            @ApiResponse(responseCode = "200", description = "인기글 목록 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "인기글 목록 조회 실패")
+    })
+    @GetMapping("/popularList")
+    public ResponseEntity<ApiBasicResponse<List<PostListObject>>> getPopularList(
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam @Nullable FitnessLevel fitnessLevel,
+            @RequestParam @Nullable String keyword) {
+        return ResponseEntity.ok(ApiBasicResponse.of(postService.getPopularList(page,fitnessLevel,keyword),HttpStatus.OK));
+    }
+
 
 }

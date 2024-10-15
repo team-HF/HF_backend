@@ -6,11 +6,15 @@ import com.hf.healthfriend.domain.comment.dto.request.CommentCreationRequestDto;
 import com.hf.healthfriend.domain.comment.dto.response.CommentCreationResponseDto;
 import com.hf.healthfriend.domain.comment.entity.Comment;
 import com.hf.healthfriend.domain.comment.exception.CommentNotFoundException;
+import com.hf.healthfriend.domain.comment.exception.PostNotFoundException;
 import com.hf.healthfriend.domain.comment.repository.CommentJpaRepository;
 import com.hf.healthfriend.domain.comment.repository.CommentRepository;
 import com.hf.healthfriend.domain.comment.repository.dto.CommentUpdateDto;
 import com.hf.healthfriend.domain.member.entity.Member;
+import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
+import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.post.entity.Post;
+import com.hf.healthfriend.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -26,6 +30,8 @@ import java.util.List;
 public class CommentService {
     private final CommentRepository commentRepository;
     private final CommentJpaRepository commentJpaRepository;
+    private final PostRepository postRepository;
+    private final MemberRepository memberRepository;
 
     public CommentCreationResponseDto createComment(Long postId, CommentCreationRequestDto requestDto)
             throws DataIntegrityViolationException {
@@ -50,14 +56,22 @@ public class CommentService {
         this.commentRepository.deleteById(commentId);
     }
 
-    public List<CommentDto> getCommentsOfPost(Long postId, SortType sortType) { // TODO: postId에 해당하는 Post가 없을 경우 어떻게?
+    public List<CommentDto> getCommentsOfPost(Long postId, SortType sortType) {
+        if (!this.postRepository.existsById(postId)) {
+            throw new PostNotFoundException(postId, "postId에 해당하는 Post가 없음");
+        }
+
         return this.commentJpaRepository.findCommentsByPostIdWithSorting(postId,sortType)
                 .stream()
                 .map(CommentDto::of)
                 .toList();
     }
 
-    public List<CommentDto> getCommentsOfWriter(Long writerId) { // TODO: 존재하지 않는 Member일 경우 어떻게?
+    public List<CommentDto> getCommentsOfWriter(Long writerId) {
+        if (!this.memberRepository.existsById(writerId)) {
+            throw new MemberNotFoundException(writerId, "writerId에 해당하는 Member가 없음");
+        }
+
         return this.commentRepository.findCommentsByWriterId(writerId)
                 .stream()
                 .map(CommentDto::of)

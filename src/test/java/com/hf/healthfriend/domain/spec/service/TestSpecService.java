@@ -1,12 +1,12 @@
 package com.hf.healthfriend.domain.spec.service;
 
 import com.hf.healthfriend.domain.member.entity.Member;
+import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.spec.constants.SpecUpdateType;
 import com.hf.healthfriend.domain.spec.dto.SpecDto;
 import com.hf.healthfriend.domain.spec.dto.request.SpecUpdateRequestDto;
 import com.hf.healthfriend.domain.spec.dto.response.SpecUpdateResponseDto;
-import com.hf.healthfriend.domain.spec.entity.Spec;
 import com.hf.healthfriend.testutil.SampleEntityGenerator;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
@@ -26,8 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.assertj.core.api.Assertions.*;
 
 @Slf4j
 @SpringBootTest
@@ -168,6 +167,20 @@ class TestSpecService {
                         null
                 )
         );
+    }
+
+    @DisplayName("addSpec - 존재하지 않는 회원의 Spec을 추가할 경우 예외 발생 - MemberNotFoundException")
+    @Test
+    void addSpec_failure_sinceAddSpecOfNotExistingMember() {
+        assertThatExceptionOfType(MemberNotFoundException.class)
+                .isThrownBy(() -> this.specService.addSpec(this.member.getId() + 1, List.of()));
+    }
+
+    @DisplayName("getSpecsOfMember - 존재하지 않는 회원의 Spec을 조회할 경우 예외 발생 - MemberNotFoundException")
+    @Test
+    void addSpec_failure_sinceGetSpecsOfNotExistingMember() {
+        assertThatExceptionOfType(MemberNotFoundException.class)
+                .isThrownBy(() -> this.specService.getSpecsOfMember(this.member.getId() + 1));
     }
 
     @DisplayName("addSpec - validation error")

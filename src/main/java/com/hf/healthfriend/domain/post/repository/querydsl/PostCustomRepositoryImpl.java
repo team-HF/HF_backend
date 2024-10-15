@@ -20,10 +20,10 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
 
     private final JPAQueryFactory queryFactory;
     private final QPost post = QPost.post;
-    OrderSpecifier<?> orderSpecifier = new OrderSpecifier<>(Order.DESC, post.creationTime);
 
     @Override
     public List<PostListObject> getList(FitnessLevel fitnessLevel, PostCategory postCategory, String keyword, Pageable pageable) {
+        OrderSpecifier<?> orderSpecifier = new OrderSpecifier<>(Order.DESC, post.creationTime);
         BooleanBuilder builder = filter(fitnessLevel, postCategory, keyword);
         return  queryFactory
                 .selectFrom(post)
@@ -47,7 +47,43 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
                             .creationTime(post.getCreationTime())
                             .content(content)
                             .fitnessLevel(post.getMember().getFitnessLevel().name())
-                            .likeCount(post.getLikes().size())
+                            .likeCount(post.getLikesCount())
+                            .build();
+                }).toList();
+    }
+
+    @Override
+    public List<PostListObject> getPopularList(List<Long> postIdList, FitnessLevel fitnessLevel, String keyword, Pageable pageable) {
+        BooleanBuilder builder = filter(fitnessLevel, null, keyword);
+        OrderSpecifier<?>[] orderSpecifier = new OrderSpecifier<?>[]{
+                /* 어차피 sortedSet 에서 정렬돼있기 때문에 실제론 수행되지 않는다.
+                2차로 최신순 정렬을 수행하려고 쓸 뿐이다.
+                 */
+                new OrderSpecifier<>(Order.DESC, post.likesCount),
+                new OrderSpecifier<>(Order.DESC, post.creationTime)
+        };
+        return  queryFactory
+                .selectFrom(post)
+                .where(post.postId.in(postIdList).and(builder))
+                .orderBy(orderSpecifier)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch()
+                .stream().map(post-> {
+                    String content = post.getContent();
+                    if (keyword!=null){
+                        String sentence = getSentenceContainKeyword(keyword,post.getContent());
+                        content = (sentence!=null)?sentence:content;
+                    }
+                    return PostListObject.builder()
+                            .postId(post.getPostId())
+                            .title(post.getTitle())
+                            .category(post.getCategory().name())
+                            .viewCount(post.getViewCount())
+                            .creationTime(post.getCreationTime())
+                            .content(content)
+                            .fitnessLevel(post.getMember().getFitnessLevel().name())
+                            .likeCount(post.getLikesCount())
                             .build();
                 }).toList();
     }
