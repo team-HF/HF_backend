@@ -26,8 +26,9 @@ public class SampleEntityGenerator {
         member.setNickname(nickname);
         member.setBirthDate(LocalDate.of(1997, 9, 16));
         member.setName("김샘플");
-        member.setCity("서울시");
-        member.setDistrict("영등포구");
+        member.setCd1("01");
+        member.setCd2("110");
+        member.setCd3("111");
         member.setGender(Gender.MALE);
         member.setIntroduction("");
         member.setFitnessLevel(FitnessLevel.BEGINNER);
