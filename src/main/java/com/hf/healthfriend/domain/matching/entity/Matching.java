@@ -50,4 +50,16 @@ public class Matching {
         this.advanced = advanced;
         this.meetingTime = meetingTime;
     }
+
+    public void accept() {
+        this.status = MatchingStatus.ACCEPTED;
+    }
+
+    public void reject() {
+        this.status = MatchingStatus.REJECTED;
+    }
+
+    public void finish() {
+        this.status = MatchingStatus.FINISHED;
+    }
 }
