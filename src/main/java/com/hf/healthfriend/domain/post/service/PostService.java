@@ -75,12 +75,12 @@ public class PostService {
     }
 
     public List<PostListObject> getList(int pageNumber, FitnessLevel fitnessLevel, PostCategory postCategory, String keyword) {
-        Pageable pageable = PageRequest.of(pageNumber - 1, 10);
+        Pageable pageable = PageRequest.of(pageNumber - 1, 5);
         return postRepository.getList(fitnessLevel, postCategory, keyword, pageable);
     }
 
     public List<PostListObject> getPopularList(int pageNumber, FitnessLevel fitnessLevel, String keyword) {
-        Pageable pageable = PageRequest.of(pageNumber - 1, 10);
+        Pageable pageable = PageRequest.of(pageNumber - 1, 5);
         RScoredSortedSet<Long> sortedSet = redissonClient.getScoredSortedSet("popular_posts");
         List<Long> postIdList = new ArrayList<>( sortedSet.readAll().stream().toList());
         Collections.reverse(postIdList);
