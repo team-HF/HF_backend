@@ -83,7 +83,6 @@ public class PostService {
         Pageable pageable = PageRequest.of(pageNumber - 1, 5);
         RScoredSortedSet<Long> sortedSet = redissonClient.getScoredSortedSet("popular_posts");
         List<Long> postIdList = new ArrayList<>( sortedSet.readAll().stream().toList());
-        Collections.reverse(postIdList);
         return postRepository.getPopularList(postIdList,fitnessLevel,keyword,pageable);
     }
 
