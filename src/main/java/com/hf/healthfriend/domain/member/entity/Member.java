@@ -118,6 +118,9 @@ public class Member implements UserDetails {
     @Column(name = "review_score")
     private double reviewScore;
 
+    @Column(name = "matched_count")
+    private long matchedCount;
+
     public Member(long memberId) {
         this.id = memberId;
     }
