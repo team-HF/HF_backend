@@ -1,15 +1,17 @@
 package com.hf.healthfriend.domain.member.service;
 
-import com.hf.healthfriend.domain.member.constant.FitnessLevel;
 import com.hf.healthfriend.domain.member.dto.MemberDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
+import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
+import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
 import com.hf.healthfriend.domain.member.dto.response.MemberUpdateResponseDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.DuplicateMemberCreationException;
 import com.hf.healthfriend.domain.member.exception.FitnessLevelUpdateException;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
+import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
 import com.hf.healthfriend.global.util.file.FileUrlResolver;
@@ -18,11 +20,14 @@ import com.hf.healthfriend.global.util.mapping.BeanMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -30,6 +35,7 @@ import java.io.IOException;
 @Transactional
 public class MemberService {
     private final MemberRepository memberRepository;
+    private final MemberJpaRepository memberJpaRepository;
     private final FileUrlResolver fileUrlResolver;
     private final MultipartFileUploader multipartFileUploader;
     private final BeanMapper beanMapper;
@@ -145,6 +151,11 @@ public class MemberService {
             log.error("[FATAL] 파일 출력 중 Error 발생", e);
             return null;
         }
+    }
+
+    public List<MemberRecommendResponse> recommendMember(MembersRecommendRequest request, int pageNumber){
+        Pageable pageable = PageRequest.of(pageNumber - 1, 6);
+        return memberJpaRepository.recommendMembers(request, pageable);
     }
 
     private MemberDto bindToDto(Member member) {

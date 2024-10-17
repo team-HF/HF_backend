@@ -179,7 +179,7 @@ public class LikeService {
         if(likeCount>=5) {
             String postKey = "post:" + postId;
             RScoredSortedSet<Long> sortedSet = redissonClient.getScoredSortedSet("popular_posts");
-            sortedSet.add((double)likeCount, postId);
+            sortedSet.add(-(double)likeCount, postId);
             log.info("popularPost sortedSet 좋아요 수 증가");
         }
     }
@@ -192,7 +192,7 @@ public class LikeService {
             log.info("popularPost sortedSet 제거 완료 ");
         }
         else {
-            sortedSet.add((double)likeCount, postId);
+            sortedSet.add(-(double)likeCount, postId);
             log.info("popularPost sortedSet 좋아요 수 감소");
         }
         // 주간 TOP 인기글이니까 일주일 뒤엔 만료

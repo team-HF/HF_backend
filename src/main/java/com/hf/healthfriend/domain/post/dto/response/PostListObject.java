@@ -14,6 +14,7 @@ public record PostListObject(
         long viewCount,
         long likeCount,
         long commentCount,
-        String fitnessLevel
+        String fitnessLevel,
+        long totalPageSize
 ) {
 }

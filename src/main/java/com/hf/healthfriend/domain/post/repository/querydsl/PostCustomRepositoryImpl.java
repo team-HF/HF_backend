@@ -48,6 +48,7 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
                             .content(content)
                             .fitnessLevel(post.getMember().getFitnessLevel().name())
                             .likeCount(post.getLikesCount())
+                            .totalPageSize(getTotalPageSize())
                             .build();
                 }).toList();
     }
@@ -71,6 +72,7 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
                 .fetch()
                 .stream().map(post-> {
                     String content = post.getContent();
+                    long totalPageSize = (long) Math.ceil((double) postIdList.size() / 5);
                     if (keyword!=null){
                         String sentence = getSentenceContainKeyword(keyword,post.getContent());
                         content = (sentence!=null)?sentence:content;
@@ -84,6 +86,7 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
                             .content(content)
                             .fitnessLevel(post.getMember().getFitnessLevel().name())
                             .likeCount(post.getLikesCount())
+                            .totalPageSize(totalPageSize)
                             .build();
                 }).toList();
     }
@@ -112,5 +115,14 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
             }
         }
         return null;
+    }
+
+    public long getTotalPageSize(){
+        Long totalPageSize = queryFactory
+                .select(post.count())
+                .from(post)
+                .fetchOne();
+        if (totalPageSize == null) return 0;
+        return (long) Math.ceil((double) totalPageSize / 5);
     }
 }

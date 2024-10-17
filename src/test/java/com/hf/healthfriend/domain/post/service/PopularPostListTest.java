@@ -32,9 +32,12 @@ class PopularPostListTest {
         redissonClient.getKeys().flushall();
 
         RScoredSortedSet<Long> sortedSet = redissonClient.getScoredSortedSet("popular_posts");
-        sortedSet.add(10.0, 1L);
-        sortedSet.add(5.0, 2L);
-        sortedSet.add(15.0, 3L);
+        sortedSet.add(-10.0, 1L);
+        sortedSet.add(-5.0, 2L);
+        sortedSet.add(-15.0, 3L);
+        sortedSet.add(-10.0, 4L);
+        sortedSet.add(-5.0, 5L);
+        sortedSet.add(-15.0, 6L);
         System.out.println("Redis Sorted Set: " + sortedSet.readAll());
     }
 
@@ -44,11 +47,20 @@ class PopularPostListTest {
 
         RScoredSortedSet<Long> sortedSet = redissonClient.getScoredSortedSet("popular_posts");
         List<Long> postIdList = new ArrayList<>( sortedSet.readAll().stream().toList());
-        Collections.reverse(postIdList);
 
         assertThat(postIdList).isNotNull();
-        assertThat(postIdList.size()).isEqualTo(3);
+        assertThat(postIdList.size()).isEqualTo(6);
         assertThat(postIdList.get(0)).isEqualTo(3L);
+    }
+
+    @Test
+    @DisplayName("인기글 목록 totalPageSize 검증")
+    void testGetPopularList_totalPageSize() {
+        RScoredSortedSet<Long> sortedSet = redissonClient.getScoredSortedSet("popular_posts");
+        List<Long> postIdList = new ArrayList<>( sortedSet.readAll().stream().toList());
+        long totalPageSize = (long) Math.ceil((double) postIdList.size() / 5);
+        assertThat(totalPageSize).isEqualTo(2);
+
     }
 
 

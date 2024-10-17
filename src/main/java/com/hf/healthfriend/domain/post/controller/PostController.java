@@ -1,6 +1,6 @@
 package com.hf.healthfriend.domain.post.controller;
 
-import com.hf.healthfriend.domain.comment.constant.SortType;
+import com.hf.healthfriend.domain.comment.constant.CommentSortType;
 import com.hf.healthfriend.domain.member.constant.FitnessLevel;
 import com.hf.healthfriend.domain.post.constant.PostCategory;
 import com.hf.healthfriend.domain.post.dto.request.PostWriteRequest;
@@ -60,7 +60,7 @@ public class PostController {
     public ResponseEntity<ApiBasicResponse<PostGetResponse>> get(@PathVariable Long postId,
                                                                  HttpServletRequest request,
                                                                  HttpServletResponse response,
-                                                                 @RequestParam @Nullable SortType sortType) {
+                                                                 @RequestParam @Nullable CommentSortType sortType) {
         Cookie[] cookies = request.getCookies();
         String visitCookieValue = null;
         if (cookies != null) {

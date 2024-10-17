@@ -1,6 +1,6 @@
 package com.hf.healthfriend.domain.post.service;
 
-import com.hf.healthfriend.domain.comment.constant.SortType;
+import com.hf.healthfriend.domain.comment.constant.CommentSortType;
 import com.hf.healthfriend.domain.comment.dto.CommentDto;
 import com.hf.healthfriend.domain.comment.service.CommentService;
 import com.hf.healthfriend.domain.like.repository.LikeRepository;
@@ -29,7 +29,6 @@ import org.springframework.data.domain.PageRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -58,7 +57,7 @@ public class PostService {
         return post.getPostId();
     }
 
-    public PostGetResponse get(Long postId, boolean canUpdateViewCount, SortType sortType) {
+    public PostGetResponse get(Long postId, boolean canUpdateViewCount, CommentSortType sortType) {
         Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
                 .orElseThrow(() -> new CustomException(PostErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
         if(canUpdateViewCount) {
@@ -76,15 +75,14 @@ public class PostService {
     }
 
     public List<PostListObject> getList(int pageNumber, FitnessLevel fitnessLevel, PostCategory postCategory, String keyword) {
-        Pageable pageable = PageRequest.of(pageNumber - 1, 10);
+        Pageable pageable = PageRequest.of(pageNumber - 1, 5);
         return postRepository.getList(fitnessLevel, postCategory, keyword, pageable);
     }
 
     public List<PostListObject> getPopularList(int pageNumber, FitnessLevel fitnessLevel, String keyword) {
-        Pageable pageable = PageRequest.of(pageNumber - 1, 10);
+        Pageable pageable = PageRequest.of(pageNumber - 1, 5);
         RScoredSortedSet<Long> sortedSet = redissonClient.getScoredSortedSet("popular_posts");
         List<Long> postIdList = new ArrayList<>( sortedSet.readAll().stream().toList());
-        Collections.reverse(postIdList);
         return postRepository.getPopularList(postIdList,fitnessLevel,keyword,pageable);
     }
 

@@ -115,6 +115,12 @@ public class Member implements UserDetails {
     @OneToMany(mappedBy = "reviewee", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviewsReceived = new ArrayList<>();
 
+    @Column(name = "review_score")
+    private double reviewScore;
+
+    @Column(name = "matched_count")
+    private long matchedCount;
+
     public Member(long memberId) {
         this.id = memberId;
     }
