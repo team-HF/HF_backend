@@ -22,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -129,7 +130,7 @@ class TestReviewService {
         this.memberRepository.save(member1);
         this.memberRepository.save(member2);
 
-        Matching savedMatching = this.matchingRepository.save(new Matching(member1, member2));
+        Matching savedMatching = this.matchingRepository.save(new Matching(member1, member2, LocalDateTime.now().plusDays(1)));
         return new Object[]{
                 member1, member2, savedMatching
         };
@@ -150,8 +151,8 @@ class TestReviewService {
         beginner2 = this.memberRepository.save(beginner2);
         advanced = this.memberRepository.save(advanced);
 
-        Matching matching1 = new Matching(beginner1, advanced);
-        Matching matching2 = new Matching(beginner2, advanced);
+        Matching matching1 = new Matching(beginner1, advanced, LocalDateTime.now().plusDays(1));
+        Matching matching2 = new Matching(beginner2, advanced, LocalDateTime.now().plusDays(1));
         matching1 = this.matchingRepository.save(matching1);
         matching2 = this.matchingRepository.save(matching2);
 

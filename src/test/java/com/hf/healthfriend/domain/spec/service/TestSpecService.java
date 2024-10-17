@@ -100,6 +100,20 @@ class TestSpecService {
         generatedIds.forEach((id) -> assertThat(id).isNotNull());
     }
 
+    @DisplayName("addSpec - 존재하지 않는 회원의 Spec을 추가할 경우 예외 발생 - MemberNotFoundException")
+    @Test
+    void addSpec_failure_sinceAddSpecOfNotExistingMember() {
+        assertThatExceptionOfType(MemberNotFoundException.class)
+                .isThrownBy(() -> this.specService.addSpec(this.member.getId() + 1, List.of()));
+    }
+
+    @DisplayName("getSpecsOfMember - 존재하지 않는 회원의 Spec을 조회할 경우 예외 발생 - MemberNotFoundException")
+    @Test
+    void addSpec_failure_sinceGetSpecsOfNotExistingMember() {
+        assertThatExceptionOfType(MemberNotFoundException.class)
+                .isThrownBy(() -> this.specService.getSpecsOfMember(this.member.getId() + 1));
+    }
+
     static Stream<Arguments> addSpec_validationFail() {
         return Stream.of(
                 Arguments.arguments(
@@ -169,34 +183,20 @@ class TestSpecService {
         );
     }
 
-    @DisplayName("addSpec - 존재하지 않는 회원의 Spec을 추가할 경우 예외 발생 - MemberNotFoundException")
-    @Test
-    void addSpec_failure_sinceAddSpecOfNotExistingMember() {
-        assertThatExceptionOfType(MemberNotFoundException.class)
-                .isThrownBy(() -> this.specService.addSpec(this.member.getId() + 1, List.of()));
-    }
-
-    @DisplayName("getSpecsOfMember - 존재하지 않는 회원의 Spec을 조회할 경우 예외 발생 - MemberNotFoundException")
-    @Test
-    void addSpec_failure_sinceGetSpecsOfNotExistingMember() {
-        assertThatExceptionOfType(MemberNotFoundException.class)
-                .isThrownBy(() -> this.specService.getSpecsOfMember(this.member.getId() + 1));
-    }
-
-    @DisplayName("addSpec - validation error")
-    @MethodSource
-    @ParameterizedTest(name = "{0}: startDate={1}, endDate={2}, isCurrent={3}, title={4}, description={5}")
-    void addSpec_validationFail(String testName,
-                                LocalDate startDate,
-                                LocalDate endDate,
-                                boolean isCurrent,
-                                String title,
-                                String description) {
-        SpecDto specDto = new SpecDto(startDate, endDate, isCurrent, title, description);
-        ValidationException validationException =
-                catchThrowableOfType(() -> this.specService.addSpec(this.member.getId(), List.of(specDto)), ValidationException.class);
-        log.info("ValidationException", validationException);
-    }
+    // TODO: Validation이 컨트롤러단에서 일어나기 때문에 해당 Validation 테스트를 컨트롤러 테스트로 이동시켜야 함
+//    @DisplayName("addSpec - validation error")
+//    @MethodSource
+//    @ParameterizedTest(name = "{0}: startDate={1}, endDate={2}, isCurrent={3}, title={4}, description={5}")
+//    void addSpec_validationFail(String testName,
+//                                LocalDate startDate,
+//                                LocalDate endDate,
+//                                boolean isCurrent,
+//                                String title,
+//                                String description) {
+//        SpecDto specDto = new SpecDto(startDate, endDate, isCurrent, title, description);
+//        assertThatExceptionOfType(ValidationException.class)
+//                .isThrownBy(() -> this.specService.addSpec(this.member.getId(), List.of(specDto)));
+//    }
 
     List<SpecDto> sampleSpecDatum = List.of(
             new SpecDto(
