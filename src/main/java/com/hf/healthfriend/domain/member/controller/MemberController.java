@@ -3,7 +3,9 @@ package com.hf.healthfriend.domain.member.controller;
 import com.hf.healthfriend.domain.member.dto.MemberDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
+import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
+import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
 import com.hf.healthfriend.domain.member.dto.response.MemberUpdateResponseDto;
 import com.hf.healthfriend.domain.member.service.MemberService;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -152,5 +155,14 @@ public class MemberController {
                                                                                   @ModelAttribute MemberUpdateRequestDto dto) {
         MemberUpdateResponseDto resultDto = this.memberService.updateMember(memberId, dto);
         return ResponseEntity.ok(ApiBasicResponse.of(resultDto, HttpStatus.OK));
+    }
+
+    @Operation(summary = "멤버 추천 목록 조회", responses = {
+            @ApiResponse(responseCode = "200", description = "멤버 추천 목록 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "멤버 추천 목록 조회 실패")
+    })
+    @GetMapping("/recommendMembers")
+    public ResponseEntity<ApiBasicResponse<List<MemberRecommendResponse>>> getRecommendMembers(MembersRecommendRequest request, int page) {
+        return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.recommendMember(request,page), HttpStatus.OK));
     }
 }
