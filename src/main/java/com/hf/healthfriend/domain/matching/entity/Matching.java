@@ -47,7 +47,9 @@ public class Matching {
 
     public Matching(Member beginner, Member advanced, LocalDateTime meetingTime) {
         this.beginner = beginner;
+        beginner.getMatchingsAsBeginner().add(this);
         this.advanced = advanced;
+        advanced.getMatchingsAsAdvanced().add(this);
         this.meetingTime = meetingTime;
     }
 
@@ -61,5 +63,6 @@ public class Matching {
 
     public void finish() {
         this.status = MatchingStatus.FINISHED;
+        this.finishTime = LocalDateTime.now();
     }
 }
