@@ -1,6 +1,6 @@
 package com.hf.healthfriend.domain.comment.constant;
 
-public enum SortType {
+public enum CommentSortType {
     LATEST,
     MOST_LIKES
 }

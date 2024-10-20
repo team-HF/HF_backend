@@ -1,6 +1,6 @@
 package com.hf.healthfriend.domain.comment.repository;
 
-import com.hf.healthfriend.domain.comment.constant.SortType;
+import com.hf.healthfriend.domain.comment.constant.CommentSortType;
 import com.hf.healthfriend.domain.comment.entity.Comment;
 import com.hf.healthfriend.domain.comment.repository.querydsl.CommentCustomRepositoryImpl;
 import com.hf.healthfriend.domain.like.constant.LikeType;
@@ -101,7 +101,7 @@ public class CommentSortTest {
         Long postId = testPost.getPostId();
 
         //When
-        List<Comment> comments = commentCustomRepository.findCommentsByPostIdWithSorting(postId, SortType.LATEST);
+        List<Comment> comments = commentCustomRepository.findCommentsByPostIdWithSorting(postId, CommentSortType.LATEST);
 
         //Then
         assertThat(comments).hasSize(5);
@@ -122,7 +122,7 @@ public class CommentSortTest {
         commentRepository.save(mostLikedComment);
 
         //When
-        List<Comment> comments = commentCustomRepository.findCommentsByPostIdWithSorting(postId, SortType.MOST_LIKES);
+        List<Comment> comments = commentCustomRepository.findCommentsByPostIdWithSorting(postId, CommentSortType.MOST_LIKES);
 
         //Then
         assertThat(comments).hasSize(5);

@@ -5,6 +5,7 @@ import com.hf.healthfriend.domain.matching.exception.MatchingNotFoundException;
 import com.hf.healthfriend.domain.matching.repository.MatchingRepository;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
+import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.review.constants.EvaluationType;
 import com.hf.healthfriend.domain.review.dto.request.ReviewCreationRequestDto;
@@ -33,6 +34,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final MatchingRepository matchingRepository;
     private final MemberRepository memberRepository;
+    private final MemberJpaRepository memberJpaRepository;
 
     /**
      * 리뷰를 추가한다.
@@ -65,6 +67,7 @@ public class ReviewService {
 
         try {
             Review saved = this.reviewRepository.save(newReview);
+            updateMemberReviewScore(dto.getRevieweeId());
             return saved.getReviewId();
         } catch (DataIntegrityViolationException e) {
             throw new MemberNotFoundException(dto.getReviewerId(), e);
@@ -140,5 +143,14 @@ public class ReviewService {
             }
         }
         return false;
+    }
+
+    private void updateMemberReviewScore(Long revieweeId) {
+        List<Integer> reviewScoreList = reviewRepository.findScoreListByRevieewId(revieweeId);
+        double averageScore = Math.round(reviewScoreList.stream()
+                .mapToInt(Integer::intValue)
+                .average()
+                .orElse(0.0)*10.0)/10.0;
+        memberJpaRepository.updateMemberReviewScore(revieweeId,averageScore);
     }
 }
