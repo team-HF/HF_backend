@@ -20,11 +20,14 @@ public class MemberUpdateDto {
     @MappingAttribute(target = "profileImageUrl", setNull = false)
     private String profileImageUrl;
 
-    @MappingAttribute(target = "city", setNull = false)
-    private String city;
+    @MappingAttribute(target = "cd1", setNull = false)
+    private String cd1;
 
-    @MappingAttribute(target = "district", setNull = false)
-    private String district;
+    @MappingAttribute(target = "cd2", setNull = false)
+    private String cd2;
+
+    @MappingAttribute(target = "cd3", setNull = false)
+    private String cd3;
 
     @MappingAttribute(target = "introduction", setNull = false)
     private String introduction;

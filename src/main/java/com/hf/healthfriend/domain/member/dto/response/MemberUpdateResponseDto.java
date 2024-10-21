@@ -6,8 +6,9 @@ import lombok.Builder;
 @Builder(toBuilder = true)
 public record MemberUpdateResponseDto(
         String profileImageUrl,
-        String city,
-        String district,
+        String cd1,
+        String cd2,
+        String cd3,
         String introduction,
         FitnessLevel fitnessLevel,
         CompanionStyle companionStyle,
