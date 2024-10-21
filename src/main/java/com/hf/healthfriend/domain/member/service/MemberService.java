@@ -116,8 +116,9 @@ public class MemberService {
         Member updatedMember = this.memberRepository.update(memberId, updateDto);
         return MemberUpdateResponseDto.builder()
                 .profileImageUrl(this.fileUrlResolver.resolveFileUrl(updatedMember.getProfileImageUrl()))
-                .city(updatedMember.getCity())
-                .district(updatedMember.getDistrict())
+                .cd1(updatedMember.getCd1())
+                .cd2(updatedMember.getCd2())
+                .cd3(updatedMember.getCd3())
                 .introduction(updatedMember.getIntroduction())
                 .fitnessLevel(updatedMember.getFitnessLevel())
                 .companionStyle(updatedMember.getCompanionStyle())

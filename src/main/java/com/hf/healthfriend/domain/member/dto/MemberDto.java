@@ -5,7 +5,9 @@ import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.global.util.mapping.BeanMapping;
 import com.hf.healthfriend.global.util.mapping.MappingAttribute;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,8 +32,9 @@ public class MemberDto {
     private LocalDateTime creationTime;
     private String nickname;
     private String profileImageUrl;
-    private String city;
-    private String district;
+    private String cd1;
+    private String cd2;
+    private String cd3;
     private LocalDate birthDate;
     private Gender gender;
     private String introduction;
