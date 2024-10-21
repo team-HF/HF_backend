@@ -31,6 +31,9 @@ logging:
       hf:
         healthfriend: trace
 
+redis:
+  host: redis://localhost:6379
+
 management:
   endpoint:
     beans:
