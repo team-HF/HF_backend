@@ -22,7 +22,7 @@ public class SpecExceptionHandlingControllerAdvice {
                         .statusCode(MEMBER_NOT_FOUND.status())
                         .message(MEMBER_NOT_FOUND.message() + " - memberId=" + e.getMemberId())
                         .build(),
-                HttpStatus.BAD_REQUEST
+                HttpStatus.NOT_FOUND
         );
     }
 }
