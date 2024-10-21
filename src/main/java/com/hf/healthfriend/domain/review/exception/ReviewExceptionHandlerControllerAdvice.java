@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import static com.hf.healthfriend.domain.review.exception.ReviewErrorCode.*;
 
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "com.hf.healthfriend.domain.review")
 public class ReviewExceptionHandlerControllerAdvice {
 
     @ExceptionHandler(MemberNotFoundException.class)
