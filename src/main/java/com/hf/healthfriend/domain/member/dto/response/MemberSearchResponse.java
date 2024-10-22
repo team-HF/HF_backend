@@ -15,4 +15,5 @@ public class MemberSearchResponse{
     private String profileImageUrl;
     private String introduction;
     private String nickname;
+    private Long followerCount;
 }

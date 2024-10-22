@@ -1,15 +1,20 @@
 package com.hf.healthfriend.domain.member.repository.querydsl;
 
 
+import static com.querydsl.core.types.ExpressionUtils.count;
+
+import com.hf.healthfriend.domain.follow.entity.QFollow;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
 import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
 import com.hf.healthfriend.domain.member.entity.QMember;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +28,7 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     private final QMember member = QMember.member;
+    private final QFollow follow = QFollow.follow;
     private final JPAQueryFactory queryFactory;
 
     @Override
@@ -33,9 +39,9 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
         List<MemberRecommendResponse> result = queryFactory
                 .select(Projections.constructor(MemberRecommendResponse.class,
                         member.profileImageUrl,
-                        member.introduction,
+                        member.nickname,
                         member.matchedCount,
-                        member.nickname))
+                        member.introduction))
                 .from(member)
                 .where(builder)
                 .groupBy(member)
@@ -60,7 +66,12 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                 .select(Projections.bean(MemberSearchResponse.class,
                         member.profileImageUrl,
                         member.introduction,
-                        member.nickname))
+                        member.nickname,
+                        ExpressionUtils.as(
+                                JPAExpressions.select(count(follow.followId))
+                                        .from(follow)
+                                        .where(follow.followee.eq(member)),
+                                "followerCount")))
                 .from(member)
                 .where(builder)
                 .groupBy(member)
