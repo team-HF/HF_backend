@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.member.entity;
 
+import com.hf.healthfriend.domain.follow.entity.Follow;
 import com.hf.healthfriend.domain.matching.entity.Matching;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.post.entity.Post;
@@ -115,11 +116,17 @@ public class Member implements UserDetails {
     @OneToMany(mappedBy = "reviewee", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviewsReceived = new ArrayList<>();
 
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Follow> following = new ArrayList<>();
+
+    @OneToMany(mappedBy = "followee", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Follow> followers = new ArrayList<>();
+
     @Column(name = "review_score")
     private double reviewScore;
 
     @Column(name = "matched_count")
-    private Long matchedCount;
+    private Long matchedCount; // 삭제하는게 좋을듯
 
     public Member(long memberId) {
         this.id = memberId;
