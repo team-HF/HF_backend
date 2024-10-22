@@ -119,7 +119,7 @@ public class Member implements UserDetails {
     private double reviewScore;
 
     @Column(name = "matched_count")
-    private long matchedCount;
+    private Long matchedCount;
 
     public Member(long memberId) {
         this.id = memberId;

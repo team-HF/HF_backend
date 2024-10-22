@@ -6,6 +6,7 @@ import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
 import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
+import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
 import com.hf.healthfriend.domain.member.dto.response.MemberUpdateResponseDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.DuplicateMemberCreationException;
@@ -164,4 +165,11 @@ public class MemberService {
                 .profileImageUrl(this.fileUrlResolver.resolveFileUrl(member.getProfileImageUrl()))
                 .build();
     }
+
+    public List<MemberSearchResponse> searchMembers(String keyword, int pageNumber, int size){
+        Pageable pageable = PageRequest.of(pageNumber - 1, size);
+        List<MemberSearchResponse> members =  memberJpaRepository.searchMembers(keyword, pageable);
+        return members;
+    }
+
 }
