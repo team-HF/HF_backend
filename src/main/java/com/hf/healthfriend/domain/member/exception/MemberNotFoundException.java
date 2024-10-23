@@ -25,6 +25,10 @@ public class MemberNotFoundException extends RuntimeException {
         this.loginId = loginId;
     }
 
+    public MemberNotFoundException(Throwable e) {
+        super(e);
+    }
+
     public MemberNotFoundException(Long memberId, String message) {
         super(message);
         this.memberId = memberId;
