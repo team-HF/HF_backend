@@ -41,8 +41,8 @@ class TestMatchingService {
         Member member3 = SampleEntityGenerator.generateSampleMember("asdf2@gmail.com", "member3");
         member3.setId(1002L);
 
-        new Matching(member1, member2, LocalDateTime.now().plusDays(1));
         new Matching(member3, member1, LocalDateTime.now().plusDays(2));
+        new Matching(member1, member2, LocalDateTime.now().plusDays(1));
         when(this.memberRepository.findById(member1.getId())).thenReturn(Optional.of(member1));
 
         // When
@@ -51,8 +51,8 @@ class TestMatchingService {
         // Then
         assertThat(matchingOfMember).size().isEqualTo(2);
         assertThat(matchingOfMember.stream().map((e) -> e.getRequester().getMemberId()))
-                .containsExactlyInAnyOrder(member1.getId(), member3.getId());
+                .containsExactly(member3.getId(), member1.getId());
         assertThat(matchingOfMember.stream().map((e) -> e.getRequestTarget().getMemberId()))
-                .containsExactlyInAnyOrder(member1.getId(), member2.getId());
+                .containsExactly(member1.getId(), member2.getId());
     }
 }
