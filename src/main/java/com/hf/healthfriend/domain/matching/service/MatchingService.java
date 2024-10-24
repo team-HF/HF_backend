@@ -66,6 +66,13 @@ public class MatchingService {
         }
     }
 
+    public MatchingResponseDto getMatching(Long matchingId) {
+        return MatchingResponseDto.of(
+                this.matchingRepository.findById(matchingId)
+                        .orElseThrow(NoSuchElementException::new)
+        );
+    }
+
     @Deprecated
     public List<MatchingResponseDto> getAllMatchingOfMember(Long memberId) {
         Member member = this.memberRepository.findById(memberId)
