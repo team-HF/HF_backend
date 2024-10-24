@@ -168,8 +168,7 @@ public class MemberService {
 
     public List<MemberSearchResponse> searchMembers(String keyword, int pageNumber, int size){
         Pageable pageable = PageRequest.of(pageNumber - 1, size);
-        List<MemberSearchResponse> members =  memberJpaRepository.searchMembers(keyword, pageable);
-        return members;
+        return memberJpaRepository.searchMembers(keyword, pageable);
     }
 
 }
