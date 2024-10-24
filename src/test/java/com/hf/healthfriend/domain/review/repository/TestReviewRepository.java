@@ -133,4 +133,33 @@ class TestReviewRepository {
         // Then
         assertThat(result).isEqualTo(((double)review1.getScore() + review2.getScore()) / 2);
     }
+
+    @DisplayName("existsByMatchingIdAndReviewerId - return true")
+    @Test
+    void existsByMatchingIdAndReviewerId_returnTrue() {
+        // Given
+        Review review1 = SampleEntityGenerator.generateSampleReview(this.sampleMatching1, this.sampleBeginner1, this.sampleAdvanced, 3);
+        review1 = this.reviewRepository.save(review1);
+
+        // When
+        boolean result = this.reviewRepository.existsByMatchingIdAndReviewerId(this.sampleMatching1.getMatchingId(),
+                this.sampleBeginner1.getId());
+
+        // Then
+        assertThat(result).isTrue();
+    }
+
+    @DisplayName("existsByMatchingIdAndReviewerId - return false")
+    @Test
+    void existsByMatchingIdAndReviewerId_returnFalse() {
+        // Given
+        // No review exists
+
+        // When
+        boolean result = this.reviewRepository.existsByMatchingIdAndReviewerId(this.sampleMatching1.getMatchingId(),
+                this.sampleBeginner1.getId());
+
+        // Then
+        assertThat(result).isFalse();
+    }
 }

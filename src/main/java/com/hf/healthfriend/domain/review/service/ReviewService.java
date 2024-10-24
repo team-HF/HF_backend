@@ -78,12 +78,12 @@ public class ReviewService {
             throw new InvalidEvaluationsException();
         }
 
-        Matching targetMatching = this.matchingRepository.findById(dto.getMatchingId())
-                .orElseThrow(() -> new MatchingNotFoundException(dto.getMatchingId()));
-
-        if (targetMatching.sizeOfReviews() >= 2) {
+        if (this.reviewRepository.existsByMatchingIdAndReviewerId(dto.getMatchingId(), dto.getReviewerId())) {
             throw new DuplicateReviewException("중복된 리뷰 등록입니다", dto.getMatchingId());
         }
+
+        Matching targetMatching = this.matchingRepository.findById(dto.getMatchingId())
+                .orElseThrow(() -> new MatchingNotFoundException(dto.getMatchingId()));
 
         // 성립되지 않은 매칭에 대해 후기를 남기려 할 경우
         if (targetMatching.getStatus() != MatchingStatus.ACCEPTED) {
