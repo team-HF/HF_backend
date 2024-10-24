@@ -21,6 +21,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -64,10 +65,10 @@ class TestReviewRepository {
         this.sampleBeginner1 = this.memberRepository.save(beginner1);
         this.sampleBeginner2 = this.memberRepository.save(beginner2);
 
-        Matching matching1 = new Matching(beginner1, advanced);
+        Matching matching1 = new Matching(beginner1, advanced, LocalDateTime.now().plusDays(1));
         this.sampleMatching1 = this.matchingRepository.save(matching1);
 
-        Matching matching2 = new Matching(beginner2, advanced);
+        Matching matching2 = new Matching(beginner2, advanced, LocalDateTime.now().plusDays(1));
         this.sampleMatching2 = this.matchingRepository.save(matching2);
     }
 
