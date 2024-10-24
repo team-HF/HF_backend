@@ -130,7 +130,7 @@ class TestReviewService {
         this.memberRepository.save(member1);
         this.memberRepository.save(member2);
 
-        Matching savedMatching = this.matchingRepository.save(new Matching(member1, member2, LocalDateTime.now().plusDays(1)));
+        Matching savedMatching = this.matchingRepository.save(new Matching(member1, member2, "스포애니", "서울시 영등포구 당산역", LocalDateTime.now().plusDays(1)));
         return new Object[]{
                 member1, member2, savedMatching
         };
@@ -151,8 +151,8 @@ class TestReviewService {
         beginner2 = this.memberRepository.save(beginner2);
         advanced = this.memberRepository.save(advanced);
 
-        Matching matching1 = new Matching(beginner1, advanced, LocalDateTime.now().plusDays(1));
-        Matching matching2 = new Matching(beginner2, advanced, LocalDateTime.now().plusDays(1));
+        Matching matching1 = new Matching(beginner1, advanced, "스포애니", "서울시 영등포구 당산역", LocalDateTime.now().plusDays(1));
+        Matching matching2 = new Matching(beginner2, advanced, "에이블짐", "서울시 영등포구 당산역", LocalDateTime.now().plusDays(1));
         matching1 = this.matchingRepository.save(matching1);
         matching2 = this.matchingRepository.save(matching2);
 

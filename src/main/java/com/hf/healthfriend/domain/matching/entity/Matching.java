@@ -27,6 +27,12 @@ public class Matching {
     @JoinColumn(name = "request_target_id")
     private Member targetMember;
 
+    @Column(name = "meeting_place")
+    private String meetingPlace;
+
+    @Column(name = "meeting_place_addr")
+    private String meetingPlaceAddress;
+
     @Enumerated(EnumType.STRING)
     private MatchingStatus status = MatchingStatus.PENDING;
 
@@ -43,12 +49,18 @@ public class Matching {
         this.matchingId = matchingId;
     }
 
-    public Matching(Member requester, Member targetMember, LocalDateTime meetingTime) {
+    public Matching(Member requester,
+                    Member targetMember,
+                    String meetingPlace,
+                    String meetingPlaceAddress,
+                    LocalDateTime meetingTime) {
         // TODO: Member entity 안에 addMatching 메소드 추가해야 함
         this.requester = requester;
         requester.getMatchingRequests().add(this);
         this.targetMember = targetMember;
         targetMember.getMatchingsReceived().add(this);
+        this.meetingPlace = meetingPlace;
+        this.meetingPlaceAddress = meetingPlaceAddress;
         this.meetingTime = meetingTime;
     }
 

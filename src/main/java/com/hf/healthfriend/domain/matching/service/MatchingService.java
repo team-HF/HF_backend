@@ -45,6 +45,8 @@ public class MatchingService {
                     new Matching(
                             new Member(requestDto.getRequesterId()),
                             new Member(requestDto.getTargetId()),
+                            requestDto.getMeetingPlace(),
+                            requestDto.getMeetingPlaceAddress(),
                             requestDto.getMeetingTime()
                     )
             );
