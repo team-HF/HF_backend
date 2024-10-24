@@ -1,19 +1,18 @@
-package com.hf.healthfriend.domain.post.exception;
+package com.hf.healthfriend.global.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-import java.io.Serializable;
 import java.util.function.Supplier;
 
 @AllArgsConstructor
 @Getter
 public class CustomException extends RuntimeException implements Supplier<CustomException> {
-    private PostErrorCode errorCode;
+    private ErrorCode errorCode;
     private HttpStatus httpStatus;
 
-    public CustomException(PostErrorCode errorCode){
+    public CustomException(ErrorCode errorCode){
         super(errorCode.getMessage());
     }
 

@@ -1,13 +1,19 @@
 package com.hf.healthfriend.domain.member.repository.querydsl;
 
 
+import static com.querydsl.core.types.ExpressionUtils.count;
+import static com.querydsl.jpa.JPAExpressions.select;
+
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
 import com.hf.healthfriend.domain.member.entity.QMember;
+import com.hf.healthfriend.domain.wish.entity.QWish;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +27,7 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     private final QMember member = QMember.member;
+    private final QWish wish = QWish.wish;
     private final JPAQueryFactory queryFactory;
 
     @Override
@@ -52,9 +59,15 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
             case SCORE -> {
                 return new OrderSpecifier<?>[]{member.reviewScore.desc()};
             }
-            // TODO : 찜하기 기능이 구현되면 이어서 작업
-            case HEART_COUNT -> {
-                return new OrderSpecifier<?>[]{};
+            case WISH_COUNT -> {
+                return new OrderSpecifier<?>[]{
+                        new OrderSpecifier<>(Order.DESC,
+                                JPAExpressions
+                                        .select(count(wish.wisher))
+                                        .from(wish)
+                                        .where(wish.wished.id.eq(member.id))
+                        )
+                };
             }
             // TODO : 채팅 기능이 구현되면 이어서 작업
             case RESPONSE_RATE -> {
