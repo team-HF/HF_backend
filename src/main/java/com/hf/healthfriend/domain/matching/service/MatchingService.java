@@ -77,8 +77,6 @@ public class MatchingService {
     public List<MatchingResponseDto> getAllMatchingOfMember(Long memberId) {
         Member member = this.memberRepository.findById(memberId)
                 .orElseThrow(NoSuchElementException::new);
-        // TODO: Member에 있는 Matching 연관관계 필드명 수정해야 함
-        // 충돌 방지를 위해 PR 머지 후 수정할 예정
         return Stream.concat(member.getMatchingRequests().stream(), member.getMatchingsReceived().stream())
                 .sorted(MATCHING_LIST_SORT_COMPARATOR)
                 .map(MatchingResponseDto::of)

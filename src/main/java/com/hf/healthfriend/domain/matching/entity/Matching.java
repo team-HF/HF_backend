@@ -2,12 +2,15 @@ package com.hf.healthfriend.domain.matching.entity;
 
 import com.hf.healthfriend.domain.matching.constant.MatchingStatus;
 import com.hf.healthfriend.domain.member.entity.Member;
+import com.hf.healthfriend.domain.review.entity.Review;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -44,6 +47,9 @@ public class Matching {
 
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime finishTime = null;
+
+    @OneToMany(mappedBy = "matching")
+    private List<Review> reviews = new ArrayList<>();
 
     public Matching(Long matchingId) {
         this.matchingId = matchingId;
@@ -84,5 +90,13 @@ public class Matching {
         }
         this.status = MatchingStatus.FINISHED;
         this.finishTime = LocalDateTime.now();
+    }
+
+    public int sizeOfReviews() {
+        return this.reviews.size();
+    }
+
+    public void addReview(Review review) {
+        this.reviews.add(review);
     }
 }
