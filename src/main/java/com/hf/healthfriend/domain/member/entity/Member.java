@@ -5,6 +5,7 @@ import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.review.entity.Review;
 import com.hf.healthfriend.domain.spec.entity.Spec;
+import com.hf.healthfriend.domain.wish.entity.Wish;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -109,6 +110,12 @@ public class Member implements UserDetails {
     @OneToMany(mappedBy = "advanced", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Matching> matchingsAsAdvanced = new ArrayList<>();
 
+    @OneToMany(mappedBy = "wished", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Wish> wishedList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "wisher", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Wish> wisherList = new ArrayList<>();
+
     @OneToMany(mappedBy = "reviewer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviewsWrote = new ArrayList<>();
 
@@ -116,10 +123,10 @@ public class Member implements UserDetails {
     private List<Review> reviewsReceived = new ArrayList<>();
 
     @Column(name = "review_score")
-    private double reviewScore;
+    private Double reviewScore;
 
     @Column(name = "matched_count")
-    private long matchedCount;
+    private Long matchedCount;
 
     public Member(long memberId) {
         this.id = memberId;
