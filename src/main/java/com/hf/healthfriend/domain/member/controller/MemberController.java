@@ -172,7 +172,9 @@ public class MemberController {
             @ApiResponse(responseCode = "400", description = "프로필 검색 목록 조회 실패")
     })
     @GetMapping("/searchMembers")
-    public ResponseEntity<ApiBasicResponse<List<MemberSearchResponse>>> getSearchedMembers(String keyword, int page, int size) {
+    public ResponseEntity<ApiBasicResponse<List<MemberSearchResponse>>> getSearchedMembers(@RequestParam String keyword,
+                                                                                           @RequestParam(value = "page", defaultValue = "1") int page,
+                                                                                           @RequestParam int size) {
         return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.searchMembers(keyword,page,size), HttpStatus.OK));
     }
 }

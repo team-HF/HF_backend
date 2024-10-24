@@ -26,7 +26,7 @@ import java.util.List;
 
 @Tag(name = "Post API", description = "커뮤니티 API")
 @RequiredArgsConstructor
-@RequestMapping("/hf/")
+@RequestMapping("/hf")
 @RestController
 public class PostController {
     private final PostService postService;
@@ -101,10 +101,11 @@ public class PostController {
     @GetMapping("/list")
     public ResponseEntity<ApiBasicResponse<List<PostListObject>>> getList(
             @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam int size,
             @RequestParam @Nullable FitnessLevel fitnessLevel,
             @RequestParam @Nullable PostCategory postCategory,
             @RequestParam @Nullable String keyword) {
-        return ResponseEntity.ok(ApiBasicResponse.of(postService.getList(page,fitnessLevel,postCategory,keyword),HttpStatus.OK));
+        return ResponseEntity.ok(ApiBasicResponse.of(postService.getList(page,size,fitnessLevel,postCategory,keyword),HttpStatus.OK));
     }
 
     @Operation(summary = "인기글 검색 및 목록 조회", responses = {
@@ -114,9 +115,10 @@ public class PostController {
     @GetMapping("/popularList")
     public ResponseEntity<ApiBasicResponse<List<PostListObject>>> getPopularList(
             @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam int size,
             @RequestParam @Nullable FitnessLevel fitnessLevel,
             @RequestParam @Nullable String keyword) {
-        return ResponseEntity.ok(ApiBasicResponse.of(postService.getPopularList(page,fitnessLevel,keyword),HttpStatus.OK));
+        return ResponseEntity.ok(ApiBasicResponse.of(postService.getPopularList(page,size,fitnessLevel,keyword),HttpStatus.OK));
     }
 
 
