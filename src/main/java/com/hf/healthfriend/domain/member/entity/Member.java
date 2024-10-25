@@ -123,7 +123,7 @@ public class Member implements UserDetails {
     private List<Follow> followers = new ArrayList<>();
 
     @Column(name = "review_score")
-    private double reviewScore;
+    private Double reviewScore;
 
     @Column(name = "matched_count")
     private Long matchedCount; // 삭제하는게 좋을듯
