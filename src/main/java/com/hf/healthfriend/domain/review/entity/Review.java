@@ -67,6 +67,7 @@ public class Review {
         this.reviewer = reviewer;
         this.reviewee = reviewee;
         this.matching = matching;
+        this.matching.addReview(this);
         this.creationTime = creationTime;
         this.score = score;
         reviewEvaluations.forEach((re) -> re.setReview(this));

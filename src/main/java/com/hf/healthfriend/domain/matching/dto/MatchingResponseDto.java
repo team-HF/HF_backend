@@ -19,6 +19,8 @@ public class MatchingResponseDto {
     private SimpleMemberDto requester;
     private SimpleMemberDto requestTarget;
     private MatchingStatus status;
+    private String meetingPlace;
+    private String meetingPlaceAddress;
     private LocalDateTime meetingTime;
     private LocalDateTime creationTime;
     private LocalDateTime finishTime;
@@ -30,6 +32,8 @@ public class MatchingResponseDto {
                 .requestTarget(SimpleMemberDto.of(entity.getTargetMember()))
                 .status(entity.getStatus())
                 .meetingTime(entity.getMeetingTime())
+                .meetingPlace(entity.getMeetingPlace())
+                .meetingPlaceAddress(entity.getMeetingPlaceAddress())
                 .creationTime(entity.getCreationTime())
                 .finishTime(entity.getFinishTime())
                 .build();
