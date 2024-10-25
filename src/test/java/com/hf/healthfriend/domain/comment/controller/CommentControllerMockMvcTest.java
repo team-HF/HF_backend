@@ -2,11 +2,12 @@ package com.hf.healthfriend.domain.comment.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hf.healthfriend.domain.comment.constant.SortType;
+import com.hf.healthfriend.domain.comment.constant.CommentSortType;
 import com.hf.healthfriend.domain.comment.dto.CommentDto;
 import com.hf.healthfriend.domain.comment.dto.request.CommentCreationRequestDto;
 import com.hf.healthfriend.domain.comment.dto.response.CommentCreationResponseDto;
 import com.hf.healthfriend.domain.comment.service.CommentService;
+import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(CommentController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @MockBean(JpaMetamodelMappingContext.class)
+@MockBean(MemberRepository.class)
 class CommentControllerMockMvcTest {
 
     @Autowired
@@ -63,7 +65,7 @@ class CommentControllerMockMvcTest {
                                 .content("sample-content")
                                 .build()
                 );
-        when(this.commentService.getCommentsOfPost(10000L, SortType.LATEST))
+        when(this.commentService.getCommentsOfPost(10000L, CommentSortType.LATEST))
                 .thenReturn(
                         List.of(
                                 CommentDto.builder()

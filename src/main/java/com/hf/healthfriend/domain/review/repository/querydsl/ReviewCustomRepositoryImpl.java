@@ -3,6 +3,7 @@ package com.hf.healthfriend.domain.review.repository.querydsl;
 import com.hf.healthfriend.domain.review.entity.QReview;
 import com.hf.healthfriend.domain.review.entity.QReviewEvaluation;
 import com.hf.healthfriend.domain.review.repository.dto.RevieweeStatisticsMapping;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
@@ -51,5 +52,19 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
                 .where(this.review.reviewee.id.eq(revieweeId))
                 .fetchOne();
         return result == null ? 0 : result;
+    }
+
+    @Override
+    public boolean existsByMatchingIdAndReviewerId(Long matchingId, Long reviewerId) {
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(this.review.matching.matchingId.eq(matchingId));
+        builder.and(this.review.reviewer.id.eq(reviewerId));
+
+        Integer fetchOne = this.queryFactory
+                .selectOne()
+                .from(this.review)
+                .where(builder)
+                .fetchFirst();
+        return fetchOne != null;
     }
 }

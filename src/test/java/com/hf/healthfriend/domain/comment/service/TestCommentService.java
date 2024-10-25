@@ -1,6 +1,6 @@
 package com.hf.healthfriend.domain.comment.service;
 
-import com.hf.healthfriend.domain.comment.constant.SortType;
+import com.hf.healthfriend.domain.comment.constant.CommentSortType;
 import com.hf.healthfriend.domain.comment.dto.request.CommentCreationRequestDto;
 import com.hf.healthfriend.domain.comment.dto.response.CommentCreationResponseDto;
 import com.hf.healthfriend.domain.comment.exception.CommentNotFoundException;
@@ -133,7 +133,7 @@ class TestCommentService {
     @Test
     void getCommentsOfPost_failure_PostNotFoundException() {
         assertThatExceptionOfType(PostNotFoundException.class)
-                .isThrownBy(() -> this.commentService.getCommentsOfPost(1111L, SortType.LATEST));
+                .isThrownBy(() -> this.commentService.getCommentsOfPost(1111L, CommentSortType.LATEST));
     }
 
     @DisplayName("getCommentsOfWriter - 존재하지 않는 회원의 댓글을 조회하려 할 때 MemberNotFoundException 발생")

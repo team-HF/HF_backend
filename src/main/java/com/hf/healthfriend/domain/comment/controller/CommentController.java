@@ -1,6 +1,6 @@
 package com.hf.healthfriend.domain.comment.controller;
 
-import com.hf.healthfriend.domain.comment.constant.SortType;
+import com.hf.healthfriend.domain.comment.constant.CommentSortType;
 import com.hf.healthfriend.domain.comment.dto.CommentDto;
 import com.hf.healthfriend.domain.comment.dto.request.CommentCreationRequestDto;
 import com.hf.healthfriend.domain.comment.dto.response.CommentCreationResponseDto;
@@ -69,7 +69,7 @@ public class CommentController {
             }
     )
     public ResponseEntity<ApiBasicResponse<List<CommentDto>>> findCommentsOfSpecificPost(@PathVariable("postId") long postId,
-                                                                                         @RequestParam @Nullable SortType sortType) {
+                                                                                         @RequestParam @Nullable CommentSortType sortType) {
         List<CommentDto> result = this.commentService.getCommentsOfPost(postId,sortType);
         log.info("result={}", result);
         return ResponseEntity.ok(ApiBasicResponse.of(result, HttpStatus.OK));

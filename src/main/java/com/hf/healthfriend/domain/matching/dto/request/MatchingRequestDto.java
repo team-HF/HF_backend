@@ -1,5 +1,8 @@
 package com.hf.healthfriend.domain.matching.dto.request;
 
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -10,9 +13,22 @@ import java.time.LocalDateTime;
 @Getter
 @ToString
 public class MatchingRequestDto {
+
+    @NotNull
     private Long requesterId;
+    
+    @NotNull
     private Long targetId;
+
+    @NotNull
+    @NotEmpty
     private String meetingPlace;
+
+    @NotNull
+    @NotEmpty
     private String meetingPlaceAddress;
+
+    @NotNull
+    @Future
     private LocalDateTime meetingTime;
 }

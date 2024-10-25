@@ -6,6 +6,7 @@ import com.hf.healthfriend.domain.matching.exception.MatchingNotFoundException;
 import com.hf.healthfriend.domain.matching.repository.MatchingRepository;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
+import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.review.constants.EvaluationType;
 import com.hf.healthfriend.domain.review.dto.request.ReviewCreationRequestDto;
@@ -37,6 +38,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final MatchingRepository matchingRepository;
     private final MemberRepository memberRepository;
+    private final MemberJpaRepository memberJpaRepository;
 
     /**
      * 리뷰를 추가한다.
@@ -67,6 +69,7 @@ public class ReviewService {
             if (saved.getMatching().sizeOfReviews() >= 2) {
                 saved.getMatching().finish();
             }
+            updateMemberReviewScore(dto.getRevieweeId());
             return saved.getReviewId();
         } catch (DataIntegrityViolationException e) {
             throw new MemberNotFoundException(dto.getReviewerId(), e);
@@ -168,5 +171,15 @@ public class ReviewService {
             }
         }
         return false;
+    }
+
+    private void updateMemberReviewScore(Long revieweeId) {
+        // TODO: 이 로직을 MemberService로 옮기고 ReviewService.addReview 메소드에서 MemberService.updateMemberReviewScore 메소드를 호출하는 게 좋을 듯
+        List<Integer> reviewScoreList = reviewRepository.findScoreListByRevieewId(revieweeId);
+        double averageScore = Math.round(reviewScoreList.stream()
+                .mapToInt(Integer::intValue)
+                .average()
+                .orElse(0.0)*10.0)/10.0;
+        memberJpaRepository.updateMemberReviewScore(revieweeId,averageScore);
     }
 }

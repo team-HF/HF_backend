@@ -1,6 +1,6 @@
 package com.hf.healthfriend.domain.comment.service;
 
-import com.hf.healthfriend.domain.comment.constant.SortType;
+import com.hf.healthfriend.domain.comment.constant.CommentSortType;
 import com.hf.healthfriend.domain.comment.dto.CommentDto;
 import com.hf.healthfriend.domain.comment.dto.request.CommentCreationRequestDto;
 import com.hf.healthfriend.domain.comment.dto.response.CommentCreationResponseDto;
@@ -56,7 +56,7 @@ public class CommentService {
         this.commentRepository.deleteById(commentId);
     }
 
-    public List<CommentDto> getCommentsOfPost(Long postId, SortType sortType) {
+    public List<CommentDto> getCommentsOfPost(Long postId, CommentSortType sortType) {
         if (!this.postRepository.existsById(postId)) {
             throw new PostNotFoundException(postId, "postId에 해당하는 Post가 없음");
         }
