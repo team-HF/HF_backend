@@ -7,10 +7,9 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Builder(access = AccessLevel.PRIVATE)
+@AllArgsConstructor
+@Builder
 @Getter
 @ToString
 public class MemberCreationResponseDto {
