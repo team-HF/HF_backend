@@ -6,14 +6,12 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@ToString
 public class Matching {
 
     @Id
@@ -22,12 +20,12 @@ public class Matching {
     private Long matchingId;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "beginner_id")
-    private Member beginner;
+    @JoinColumn(name = "requester_id")
+    private Member requester;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "advanced_id")
-    private Member advanced;
+    @JoinColumn(name = "request_target_id")
+    private Member targetMember;
 
     @Enumerated(EnumType.STRING)
     private MatchingStatus status = MatchingStatus.PENDING;
@@ -45,23 +43,33 @@ public class Matching {
         this.matchingId = matchingId;
     }
 
-    public Matching(Member beginner, Member advanced, LocalDateTime meetingTime) {
-        this.beginner = beginner;
-        beginner.getMatchingsAsBeginner().add(this);
-        this.advanced = advanced;
-        advanced.getMatchingsAsAdvanced().add(this);
+    public Matching(Member requester, Member targetMember, LocalDateTime meetingTime) {
+        // TODO: Member entity 안에 addMatching 메소드 추가해야 함
+        this.requester = requester;
+        requester.getMatchingRequests().add(this);
+        this.targetMember = targetMember;
+        targetMember.getMatchingsReceived().add(this);
         this.meetingTime = meetingTime;
     }
 
     public void accept() {
+        if (this.status != MatchingStatus.PENDING) {
+            throw new IllegalStateException("대기 중인 매칭만 수락할 수 있습니다");
+        }
         this.status = MatchingStatus.ACCEPTED;
     }
 
     public void reject() {
+        if (this.status != MatchingStatus.PENDING) {
+            throw new IllegalStateException("대기 중인 매칭만 거절할 수 있습니다");
+        }
         this.status = MatchingStatus.REJECTED;
     }
 
     public void finish() {
+        if (this.status != MatchingStatus.ACCEPTED) {
+            throw new IllegalArgumentException("수락된 매칭만 종료될 수 있습니다");
+        }
         this.status = MatchingStatus.FINISHED;
         this.finishTime = LocalDateTime.now();
     }

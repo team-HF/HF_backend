@@ -1,49 +1,57 @@
 package com.hf.healthfriend.domain.matching.service;
 
+import com.hf.healthfriend.domain.matching.constant.MatchingFetchType;
 import com.hf.healthfriend.domain.matching.constant.MatchingStatus;
-import com.hf.healthfriend.domain.matching.dto.MatchingDto;
+import com.hf.healthfriend.domain.matching.dto.MatchingResponseDto;
 import com.hf.healthfriend.domain.matching.dto.request.MatchingRequestDto;
 import com.hf.healthfriend.domain.matching.entity.Matching;
-import com.hf.healthfriend.domain.matching.exception.InvalidLevelMatchingException;
 import com.hf.healthfriend.domain.matching.repository.MatchingRepository;
-import com.hf.healthfriend.domain.member.constant.FitnessLevel;
-import com.hf.healthfriend.domain.member.dto.MemberDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
-import com.hf.healthfriend.global.util.mapping.BeanMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Stream;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class MatchingService {
+    private static final Comparator<Matching> MATCHING_LIST_SORT_COMPARATOR = (d1, d2) -> {
+        LocalDateTime creationTime1 = d1.getMeetingTime();
+        LocalDateTime creationTime2 = d2.getMeetingTime();
+        if (creationTime1.isAfter(creationTime2)) {
+            return -1;
+        } else if (creationTime1.equals(creationTime2)) {
+            return 0;
+        } else {
+            return 1;
+        }
+    };
+
     private final MatchingRepository matchingRepository;
     private final MemberRepository memberRepository;
-    private final BeanMapper beanMapper;
 
     public Long requestMatching(MatchingRequestDto requestDto) {
-        Member requester = this.memberRepository.findById(requestDto.getRequesterId())
-                .orElseThrow(() -> new MemberNotFoundException("요청하는 회원의 ID가 존재하지 않습니다: " + requestDto.getRequesterId()));
-        Member target = this.memberRepository.findById(requestDto.getTargetId())
-                .orElseThrow(() -> new MemberNotFoundException("요청 대상의 ID가 존재하지 않습니다: " + requestDto.getTargetId()));
-
-        FitnessLevel requesterLevel = requester.getFitnessLevel();
-        if (target.getFitnessLevel() == requesterLevel) {
-            throw new InvalidLevelMatchingException(requesterLevel, target.getFitnessLevel());
+        try {
+            Matching savedMatching = this.matchingRepository.save(
+                    new Matching(
+                            new Member(requestDto.getRequesterId()),
+                            new Member(requestDto.getTargetId()),
+                            requestDto.getMeetingTime()
+                    )
+            );
+            return savedMatching.getMatchingId();
+        } catch (DataIntegrityViolationException e) {
+            throw new MemberNotFoundException(e);
         }
-
-        Matching newMatching = requesterLevel == FitnessLevel.BEGINNER
-                ? new Matching(requester, target, requestDto.getMeetingTime())
-                : new Matching(target, requester, requestDto.getMeetingTime());
-
-        Matching savedMatching = this.matchingRepository.save(newMatching);
-        return savedMatching.getMatchingId();
     }
 
     public void updateMatchingStatus(Long matchingId, MatchingStatus matchingStatus) {
@@ -56,26 +64,34 @@ public class MatchingService {
         }
     }
 
-    public List<MatchingDto> getMatchingOfMember(Long memberId) {
+    @Deprecated
+    public List<MatchingResponseDto> getAllMatchingOfMember(Long memberId) {
         Member member = this.memberRepository.findById(memberId)
                 .orElseThrow(NoSuchElementException::new);
-        return (member.getFitnessLevel() == FitnessLevel.ADVANCED
-                ? member.getMatchingsAsAdvanced()
-                : member.getMatchingsAsBeginner())
-                .stream()
-                .map((m) -> {
-                    MatchingDto matchingDto = this.beanMapper.generateBean(m, MatchingDto.class);
-                    matchingDto.setTargetMember(
-                            this.beanMapper.generateBean(
-                                    // 조회하려는 회원이 고수면 상대는 새싹일 테므로
-                                    member.getFitnessLevel() == FitnessLevel.ADVANCED
-                                            ? m.getBeginner()
-                                            : m.getAdvanced(),
-                                    MemberDto.class
-                            )
-                    );
-                    return matchingDto;
-                })
+        // TODO: Member에 있는 Matching 연관관계 필드명 수정해야 함
+        // 충돌 방지를 위해 PR 머지 후 수정할 예정
+        return Stream.concat(member.getMatchingRequests().stream(), member.getMatchingsReceived().stream())
+                .sorted(MATCHING_LIST_SORT_COMPARATOR)
+                .map(MatchingResponseDto::of)
+                .toList();
+    }
+
+    public List<MatchingResponseDto> getMatchingOfMember(Long memberId, MatchingFetchType fetchType) {
+        Member member = this.memberRepository.findById(memberId)
+                .orElseThrow(NoSuchElementException::new);
+        return switch (fetchType) {
+            case ALL -> convertStreamToMatchingResponseDtoList(
+                    Stream.concat(member.getMatchingRequests().stream(), member.getMatchingsReceived().stream())
+            );
+            case WHAT_I_REQUESTED -> convertStreamToMatchingResponseDtoList(member.getMatchingRequests().stream());
+            case WHAT_I_RECEIVED -> convertStreamToMatchingResponseDtoList(member.getMatchingsReceived().stream());
+        };
+    }
+
+    private List<MatchingResponseDto> convertStreamToMatchingResponseDtoList(Stream<Matching> matchingStream) {
+        return matchingStream
+                .sorted(MATCHING_LIST_SORT_COMPARATOR)
+                .map(MatchingResponseDto::of)
                 .toList();
     }
 }

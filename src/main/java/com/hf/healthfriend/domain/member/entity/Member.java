@@ -106,11 +106,11 @@ public class Member implements UserDetails {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Spec> specs = new ArrayList<>();
 
-    @OneToMany(mappedBy = "beginner", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Matching> matchingsAsBeginner = new ArrayList<>();
+    @OneToMany(mappedBy = "requester", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Matching> matchingRequests = new ArrayList<>();
 
-    @OneToMany(mappedBy = "advanced", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Matching> matchingsAsAdvanced = new ArrayList<>();
+    @OneToMany(mappedBy = "targetMember", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Matching> matchingsReceived = new ArrayList<>();
 
     @OneToMany(mappedBy = "reviewer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviewsWrote = new ArrayList<>();
