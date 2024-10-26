@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -139,7 +140,12 @@ public class OAuth2TokenController {
             )
     })
     public ResponseEntity<ApiBasicResponse<MemberDto>> whoAmI() {
-        long id = Long.parseLong(SecurityContextHolder.getContext().getAuthentication().getName());
+        long id;
+        try {
+            id = Long.parseLong(SecurityContextHolder.getContext().getAuthentication().getName());
+        } catch (NumberFormatException e) {
+            throw new AccessDeniedException("Member Not allowed", e);
+        }
         if (log.isTraceEnabled()) {
             log.trace("Logged In OAuth 2.0 Member={}", id);
         }
