@@ -70,6 +70,15 @@ class TestMemberService {
                 .fitnessEagerness(FitnessEagerness.LAZY)
                 .fitnessObjective(FitnessObjective.RUNNING)
                 .fitnessKind(FitnessKind.FUNCTIONAL)
+                .specs(List.of(
+                        SpecDto.builder()
+                                .startDate(LocalDate.of(1997, 9, 16))
+                                .endDate(LocalDate.of(2022, 12, 13))
+                                .isCurrent(true)
+                                .title("title")
+                                .description("desc")
+                                .build()
+                ))
                 .build();
 
         log.info("requestDto={}", requestDto);
@@ -94,6 +103,8 @@ class TestMemberService {
         assertThat(responseDto.getFitnessEagerness()).isEqualTo(FitnessEagerness.LAZY);
         assertThat(responseDto.getFitnessObjective()).isEqualTo(FitnessObjective.RUNNING);
         assertThat(responseDto.getFitnessKind()).isEqualTo(FitnessKind.FUNCTIONAL);
+
+        assertThat(responseDto.getSpecIds()).size().isNotZero();
 
         Member member = this.memberJpaRepository.findByEmail("sample@gmail.com").orElseThrow();
 

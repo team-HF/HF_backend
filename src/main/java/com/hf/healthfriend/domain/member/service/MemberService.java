@@ -14,8 +14,9 @@ import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
+import com.hf.healthfriend.domain.spec.dto.SpecDto;
+import com.hf.healthfriend.domain.spec.service.SpecService;
 import com.hf.healthfriend.global.file.FileUrlResolver;
-import com.hf.healthfriend.global.file.FileUploader;
 import com.hf.healthfriend.global.util.mapping.BeanMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,9 +25,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -36,8 +35,8 @@ import java.util.List;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final MemberJpaRepository memberJpaRepository;
+    private final SpecService specService;
     private final FileUrlResolver fileUrlResolver;
-    private final FileUploader fileUploader;
     private final BeanMapper beanMapper;
 
     /**
@@ -60,18 +59,18 @@ public class MemberService {
             log.debug("newMember={}", newMember);
         }
 
-        if (dto.getProfileImage() != null) {
-            String filePath = storeProfileImage(dto.getProfileImage());
-            if (filePath != null) {
-                log.info("id={}, filePath={}", newMember.getId(), filePath);
-                newMember.setProfileImageUrl(filePath);
-            } else {
-                log.info("id={}, File not created", newMember.getId());
-            }
+        String profileImagePath = null;
+        if (dto.isProfileImagePresent()) {
+            profileImagePath = this.fileUrlResolver.generateFilePathWithUuid("image");
+            newMember.setProfileImageUrl(profileImagePath);
+            log.info("id={}, profileImagePath={}", newMember.getId(), profileImagePath);
+        } else {
+            log.info("id={}, File not created", newMember.getId());
         }
 
         Member saved = this.memberRepository.save(newMember);
-        return MemberCreationResponseDto.of(saved);
+        List<Long> generatedSpecIds = this.specService.addSpec(saved.getId(), dto.getSpecs());
+        return MemberCreationResponseDto.of(saved, this.fileUrlResolver.generateUploadUrl(profileImagePath), generatedSpecIds);
     }
 
     public boolean isMemberExists(Long memberId) {
@@ -85,7 +84,7 @@ public class MemberService {
     public MemberDto findMember(Long memberId) throws MemberNotFoundException {
         Member findMember = this.memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
-        return bindToDto(findMember);
+        return buildDto(findMember);
     }
 
     public MemberDto findMemberByLoginId(String loginId) throws MemberNotFoundException {
@@ -96,26 +95,25 @@ public class MemberService {
     public MemberDto findMemberByEmail(String email) throws MemberNotFoundException {
         Member findMember = this.memberRepository.findByEmail(email)
                 .orElseThrow(() -> new MemberNotFoundException(email));
-        return bindToDto(findMember);
+        return buildDto(findMember);
     }
 
     public MemberUpdateResponseDto updateMember(Long memberId, MemberUpdateRequestDto requestDto) throws MemberNotFoundException {
         validateUpdateRequest(memberId, requestDto);
         MemberUpdateDto updateDto = this.beanMapper.generateBean(requestDto, MemberUpdateDto.class);
-        if (requestDto.getProfileImage() != null) {
-            String filePath = storeProfileImage(requestDto.getProfileImage());
-            if (filePath != null) {
-                log.info("id={}, filePath={}", memberId, filePath);
-                updateDto = updateDto.toBuilder()
-                        .profileImageUrl(filePath)
-                        .build();
-            } else {
-                log.info("id={}, File not updated", memberId);
-            }
+        String profileImagePath = null;
+        if (requestDto.isProfileImagePresent()) {
+            profileImagePath = this.fileUrlResolver.generateFilePathWithUuid("image");
+            updateDto = updateDto.toBuilder()
+                    .profileImageUrl(profileImagePath)
+                    .build();
+            log.info("id={}, profileImagePath={}", memberId, profileImagePath);
         }
+
         Member updatedMember = this.memberRepository.update(memberId, updateDto);
+        this.specService.updateSpecsOfMember(memberId, requestDto.getSpecUpdate());
         return MemberUpdateResponseDto.builder()
-                .profileImageUrl(this.fileUrlResolver.resolveFileUrl(updatedMember.getProfileImageUrl()))
+                .profileImageUploadUrl(this.fileUrlResolver.generateUploadUrl(profileImagePath))
                 .cd1(updatedMember.getCd1())
                 .cd2(updatedMember.getCd2())
                 .cd3(updatedMember.getCd3())
@@ -141,28 +139,17 @@ public class MemberService {
         }
     }
 
-    private String storeProfileImage(MultipartFile profileImage) {
-        String originalFilename = profileImage.getOriginalFilename();
-        String filePath = this.fileUrlResolver.generateFilePath(originalFilename, "image");
-
-        try {
-            this.fileUploader.uploadFile(filePath, profileImage);
-            return filePath;
-        } catch (IOException e) {
-            log.error("[FATAL] 파일 출력 중 Error 발생", e);
-            return null;
-        }
-    }
-
     public List<MemberRecommendResponse> recommendMember(MembersRecommendRequest request, int pageNumber){
         Pageable pageable = PageRequest.of(pageNumber - 1, 6);
         return memberJpaRepository.recommendMembers(request, pageable);
     }
 
-    private MemberDto bindToDto(Member member) {
+    private MemberDto buildDto(Member member) {
         MemberDto memberDto = this.beanMapper.generateBean(member, MemberDto.class);
+        List<SpecDto> specsOfMember = this.specService.getSpecsOfMember(member.getId());
         return memberDto.toBuilder()
                 .profileImageUrl(this.fileUrlResolver.resolveFileUrl(member.getProfileImageUrl()))
+                .specs(specsOfMember)
                 .build();
     }
 }

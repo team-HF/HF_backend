@@ -5,7 +5,7 @@ import lombok.Builder;
 
 @Builder(toBuilder = true)
 public record MemberUpdateResponseDto(
-        String profileImageUrl,
+        String profileImageUploadUrl,
         String cd1,
         String cd2,
         String cd3,

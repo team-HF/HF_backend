@@ -13,7 +13,6 @@ import com.hf.healthfriend.global.spec.ApiErrorResponse;
 import com.hf.healthfriend.global.spec.schema.MemberCreationResponseSchema;
 import com.hf.healthfriend.global.spec.schema.MemberResponseSchema;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -40,7 +39,7 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "회원 생성"
     )

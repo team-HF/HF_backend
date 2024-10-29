@@ -61,23 +61,24 @@ public class SpecService {
     }
 
     public List<SpecDto> getSpecsOfMember(Long memberId) {
-        validateMemberWhetherMemberExists(memberId);
-        return this.specRepository.findByMemberId(memberId)
+        // 캐싱된 Member 엔티티 가져오기
+        return this.memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException(memberId, "회원이 존재하지 않음"))
+                .getSpecs()
                 .stream()
                 .map(SpecDto::of)
                 .toList();
     }
 
     public SpecUpdateResponseDto updateSpecsOfMember(Long memberId, List<SpecUpdateRequestDto> specUpdateRequestDtos) {
-        validateMemberWhetherMemberExists(memberId);
         if (specUpdateRequestDtos == null) {
             return new SpecUpdateResponseDto(List.of(), List.of(), List.of());
         }
-        List<Long> insertedSpecIds = addSpec(memberId, specUpdateRequestDtos.stream()
-                .filter((dto) -> dto.getSpecUpdateType() == SpecUpdateType.INSERT)
-                .map(SpecUpdateRequestDto::getSpec)
-                .toList());
 
+        Member member = this.memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException(memberId, "회원이 존재하지 않음"));
+
+        // Map의 key는 업데이트할 Spec의 ID
         Map<Long, SpecUpdateRequestDto> specsBySpecId = specUpdateRequestDtos.stream()
                 .filter((dto) -> dto.getSpecUpdateType() != SpecUpdateType.INSERT)
                 .collect(Collectors.toMap(
@@ -85,30 +86,37 @@ public class SpecService {
                         (s) -> s,
                         (s1, s2) -> s1
                 ));
-        List<Spec> specsToUpdate = this.specRepository.findBySpecIdsIn(specsBySpecId.keySet());
-        
+
         List<Long> updatedSpecIds = new ArrayList<>();
         List<Long> deletedSpecIds = new ArrayList<>();
 
-        for (Spec specToUpdate : specsToUpdate) {
-            SpecUpdateRequestDto updateDto = specsBySpecId.get(specToUpdate.getSpecId());
+        // Map의 Key는 Spec의 Id
+        Map<Long, Spec> specById = member.getSpecs()
+                .stream()
+                .collect(Collectors.toMap(Spec::getSpecId, (s) -> s));
+
+        for (Map.Entry<Long, Spec> entry : specById.entrySet()) {
+            SpecUpdateRequestDto updateDto = specsBySpecId.get(entry.getKey());
+            Spec spec = entry.getValue();
+            // UPDATE일 경우 기존 Spec을 업데이트하고, DELETE일 경우 Spec 삭제
+            // INSERT의 경우 여기서는 처리하지 않고 바로 아래 있는 부분에서 처리
             switch (updateDto.getSpecUpdateType()) {
                 case UPDATE -> {
-                    specToUpdate.update(updateDto.getSpec());
-                    updatedSpecIds.add(specToUpdate.getSpecId());
+                    spec.update(updateDto.getSpec());
+                    updatedSpecIds.add(entry.getKey());
                 }
                 case DELETE -> {
-                    specToUpdate.delete();
-                    deletedSpecIds.add(specToUpdate.getSpecId());
+                    spec.delete();
+                    deletedSpecIds.add(entry.getKey());
                 }
             }
         }
-        return new SpecUpdateResponseDto(insertedSpecIds, updatedSpecIds, deletedSpecIds);
-    }
 
-    private void validateMemberWhetherMemberExists(Long memberId) {
-        if (!this.memberRepository.existsById(memberId)) {
-            throw new MemberNotFoundException(memberId, "회원이 존재하지 않음");
-        }
+        List<Long> insertedSpecIds = addSpec(memberId, specUpdateRequestDtos.stream()
+                .filter((dto) -> dto.getSpecUpdateType() == SpecUpdateType.INSERT)
+                .map(SpecUpdateRequestDto::getSpec)
+                .toList());
+
+        return new SpecUpdateResponseDto(insertedSpecIds, updatedSpecIds, deletedSpecIds);
     }
 }
