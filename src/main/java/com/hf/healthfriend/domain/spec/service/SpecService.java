@@ -66,6 +66,13 @@ public class SpecService {
                 .orElseThrow(() -> new MemberNotFoundException(memberId, "회원이 존재하지 않음"))
                 .getSpecs()
                 .stream()
+                // 삭제된 Spec은 아예 가져오지 않는 게 성능상 더 이점을 가지지만
+                // getSpecsOfMember 메소드는 MemberService 내부에서 호출되기 때문에
+                // 이미 영속성 컨텍스트에 있는 Member 엔티티를 가져와서 사용하는 것이 쿼리 횟수를 줄일 수 있음
+                // MemberRepository.findByMemberId는 Fetch Join으로 회원 엔티티와 그와 연관된 Spec 엔티티를 가지고 오는데
+                // 이때 삭제 처리된 Spec은 제외하고 가지고 오기 때문에 MemberService에서 getSpecsOfMember를 호출할 때
+                // 영속성 컨텍스트에 있는 Member 엔티티는 삭제된 Spec을 가지고 있지 않음
+                .filter((spec) -> !spec.isDeleted())
                 .map(SpecDto::of)
                 .toList();
     }

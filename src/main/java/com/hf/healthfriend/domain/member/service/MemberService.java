@@ -82,7 +82,7 @@ public class MemberService {
     }
 
     public MemberDto findMember(Long memberId) throws MemberNotFoundException {
-        Member findMember = this.memberRepository.findById(memberId)
+        Member findMember = this.memberJpaRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
         return buildDto(findMember);
     }
