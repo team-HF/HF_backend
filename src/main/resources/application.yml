@@ -43,6 +43,8 @@ management:
       exposure:
         include: beans
 
+local-file-upload: true
+
 springdoc:
   packages-to-scan: com.hf.healthfriend
   override-with-generic-response: true

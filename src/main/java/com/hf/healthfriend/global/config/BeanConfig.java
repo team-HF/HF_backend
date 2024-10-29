@@ -6,10 +6,10 @@ import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hf.healthfriend.global.util.HttpCookieUtils;
 import com.hf.healthfriend.global.util.SecuredHttpCookieUtils;
-import com.hf.healthfriend.global.util.file.FileUrlResolver;
-import com.hf.healthfriend.global.util.file.MultipartFileUploader;
-import com.hf.healthfriend.global.util.file.local.LocalFileUrlResolver;
-import com.hf.healthfriend.global.util.file.local.LocalMultipartFileUploader;
+import com.hf.healthfriend.global.file.FileUrlResolver;
+import com.hf.healthfriend.global.file.FileUploader;
+import com.hf.healthfriend.global.file.local.LocalFileUrlResolver;
+import com.hf.healthfriend.global.file.local.LocalFileUploader;
 import jakarta.servlet.ServletContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -47,8 +47,8 @@ public class BeanConfig {
     }
 
     @Bean
-    @ConditionalOnMissingBean(MultipartFileUploader.class)
-    public LocalMultipartFileUploader localMultipartFileUploader(ServletContext servletContext) {
-        return new LocalMultipartFileUploader(servletContext);
+    @ConditionalOnMissingBean(FileUploader.class)
+    public LocalFileUploader localMultipartFileUploader(ServletContext servletContext) {
+        return new LocalFileUploader(servletContext);
     }
 }

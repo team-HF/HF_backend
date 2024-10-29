@@ -14,8 +14,8 @@ import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
-import com.hf.healthfriend.global.util.file.FileUrlResolver;
-import com.hf.healthfriend.global.util.file.MultipartFileUploader;
+import com.hf.healthfriend.global.file.FileUrlResolver;
+import com.hf.healthfriend.global.file.FileUploader;
 import com.hf.healthfriend.global.util.mapping.BeanMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +37,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final MemberJpaRepository memberJpaRepository;
     private final FileUrlResolver fileUrlResolver;
-    private final MultipartFileUploader multipartFileUploader;
+    private final FileUploader fileUploader;
     private final BeanMapper beanMapper;
 
     /**
@@ -146,7 +146,7 @@ public class MemberService {
         String filePath = this.fileUrlResolver.generateFilePath(originalFilename, "image");
 
         try {
-            this.multipartFileUploader.uploadFile(filePath, profileImage);
+            this.fileUploader.uploadFile(filePath, profileImage);
             return filePath;
         } catch (IOException e) {
             log.error("[FATAL] 파일 출력 중 Error 발생", e);

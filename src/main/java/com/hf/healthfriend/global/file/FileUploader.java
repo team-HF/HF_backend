@@ -1,9 +1,10 @@
-package com.hf.healthfriend.global.util.file;
+package com.hf.healthfriend.global.file;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * 여러 구현체를 선택할 수 있는 Multipart 파일 업로더.
@@ -13,9 +14,12 @@ import java.io.IOException;
  * @author PGD
  */
 @Component
-public interface MultipartFileUploader {
+public interface FileUploader {
 
+    // TODO: IOException을 RuntimeException 계열의 예외로 래핑해야 할 듯
     void uploadFile(String filePath, MultipartFile multipartFile) throws IOException;
 
     void uploadFile(String filePath, byte[] bytes) throws IOException;
+
+    void uploadFile(String filePath, InputStream is) throws IOException;
 }
