@@ -33,7 +33,7 @@ public class MemberCreationRequestDto {
     @NotNull
     private String nickname;
 
-    @Schema(description = "회원 프로필 이미지 등록 여부")
+    @Schema(description = "회원 프로필 이미지 등록 여부. true일 경우 profileImageUploadUrl을 반환한다.")
     private boolean profileImagePresent;
 
     @Schema(description = "yyyy-mm-dd 형식 ex) 2017-08-09")

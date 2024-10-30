@@ -32,6 +32,9 @@ public class MemberCreationResponseDto {
     private final LocalDate birthDate;
     private final Gender gender;
     private final String introduction;
+
+    @Schema(description = "프로필 이미지를 업로드할 URL. 이 URL로 PUT Method를 통해 이미지 binary data를 전송하면 된다. " +
+            "이 URL로 이미지 업로드 요청을 보낼 때 Content-Type은 image/png, image/jpeg 등")
     private final String profileImageUploadUrl;
 
     @Schema(description = "운동 레벨 - 새싹 = BEGINNER / 고수 = ADVANCED")

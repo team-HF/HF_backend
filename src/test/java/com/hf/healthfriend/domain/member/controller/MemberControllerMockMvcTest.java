@@ -10,10 +10,12 @@ import com.hf.healthfriend.domain.member.exception.DuplicateMemberCreationExcept
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.member.service.MemberService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -24,10 +26,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -67,22 +69,25 @@ class MemberControllerMockMvcTest {
                 .build();
 
         LocalDateTime now = LocalDateTime.now();
-        when(this.memberService.createMember(given))
-                .thenReturn(MemberCreationResponseDto.builder()
-                        .memberId(1000L)
-                        .loginId(given.getId())
-                        .email(given.getId())
-                        .role(Role.ROLE_MEMBER.name())
-                        .creationTime(now)
-                        .nickname(given.getNickname())
-                        .birthDate(given.getBirthDate())
-                        .gender(given.getGender())
-                        .introduction(given.getIntroduction())
-                        .fitnessLevel(given.getFitnessLevel())
-                        .companionStyle(given.getCompanionStyle())
-                        .fitnessObjective(given.getFitnessObjective())
-                        .fitnessKind(given.getFitnessKind())
-                        .build());
+        doReturn(MemberCreationResponseDto.builder()
+                .memberId(1000L)
+                .loginId(given.getId())
+                .email(given.getId())
+                .role(Role.ROLE_MEMBER.name())
+                .creationTime(now)
+                .nickname(given.getNickname())
+                .birthDate(given.getBirthDate())
+                .gender(given.getGender())
+                .introduction(given.getIntroduction())
+                .fitnessLevel(given.getFitnessLevel())
+                .companionStyle(given.getCompanionStyle())
+                .fitnessObjective(given.getFitnessObjective())
+                .fitnessKind(given.getFitnessKind())
+                .specIds(List.of(1000L))
+                .build())
+
+                .when(this.memberService)
+                .createMember(argThat(new MemberCreationRequestDtoArgumentMatcher(given)));
 
         MemberCreationRequestDto duplicateCreation = MemberCreationRequestDto.builder()
                 .id("duplicate@gmail.com")
@@ -101,8 +106,9 @@ class MemberControllerMockMvcTest {
                 .fitnessKind(FitnessKind.FUNCTIONAL)
                 .build();
 
-        when(this.memberService.createMember(duplicateCreation))
-                .thenThrow(new DuplicateMemberCreationException(duplicateCreation.getId()));
+        doThrow(new DuplicateMemberCreationException(duplicateCreation.getId()))
+                .when(this.memberService)
+                .createMember(argThat(new MemberCreationRequestDtoArgumentMatcher(duplicateCreation)));
 
         when(this.memberService.findMember(10050L)).thenReturn(MemberDto.builder()
                 .memberId(10050L)
@@ -131,25 +137,50 @@ class MemberControllerMockMvcTest {
                 .thenThrow(new MemberNotFoundException(10600L));
     }
 
+    @AllArgsConstructor
+    static class MemberCreationRequestDtoArgumentMatcher implements ArgumentMatcher<MemberCreationRequestDto> {
+        MemberCreationRequestDto requestDto;
+
+
+        @Override
+        public boolean matches(MemberCreationRequestDto argument) {
+            return this.requestDto.getId().equals(argument.getId());
+        }
+    }
+
     @DisplayName("POST /hf/members - success")
     @Test
     void memberCreation_success() throws Exception {
-        this.mockMvc.perform(multipart("/hf/members")
-                        .param("id", "new@gmail.com")
-                        .param("nickname", "새로운인간")
-                        .param("name", "김샘플")
-                        .param("birthDate", "1997-09-16")
-                        .param("gender", "MALE")
-                        .param("phoneNumber", "010-1234-5555")
-                        .param("cd1", "01")
-                        .param("cd2", "110")
-                        .param("cd3", "112")
-                        .param("introduction", "안녕하세요")
-                        .param("fitnessLevel", "BEGINNER")
-                        .param("companionStyle", "GROUP")
-                        .param("fitnessEagerness", "EAGER")
-                        .param("fitnessObjective", "BULK_UP")
-                        .param("fitnessKind", "FUNCTIONAL"))
+        this.mockMvc.perform(post("/hf/members")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "id": "new@gmail.com",
+                                    "name": "김샘플",
+                                    "nickname": "새로운인간",
+                                    "profileImagePresent": false,
+                                    "birthDate": "1997-09-16",
+                                    "gender": "MALE",
+                                    "cd1": "01",
+                                    "cd2": "110",
+                                    "cd3": "112",
+                                    "introduction": "안녕하세요",
+                                    "fitnessLevel": "BEGINNER",
+                                    "companionStyle": "GROUP",
+                                    "fitnessEagerness": "EAGER",
+                                    "fitnessObjective": "BULK_UP",
+                                    "fitnessKind": "FUNCTIONAL",
+                                    "specs": [
+                                        {
+                                            "startDate": "2021-10",
+                                            "endDate": "2023-12",
+                                            "title": "Hello",
+                                            "description": "Good bye",
+                                            "isCurrent": false
+                                        }
+                                    ]
+                                }
+                                """))
                 .andDo(log())
                 .andDo(print())
                 .andExpect(status().isCreated())
@@ -162,7 +193,8 @@ class MemberControllerMockMvcTest {
                                 "email": "new@gmail.com",
                                 "role": "ROLE_MEMBER",
                                 "nickname": "새로운인간",
-                                "gender": "MALE"
+                                "gender": "MALE",
+                                "specIds": [ 1000 ]
                             }
                         }
                         """));
@@ -172,22 +204,36 @@ class MemberControllerMockMvcTest {
     @DisplayName("POST /hf/members - failure")
     @Test
     void memberCreation_failure() throws Exception {
-        this.mockMvc.perform(multipart("/hf/members")
-                        .param("id", "duplicate@gmail.com")
-                        .param("nickname", "샘플닉네임")
-                        .param("name", "김샘플")
-                        .param("birthDate", "1997-09-16")
-                        .param("gender", "MALE")
-                        .param("phoneNumber", "010-1234-5555")
-                        .param("cd1", "01")
-                        .param("cd2", "110")
-                        .param("cd3", "112")
-                        .param("introduction", "안녕하세요")
-                        .param("fitnessLevel", "BEGINNER")
-                        .param("companionStyle", "GROUP")
-                        .param("fitnessEagerness", "EAGER")
-                        .param("fitnessObjective", "BULK_UP")
-                        .param("fitnessKind", "FUNCTIONAL"))
+        this.mockMvc.perform(post("/hf/members")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                                {
+                                    "id": "duplicate@gmail.com",
+                                    "name": "김샘플",
+                                    "nickname": "새로운인간",
+                                    "profileImagePresent": false,
+                                    "birthDate": "1997-09-16",
+                                    "gender": "MALE",
+                                    "cd1": "01",
+                                    "cd2": "110",
+                                    "cd3": "112",
+                                    "introduction": "안녕하세요",
+                                    "fitnessLevel": "BEGINNER",
+                                    "companionStyle": "GROUP",
+                                    "fitnessEagerness": "EAGER",
+                                    "fitnessObjective": "BULK_UP",
+                                    "fitnessKind": "FUNCTIONAL",
+                                    "specs": [
+                                        {
+                                            "startDate": "2021-10",
+                                            "endDate": "2023-12",
+                                            "title": "Hello",
+                                            "description": "Good bye",
+                                            "isCurrent": false
+                                        }
+                                    ]
+                                }
+                                """))
                 .andDo(log())
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -270,7 +316,7 @@ class MemberControllerMockMvcTest {
     @Test
     void updateMember_success() throws Exception {
         this.mockMvc.perform(patch("/hf/members/{memberId}", 10500)
-                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andDo(log())
@@ -288,7 +334,7 @@ class MemberControllerMockMvcTest {
     @Test
     void updateMember_memberNotFound() throws Exception {
         this.mockMvc.perform(patch("/hf/members/{memberId}", 10600)
-                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andDo(log())
