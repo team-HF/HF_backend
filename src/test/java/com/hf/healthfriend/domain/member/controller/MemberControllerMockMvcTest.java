@@ -10,6 +10,7 @@ import com.hf.healthfriend.domain.member.exception.DuplicateMemberCreationExcept
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.member.service.MemberService;
+import com.hf.healthfriend.global.config.BeanConfig;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -41,6 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc(addFilters = false)
 @MockBean(JpaMetamodelMappingContext.class)
 @MockBean(MemberRepository.class)
+@Import(BeanConfig.class)
 class MemberControllerMockMvcTest {
 
     @Autowired
@@ -158,7 +161,7 @@ class MemberControllerMockMvcTest {
                                     "id": "new@gmail.com",
                                     "name": "김샘플",
                                     "nickname": "새로운인간",
-                                    "profileImagePresent": false,
+                                    "profileImageFileExtension": "jpg",
                                     "birthDate": "1997-09-16",
                                     "gender": "MALE",
                                     "cd1": "01",
@@ -211,7 +214,7 @@ class MemberControllerMockMvcTest {
                                     "id": "duplicate@gmail.com",
                                     "name": "김샘플",
                                     "nickname": "새로운인간",
-                                    "profileImagePresent": false,
+                                    "profileImageFileExtension": null,
                                     "birthDate": "1997-09-16",
                                     "gender": "MALE",
                                     "cd1": "01",

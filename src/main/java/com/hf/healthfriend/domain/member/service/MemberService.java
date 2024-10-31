@@ -60,8 +60,8 @@ public class MemberService {
         }
 
         String profileImagePath = null;
-        if (dto.isProfileImagePresent()) {
-            profileImagePath = this.fileUrlResolver.generateFilePathWithUuid("image");
+        if (dto.getProfileImageFileExtension() != null) {
+            profileImagePath = this.fileUrlResolver.generateFilePathWithUuid(dto.getProfileImageFileExtension(), "image");
             newMember.setProfileImageUrl(profileImagePath);
             log.info("id={}, profileImagePath={}", newMember.getId(), profileImagePath);
         } else {
@@ -102,8 +102,8 @@ public class MemberService {
         validateUpdateRequest(memberId, requestDto);
         MemberUpdateDto updateDto = this.beanMapper.generateBean(requestDto, MemberUpdateDto.class);
         String profileImagePath = null;
-        if (requestDto.isProfileImagePresent()) {
-            profileImagePath = this.fileUrlResolver.generateFilePathWithUuid("image");
+        if (requestDto.getProfileImageFileExtension() != null) {
+            profileImagePath = this.fileUrlResolver.generateFilePathWithUuid(requestDto.getProfileImageFileExtension(), "image");
             updateDto = updateDto.toBuilder()
                     .profileImageUrl(profileImagePath)
                     .build();

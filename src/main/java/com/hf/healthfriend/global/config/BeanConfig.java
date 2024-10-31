@@ -2,8 +2,11 @@ package com.hf.healthfriend.global.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.hf.healthfriend.global.file.image.ImageExtension;
+import com.hf.healthfriend.global.jackson.deserializer.ImageExtensionDeserializer;
 import com.hf.healthfriend.global.util.HttpCookieUtils;
 import com.hf.healthfriend.global.util.SecuredHttpCookieUtils;
 import com.hf.healthfriend.global.file.FileUrlResolver;
@@ -37,6 +40,11 @@ public class BeanConfig {
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         objectMapper.setDateFormat(new StdDateFormat().withColonInTimeZone(true));
+
+        SimpleModule imageExtensionModule = new SimpleModule();
+        imageExtensionModule.addDeserializer(ImageExtension.class, new ImageExtensionDeserializer());
+        objectMapper.registerModule(imageExtensionModule);
+
         return objectMapper;
     }
 

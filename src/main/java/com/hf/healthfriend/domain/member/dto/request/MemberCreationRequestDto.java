@@ -2,6 +2,7 @@ package com.hf.healthfriend.domain.member.dto.request;
 
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.spec.dto.SpecDto;
+import com.hf.healthfriend.global.file.image.ImageExtension;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -33,8 +34,8 @@ public class MemberCreationRequestDto {
     @NotNull
     private String nickname;
 
-    @Schema(description = "회원 프로필 이미지 등록 여부. true일 경우 profileImageUploadUrl을 반환한다.")
-    private boolean profileImagePresent;
+    @Schema(description = "회원 프로필 사진 파일의 확장자. null일 경우, 기본 프로필 사진 사용")
+    private ImageExtension profileImageFileExtension;
 
     @Schema(description = "yyyy-mm-dd 형식 ex) 2017-08-09")
     @Past

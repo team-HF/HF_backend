@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -51,7 +52,7 @@ public class MemberController {
                                         "id": "new@gmail.com",
                                         "name": "김샘플",
                                         "nickname": "새로운인간",
-                                        "profileImagePresent": true,
+                                        "profileImageFileExtension": "jpg",
                                         "birthDate": "1997-09-16",
                                         "gender": "MALE",
                                         "cd1": "01",
@@ -219,7 +220,7 @@ public class MemberController {
                                         "fitnessEagerness": "EAGER",
                                         "fitnessObjective": "BULK_UP",
                                         "fitnessKind": "FUNCTIONAL",
-                                        "profileImagePresent": true,
+                                        "profileImageFileExtension": null,
                                         "specUpdate": [
                                             {
                                                 "specUpdateType": "INSERT",

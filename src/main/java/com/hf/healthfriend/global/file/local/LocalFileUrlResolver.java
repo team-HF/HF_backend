@@ -1,6 +1,7 @@
 package com.hf.healthfriend.global.file.local;
 
 import com.hf.healthfriend.global.file.FileUrlResolver;
+import com.hf.healthfriend.global.file.image.ImageExtension;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
@@ -26,8 +27,8 @@ public class LocalFileUrlResolver implements FileUrlResolver {
     }
 
     @Override
-    public String generateFilePathWithUuid(String... paths) {
-        return generateFilePath(UUID.randomUUID().toString(), paths);
+    public String generateFilePathWithUuid(ImageExtension extension, String... paths) {
+        return generateFilePath(UUID.randomUUID() + extension.value(), paths);
     }
 
     @Override

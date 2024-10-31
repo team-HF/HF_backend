@@ -3,6 +3,7 @@ package com.hf.healthfriend.domain.member.dto.request;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
 import com.hf.healthfriend.domain.spec.dto.request.SpecUpdateRequestDto;
+import com.hf.healthfriend.global.file.image.ImageExtension;
 import com.hf.healthfriend.global.util.mapping.BeanMapping;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -50,8 +51,8 @@ public class MemberUpdateRequestDto {
     @Schema(description = "주로 하고 있는 운동은? - 고강도 운동 위주 = HIGH_STRESS / 기능성 피트니스 위주 = FUNCTIONAL")
     private FitnessKind fitnessKind;
 
-    @Schema(description = "회원 프로필 이미지 등록 여부")
-    private boolean profileImagePresent;
+    @Schema(description = "회원 프로필 사진 파일의 확장자. null일 경우, 기본 프로필 사진 사용")
+    private ImageExtension profileImageFileExtension;
 
     @Schema(description = "수상 및 경력")
     private List<SpecUpdateRequestDto> specUpdate;

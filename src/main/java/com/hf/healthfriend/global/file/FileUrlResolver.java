@@ -1,5 +1,7 @@
 package com.hf.healthfriend.global.file;
 
+import com.hf.healthfriend.global.file.image.ImageExtension;
+
 /**
  * 파일의 정확한 위치를 나타내는 URL을 생성해 주는 interface.
  * 로컬 (개발) 환경에 파일을 저장하는지, 클라우드에 저장하는지
@@ -23,7 +25,7 @@ public interface FileUrlResolver {
      * @param paths 저장할 파일의 경로
      * @return 파일이 저장될 경로 + 파일명 e.g. /image/my-profile.jpg
      */
-    String generateFilePathWithUuid(String... paths);
+    String generateFilePathWithUuid(ImageExtension extension, String... paths);
 
     /**
      * filePath로부터 웹에서 접근할 수 있는 URL을 생성해 준다.
