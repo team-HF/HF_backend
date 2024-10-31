@@ -41,7 +41,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: beans
+        include: beans, health
 
 springdoc:
   packages-to-scan: com.hf.healthfriend
