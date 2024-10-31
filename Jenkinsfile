@@ -38,10 +38,31 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                withCredentials([file(credentialsId: 'docker_shell_script', variable: 'deployShellFile')]) {
+                withCredentials([file(credentialsId: 'node_credential', variable: 'nodeInfo'),
+                        file(credentialsId: 'docker_shell_script', variable: 'deployShellFile')]) {
                     sh "sudo chown jenkins ${deployShellFile}"
-                    sh "sh ${deployShellFile} ${env.BUILD_ID}"
+                    sh "sudo chown jenkins ${nodeInfo}"
+                    sh "sh ${deployShellFile} \$(cat ${nodeInfo}) ${env.BUILD_ID}"
                 }
+            }
+        }
+
+        stage('Health Check') {
+            steps {
+                echo "Health Check new deployment"
+            }
+        }
+
+        stage('Convert Blue or Green') {
+            steps {
+                echo "Convert traffic"
+                echo "Stop old version container"
+            }
+        }
+
+        stage('Clear') {
+            steps {
+                echo "Clear old images"
             }
         }
     }
