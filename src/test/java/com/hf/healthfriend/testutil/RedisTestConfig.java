@@ -9,7 +9,7 @@ import org.testcontainers.containers.GenericContainer;
 
 @TestConfiguration
 public class RedisTestConfig {
-    @Bean
+    @Bean(name = "testRedissonClient")
     public RedissonClient redissonClient() {
         // Redis TestContainer 설정
         GenericContainer<?> redisContainer = new GenericContainer<>("redis:7.0.8-alpine")

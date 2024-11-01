@@ -21,6 +21,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -64,10 +65,10 @@ class TestReviewRepository {
         this.sampleBeginner1 = this.memberRepository.save(beginner1);
         this.sampleBeginner2 = this.memberRepository.save(beginner2);
 
-        Matching matching1 = new Matching(beginner1, advanced);
+        Matching matching1 = new Matching(beginner1, advanced, "스포애니", "서울시 영등포구 당산역", LocalDateTime.now().plusDays(1));
         this.sampleMatching1 = this.matchingRepository.save(matching1);
 
-        Matching matching2 = new Matching(beginner2, advanced);
+        Matching matching2 = new Matching(beginner2, advanced, "에이블짐", "서울시 영등포구 당산역", LocalDateTime.now().plusDays(1));
         this.sampleMatching2 = this.matchingRepository.save(matching2);
     }
 
@@ -131,5 +132,34 @@ class TestReviewRepository {
 
         // Then
         assertThat(result).isEqualTo(((double)review1.getScore() + review2.getScore()) / 2);
+    }
+
+    @DisplayName("existsByMatchingIdAndReviewerId - return true")
+    @Test
+    void existsByMatchingIdAndReviewerId_returnTrue() {
+        // Given
+        Review review1 = SampleEntityGenerator.generateSampleReview(this.sampleMatching1, this.sampleBeginner1, this.sampleAdvanced, 3);
+        review1 = this.reviewRepository.save(review1);
+
+        // When
+        boolean result = this.reviewRepository.existsByMatchingIdAndReviewerId(this.sampleMatching1.getMatchingId(),
+                this.sampleBeginner1.getId());
+
+        // Then
+        assertThat(result).isTrue();
+    }
+
+    @DisplayName("existsByMatchingIdAndReviewerId - return false")
+    @Test
+    void existsByMatchingIdAndReviewerId_returnFalse() {
+        // Given
+        // No review exists
+
+        // When
+        boolean result = this.reviewRepository.existsByMatchingIdAndReviewerId(this.sampleMatching1.getMatchingId(),
+                this.sampleBeginner1.getId());
+
+        // Then
+        assertThat(result).isFalse();
     }
 }

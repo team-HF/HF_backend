@@ -47,13 +47,21 @@ public class MemberCreationRequestDto {
     @NotNull
     private Gender gender;
 
-    @Schema(description = "회원이 현재 위치하고 있는 시")
+    @Schema(description = "회원이 현재 위치하고 있는 시/도 id")
     @NotNull
-    private String city;
+    @Length(min = 2, max = 2)
+    private String cd1;
 
-    @Schema(description = "회원이 현재 위치하고 있는 구")
+    @Schema(description = "회원이 현재 위치하고 있는 구 id")
     @NotNull
-    private String district;
+    @Length(min = 3, max = 3)
+    private String cd2;
+
+    @Schema(description = "회원이 현재 위치하고 있는 동 id")
+    @NotNull
+    @Length(min = 3, max = 3)
+    private String cd3;
+
 
     @Length(max = 500)
     @NotNull

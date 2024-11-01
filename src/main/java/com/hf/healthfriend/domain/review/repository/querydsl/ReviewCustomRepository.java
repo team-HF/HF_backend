@@ -10,4 +10,6 @@ public interface ReviewCustomRepository {
     List<RevieweeStatisticsMapping> getRevieweeStatistics(@Param("revieweeId") Long revieweeId);
 
     double calculateAverageScoreByRevieweeId(@Param("revieweeId") Long revieweeId);
+
+    boolean existsByMatchingIdAndReviewerId(@Param("matchingId") Long matchingId, @Param("reviewerId") Long reviewerId);
 }

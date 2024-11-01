@@ -6,6 +6,7 @@ import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
 import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
+import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
 import com.hf.healthfriend.domain.member.dto.response.MemberUpdateResponseDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.DuplicateMemberCreationException;
@@ -116,8 +117,9 @@ public class MemberService {
         Member updatedMember = this.memberRepository.update(memberId, updateDto);
         return MemberUpdateResponseDto.builder()
                 .profileImageUrl(this.fileUrlResolver.resolveFileUrl(updatedMember.getProfileImageUrl()))
-                .city(updatedMember.getCity())
-                .district(updatedMember.getDistrict())
+                .cd1(updatedMember.getCd1())
+                .cd2(updatedMember.getCd2())
+                .cd3(updatedMember.getCd3())
                 .introduction(updatedMember.getIntroduction())
                 .fitnessLevel(updatedMember.getFitnessLevel())
                 .companionStyle(updatedMember.getCompanionStyle())
@@ -164,4 +166,10 @@ public class MemberService {
                 .profileImageUrl(this.fileUrlResolver.resolveFileUrl(member.getProfileImageUrl()))
                 .build();
     }
+
+    public List<MemberSearchResponse> searchMembers(String keyword, int pageNumber, int size){
+        Pageable pageable = PageRequest.of(pageNumber - 1, size);
+        return memberJpaRepository.searchMembers(keyword, pageable);
+    }
+
 }

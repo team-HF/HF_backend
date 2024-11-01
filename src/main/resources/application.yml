@@ -31,6 +31,9 @@ logging:
       hf:
         healthfriend: trace
 
+redis:
+  host: redis://localhost:6379
+
 management:
   endpoint:
     beans:
@@ -38,7 +41,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: beans
+        include: beans, health
 
 springdoc:
   packages-to-scan: com.hf.healthfriend
@@ -55,6 +58,9 @@ client:
 
 server:
   port: 8080
+
+redis:
+  host: redis://localhost:6379
 ---
 spring:
   config:
@@ -62,8 +68,8 @@ spring:
       on-profile: no-auth
 
   jpa:
-#    hibernate:
-#      ddl-auto: update
+    hibernate:
+      ddl-auto: update
     properties:
       hibernate:
         show_sql: true

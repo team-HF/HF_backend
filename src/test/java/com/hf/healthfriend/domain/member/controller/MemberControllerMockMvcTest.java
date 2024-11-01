@@ -1,29 +1,33 @@
 package com.hf.healthfriend.domain.member.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hf.healthfriend.domain.member.constant.*;
+import com.hf.healthfriend.domain.member.dto.MemberDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
+import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
-import com.hf.healthfriend.domain.member.entity.Member;
-import com.hf.healthfriend.domain.member.exceptionhandler.MemberExceptionHandlerControllerAdvice;
+import com.hf.healthfriend.domain.member.dto.response.MemberUpdateResponseDto;
+import com.hf.healthfriend.domain.member.exception.DuplicateMemberCreationException;
+import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
+import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.member.service.MemberService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDate;
-import java.time.Month;
+import java.time.LocalDateTime;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -31,39 +35,29 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
-@SpringBootTest
-@ActiveProfiles({"constants", "secret"})
-@Transactional
-class TestMemberController {
+@WebMvcTest(MemberController.class)
+@AutoConfigureMockMvc(addFilters = false)
+@MockBean(JpaMetamodelMappingContext.class)
+@MockBean(MemberRepository.class)
+class MemberControllerMockMvcTest {
 
+    @Autowired
     MockMvc mockMvc;
 
-    Member sampleMember;
-
-    @Autowired
-    WebApplicationContext context;
-
-    @Autowired
-    MemberExceptionHandlerControllerAdvice memberExceptionHandlerControllerAdvice;
-
-    @Autowired
+    @MockBean
     MemberService memberService;
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    long createdMemberId;
 
     @BeforeEach
     void beforeEach() {
-        MemberCreationRequestDto creationRequestDtoDuplicate = MemberCreationRequestDto.builder()
-                .id("sample@gmail.com")
+        MemberCreationRequestDto given = MemberCreationRequestDto.builder()
+                .id("new@gmail.com")
+                .nickname("새로운인간")
                 .name("김샘플")
-                .nickname("샘플닉네임")
-                .city("서울시")
-                .district("동작구")
-                .birthDate(LocalDate.of(1997, Month.SEPTEMBER, 16))
+                .birthDate(LocalDate.of(1997, 9, 16))
                 .gender(Gender.MALE)
+                .cd1("01")
+                .cd2("110")
+                .cd3("112")
                 .introduction("안녕하세요")
                 .fitnessLevel(FitnessLevel.BEGINNER)
                 .companionStyle(CompanionStyle.GROUP)
@@ -72,12 +66,69 @@ class TestMemberController {
                 .fitnessKind(FitnessKind.FUNCTIONAL)
                 .build();
 
-        MemberCreationResponseDto responseDto = this.memberService.createMember(creationRequestDtoDuplicate);
-        this.createdMemberId = responseDto.getMemberId();
+        LocalDateTime now = LocalDateTime.now();
+        when(this.memberService.createMember(given))
+                .thenReturn(MemberCreationResponseDto.builder()
+                        .memberId(1000L)
+                        .loginId(given.getId())
+                        .email(given.getId())
+                        .role(Role.ROLE_MEMBER.name())
+                        .creationTime(now)
+                        .nickname(given.getNickname())
+                        .birthDate(given.getBirthDate())
+                        .gender(given.getGender())
+                        .introduction(given.getIntroduction())
+                        .fitnessLevel(given.getFitnessLevel())
+                        .companionStyle(given.getCompanionStyle())
+                        .fitnessObjective(given.getFitnessObjective())
+                        .fitnessKind(given.getFitnessKind())
+                        .build());
 
-        this.mockMvc = MockMvcBuilders.standaloneSetup(new MemberController(this.memberService))
-                .setControllerAdvice(this.memberExceptionHandlerControllerAdvice)
+        MemberCreationRequestDto duplicateCreation = MemberCreationRequestDto.builder()
+                .id("duplicate@gmail.com")
+                .nickname("샘플닉네임")
+                .name("김샘플")
+                .birthDate(LocalDate.of(1997, 9, 16))
+                .gender(Gender.MALE)
+                .cd1("01")
+                .cd2("110")
+                .cd3("112")
+                .introduction("안녕하세요")
+                .fitnessLevel(FitnessLevel.BEGINNER)
+                .companionStyle(CompanionStyle.GROUP)
+                .fitnessEagerness(FitnessEagerness.EAGER)
+                .fitnessObjective(FitnessObjective.BULK_UP)
+                .fitnessKind(FitnessKind.FUNCTIONAL)
                 .build();
+
+        when(this.memberService.createMember(duplicateCreation))
+                .thenThrow(new DuplicateMemberCreationException(duplicateCreation.getId()));
+
+        when(this.memberService.findMember(10050L)).thenReturn(MemberDto.builder()
+                .memberId(10050L)
+                .loginId("sample@gmail.com")
+                .email("sample@gmail.com")
+                .role(Role.ROLE_MEMBER)
+                .nickname("샘플닉네임")
+                .name("김샘플")
+                .birthDate(LocalDate.of(1997, 9, 16))
+                .gender(Gender.MALE)
+                .cd1("01")
+                .cd2("110")
+                .cd3("112")
+                .introduction("안녕하세요")
+                .fitnessLevel(FitnessLevel.BEGINNER)
+                .companionStyle(CompanionStyle.GROUP)
+                .fitnessEagerness(FitnessEagerness.EAGER)
+                .fitnessObjective(FitnessObjective.BULK_UP)
+                .fitnessKind(FitnessKind.FUNCTIONAL)
+                .build());
+
+        when(this.memberService.findMember(10060L)).thenThrow(new MemberNotFoundException(10060L));
+        when(this.memberService.updateMember(eq(10500L), any(MemberUpdateRequestDto.class)))
+                .thenReturn(MemberUpdateResponseDto.builder().build());
+        when(this.memberService.updateMember(eq(10600L), any()))
+                .thenThrow(new MemberNotFoundException(10600L));
     }
 
     @DisplayName("POST /hf/members - success")
@@ -90,15 +141,15 @@ class TestMemberController {
                         .param("birthDate", "1997-09-16")
                         .param("gender", "MALE")
                         .param("phoneNumber", "010-1234-5555")
-                        .param("city", "부산시")
-                        .param("district", "중구")
+                        .param("cd1", "01")
+                        .param("cd2", "110")
+                        .param("cd3", "112")
                         .param("introduction", "안녕하세요")
                         .param("fitnessLevel", "BEGINNER")
                         .param("companionStyle", "GROUP")
                         .param("fitnessEagerness", "EAGER")
                         .param("fitnessObjective", "BULK_UP")
-                        .param("fitnessKind", "FUNCTIONAL")
-                        .with(csrf()))
+                        .param("fitnessKind", "FUNCTIONAL"))
                 .andDo(log())
                 .andDo(print())
                 .andExpect(status().isCreated())
@@ -122,21 +173,21 @@ class TestMemberController {
     @Test
     void memberCreation_failure() throws Exception {
         this.mockMvc.perform(multipart("/hf/members")
-                        .param("id", "sample@gmail.com")
+                        .param("id", "duplicate@gmail.com")
                         .param("nickname", "샘플닉네임")
                         .param("name", "김샘플")
                         .param("birthDate", "1997-09-16")
                         .param("gender", "MALE")
                         .param("phoneNumber", "010-1234-5555")
-                        .param("city", "부산시")
-                        .param("district", "중구")
+                        .param("cd1", "01")
+                        .param("cd2", "110")
+                        .param("cd3", "112")
                         .param("introduction", "안녕하세요")
                         .param("fitnessLevel", "BEGINNER")
                         .param("companionStyle", "GROUP")
                         .param("fitnessEagerness", "EAGER")
                         .param("fitnessObjective", "BULK_UP")
-                        .param("fitnessKind", "FUNCTIONAL")
-                        .with(csrf()))
+                        .param("fitnessKind", "FUNCTIONAL"))
                 .andDo(log())
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -152,8 +203,7 @@ class TestMemberController {
     @DisplayName("GET /hf/members/{memberId} - succeess to find member")
     @Test
     void findMember_success() throws Exception {
-        log.info("createdMemberId={}", this.createdMemberId);
-        String responseBodyAsString = this.mockMvc.perform(get("/hf/members/{memberId}", this.createdMemberId)
+        String responseBodyAsString = this.mockMvc.perform(get("/hf/members/{memberId}", 10050)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(log())
                 .andDo(print())
@@ -201,7 +251,7 @@ class TestMemberController {
     @DisplayName("GET /hf/members/{memberId} - Member not found")
     @Test
     void findMember_memberNotFound() throws Exception {
-        this.mockMvc.perform(get("/hf/members/{memberId}", this.createdMemberId + 1)
+        this.mockMvc.perform(get("/hf/members/{memberId}", 10060)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(log())
                 .andDo(print())
@@ -219,7 +269,7 @@ class TestMemberController {
     @DisplayName("PATCH /hf/members/{memberId} - success")
     @Test
     void updateMember_success() throws Exception {
-        this.mockMvc.perform(patch("/hf/members/{memberId}", this.createdMemberId)
+        this.mockMvc.perform(patch("/hf/members/{memberId}", 10500)
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .accept(MediaType.APPLICATION_JSON)
                         .content("{}"))
@@ -237,7 +287,7 @@ class TestMemberController {
     @DisplayName("PATCH /hf/members/{memberId} - Member not found")
     @Test
     void updateMember_memberNotFound() throws Exception {
-        this.mockMvc.perform(patch("/hf/members/{memberId}", this.createdMemberId + 1)
+        this.mockMvc.perform(patch("/hf/members/{memberId}", 10600)
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .accept(MediaType.APPLICATION_JSON)
                         .content("{}"))

@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.member.entity;
 
+import com.hf.healthfriend.domain.follow.entity.Follow;
 import com.hf.healthfriend.domain.matching.entity.Matching;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.post.entity.Post;
@@ -58,11 +59,14 @@ public class Member implements UserDetails {
     @Column(name = "profile_url")
     private String profileImageUrl;
 
-    @Column(name = "city", nullable = false)
-    private String city;
+    @Column(name = "cd1")
+    private String cd1;
 
-    @Column(name = "district", nullable = false)
-    private String district;
+    @Column(name = "cd2")
+    private String cd2;
+
+    @Column(name = "cd3")
+    private String cd3;
 
     @Column(name = "birth_date", nullable = false)
     @Temporal(TemporalType.DATE)
@@ -104,11 +108,11 @@ public class Member implements UserDetails {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Spec> specs = new ArrayList<>();
 
-    @OneToMany(mappedBy = "beginner", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Matching> matchingsAsBeginner = new ArrayList<>();
+    @OneToMany(mappedBy = "requester", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Matching> matchingRequests = new ArrayList<>();
 
-    @OneToMany(mappedBy = "advanced", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Matching> matchingsAsAdvanced = new ArrayList<>();
+    @OneToMany(mappedBy = "targetMember", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Matching> matchingsReceived = new ArrayList<>();
 
     @OneToMany(mappedBy = "wished", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Wish> wishedList = new ArrayList<>();
@@ -121,6 +125,12 @@ public class Member implements UserDetails {
 
     @OneToMany(mappedBy = "reviewee", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviewsReceived = new ArrayList<>();
+
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Follow> following = new ArrayList<>();
+
+    @OneToMany(mappedBy = "followee", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Follow> followers = new ArrayList<>();
 
     @Column(name = "review_score")
     private Double reviewScore;

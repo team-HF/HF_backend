@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.review.service;
 
+import com.hf.healthfriend.domain.matching.constant.MatchingStatus;
 import com.hf.healthfriend.domain.matching.entity.Matching;
 import com.hf.healthfriend.domain.matching.exception.MatchingNotFoundException;
 import com.hf.healthfriend.domain.matching.repository.MatchingRepository;
@@ -15,7 +16,9 @@ import com.hf.healthfriend.domain.review.dto.response.ReviewResponseDto;
 import com.hf.healthfriend.domain.review.dto.response.RevieweeResponseDto;
 import com.hf.healthfriend.domain.review.entity.Review;
 import com.hf.healthfriend.domain.review.entity.ReviewEvaluation;
+import com.hf.healthfriend.domain.review.exception.DuplicateReviewException;
 import com.hf.healthfriend.domain.review.exception.InvalidEvaluationsException;
+import com.hf.healthfriend.domain.review.exception.ReviewBeforeMeetingException;
 import com.hf.healthfriend.domain.review.repository.ReviewRepository;
 import com.hf.healthfriend.domain.review.repository.dto.RevieweeStatisticsMapping;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +27,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
@@ -43,15 +47,10 @@ public class ReviewService {
      * @return 자동 생성된 리뷰의 ID
      */
     public Long addReview(ReviewCreationRequestDto dto) {
-        if (isDuplicateEvaluationPresent(dto.getEvaluations())) {
-            throw new InvalidEvaluationsException();
-        }
-
         // TODO: 동시성 문제 해결해야 함
-        // 한 번에 여러 리뷰를 등록하려고 할 경우 동시성 문제 발생
-        // 한 회원이 하나의 매칭에 대해 리뷰를 여러 번 남길 수 있을지도? 이 부분은 기획분들께 여쭤 보고 결정
-        Matching targetMatching = this.matchingRepository.findById(dto.getMatchingId())
-                .orElseThrow(() -> new MatchingNotFoundException(dto.getMatchingId()));
+        // 한 번에 여러 리뷰를 등록하려고 할 경우 동시성 문제 발생 - 분산 락으로 해결해야 함
+        Matching targetMatching = fetchMatchingAndValidate(dto);
+
         Review newReview = new Review(
                 new Member(dto.getReviewerId()),
                 new Member(dto.getRevieweeId()),
@@ -67,11 +66,40 @@ public class ReviewService {
 
         try {
             Review saved = this.reviewRepository.save(newReview);
+            if (saved.getMatching().sizeOfReviews() >= 2) {
+                saved.getMatching().finish();
+            }
             updateMemberReviewScore(dto.getRevieweeId());
             return saved.getReviewId();
         } catch (DataIntegrityViolationException e) {
             throw new MemberNotFoundException(dto.getReviewerId(), e);
         }
+    }
+
+    private Matching fetchMatchingAndValidate(ReviewCreationRequestDto dto) throws RuntimeException {
+        if (isDuplicateEvaluationPresent(dto.getEvaluations())) {
+            throw new InvalidEvaluationsException();
+        }
+
+        if (this.reviewRepository.existsByMatchingIdAndReviewerId(dto.getMatchingId(), dto.getReviewerId())) {
+            throw new DuplicateReviewException("중복된 리뷰 등록입니다", dto.getMatchingId());
+        }
+
+        Matching targetMatching = this.matchingRepository.findById(dto.getMatchingId())
+                .orElseThrow(() -> new MatchingNotFoundException(dto.getMatchingId()));
+
+        // 성립되지 않은 매칭에 대해 후기를 남기려 할 경우
+        if (targetMatching.getStatus() != MatchingStatus.ACCEPTED) {
+            throw new IllegalStateException();
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        // 만나기 전에 후기를 남기려 할 경우
+        if (now.isBefore(targetMatching.getMeetingTime())) {
+            throw new ReviewBeforeMeetingException(now, targetMatching.getMeetingTime());
+        }
+
+        return targetMatching;
     }
 
     /**
@@ -146,6 +174,7 @@ public class ReviewService {
     }
 
     private void updateMemberReviewScore(Long revieweeId) {
+        // TODO: 이 로직을 MemberService로 옮기고 ReviewService.addReview 메소드에서 MemberService.updateMemberReviewScore 메소드를 호출하는 게 좋을 듯
         List<Integer> reviewScoreList = reviewRepository.findScoreListByRevieewId(revieweeId);
         double averageScore = Math.round(reviewScoreList.stream()
                 .mapToInt(Integer::intValue)
