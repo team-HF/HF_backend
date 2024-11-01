@@ -45,6 +45,7 @@ public class SecurityConfig {
             "/favicon.ico",
             "/oauth/token/**",
             "/files/**",
+            "/hf/current-state",
 
             // TODO: 해당 endpoint 확인 후 삭제할 수 있음
             "/login",
