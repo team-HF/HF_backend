@@ -55,6 +55,9 @@ client:
 
 server:
   port: 8080
+
+redis:
+  host: redis://localhost:6379
 ---
 spring:
   config:
@@ -62,8 +65,8 @@ spring:
       on-profile: no-auth
 
   jpa:
-#    hibernate:
-#      ddl-auto: update
+    hibernate:
+      ddl-auto: update
     properties:
       hibernate:
         show_sql: true

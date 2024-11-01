@@ -28,6 +28,7 @@ public class SearchService {
         List<MemberSearchResponse> profileList = new ArrayList<>();
         List<String> recentSearchList = new ArrayList<>();
 
+        // TODO : 메서드 분리할 것 (SRP)
         if(searchCategory == SearchCategory.POST) {
             postList = postService.getList(page, size, null, null, keyword);
         }
