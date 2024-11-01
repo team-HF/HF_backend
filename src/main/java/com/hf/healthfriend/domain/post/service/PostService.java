@@ -74,13 +74,13 @@ public class PostService {
         likeRepository.deleteLikeByPostId(postId);
     }
 
-    public List<PostListObject> getList(int pageNumber, FitnessLevel fitnessLevel, PostCategory postCategory, String keyword) {
-        Pageable pageable = PageRequest.of(pageNumber - 1, 5);
+    public List<PostListObject> getList(int pageNumber, int size,FitnessLevel fitnessLevel, PostCategory postCategory, String keyword) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, size);
         return postRepository.getList(fitnessLevel, postCategory, keyword, pageable);
     }
 
-    public List<PostListObject> getPopularList(int pageNumber, FitnessLevel fitnessLevel, String keyword) {
-        Pageable pageable = PageRequest.of(pageNumber - 1, 5);
+    public List<PostListObject> getPopularList(int pageNumber, int size,FitnessLevel fitnessLevel, String keyword) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, size);
         RScoredSortedSet<Long> sortedSet = redissonClient.getScoredSortedSet("popular_posts");
         List<Long> postIdList = new ArrayList<>( sortedSet.readAll().stream().toList());
         return postRepository.getPopularList(postIdList,fitnessLevel,keyword,pageable);
