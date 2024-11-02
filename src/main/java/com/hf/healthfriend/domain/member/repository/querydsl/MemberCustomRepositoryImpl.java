@@ -5,22 +5,32 @@ import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
 import com.hf.healthfriend.domain.member.entity.QMember;
+import com.hf.healthfriend.domain.member.repository.dto.ProfileQueryResultDto;
+import com.hf.healthfriend.domain.spec.dto.SpecDto;
+import com.hf.healthfriend.domain.spec.entity.QSpec;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     private final QMember member = QMember.member;
+    private final QSpec spec = QSpec.spec;
     private final JPAQueryFactory queryFactory;
 
     @Override
@@ -64,7 +74,6 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                 return new OrderSpecifier<?>[]{member.matchedCount.desc()};
             }
         }
-
     }
 
     public BooleanBuilder filter(MembersRecommendRequest request) {
@@ -100,5 +109,38 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
         if (items != null)
             for (T item : items)
                 fitnessTypeList.add(item.name());
+    }
+
+    @Override
+    public Optional<ProfileQueryResultDto> findProfileByMemberId(Long memberId) {
+        List<ProfileQueryResultDto> result = this.queryFactory.selectFrom(this.member)
+                .leftJoin(this.spec).on(this.spec.member.eq(this.member))
+                .where(this.member.id.eq(memberId),
+                        this.member.isDeleted.isFalse(),
+                        this.spec.isDeleted.isFalse())
+                .orderBy(this.spec.startDate.desc(), this.spec.endDate.desc().nullsFirst())
+                .transform(GroupBy.groupBy(this.member.id).list(
+                        Projections.constructor(
+                                ProfileQueryResultDto.class,
+                                this.member.id,
+                                this.member.introduction,
+                                GroupBy.list(
+                                        Projections.constructor(
+                                                SpecDto.class,
+                                                this.spec.specId,
+                                                this.spec.startDate,
+                                                this.spec.endDate,
+                                                this.spec.isCurrent,
+                                                this.spec.title,
+                                                this.spec.description
+                                        )
+                                )
+                        )
+                ));
+        if (result.size() > 1) {
+            log.warn("findProfileByMemberId - 쿼리 결과 리스트의 사이즈가 1을 초과합니다.");
+            result.forEach((r) -> log.warn("memberId={}", r.memberId()));
+        }
+        return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
     }
 }

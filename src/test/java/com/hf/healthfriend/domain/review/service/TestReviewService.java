@@ -203,8 +203,6 @@ class TestReviewService {
                                 3.5, EvaluationType.GOOD, 2, 1L
                         )
                 ));
-        when(this.reviewRepository.calculateAverageScoreByRevieweeId(reviewee.getId()))
-                .thenReturn(3.5);
 
         Map<EvaluationType, Map<Integer, Long>> expectedMap = Map.of(
                 EvaluationType.GOOD,
