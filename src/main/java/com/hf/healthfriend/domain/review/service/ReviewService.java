@@ -102,6 +102,31 @@ public class ReviewService {
         return targetMatching;
     }
 
+    private boolean isDuplicateEvaluationPresent(List<ReviewEvaluationDto> evaluations) {
+        if (evaluations == null) {
+            return true;
+        }
+
+        // TODO: iteration 때문에 성능상 약간 좀 안 좋을 수 있음 - 이걸 DB에서 검증하도록 하는 게 나을까?
+        Map<EvaluationType, Set<Integer>> evaluationIdsByEvaluationType = new HashMap<>();
+        for (ReviewEvaluationDto evaluationDto : evaluations) {
+            EvaluationType evaluationType = evaluationDto.getEvaluationType();
+            Integer evaluationId = evaluationDto.getEvaluationDetailId();
+            if (evaluationIdsByEvaluationType.containsKey(evaluationType)) {
+                Set<Integer> ids = evaluationIdsByEvaluationType.get(evaluationType);
+                if (ids.contains(evaluationId)) {
+                    return true;
+                }
+                ids.add(evaluationId);
+            } else {
+                Set<Integer> idSet = new HashSet<>();
+                idSet.add(evaluationId);
+                evaluationIdsByEvaluationType.put(evaluationType, idSet);
+            }
+        }
+        return false;
+    }
+
     /**
      * 특정 회원에게 달린 리뷰 정보를 가져온다.
      *
@@ -113,9 +138,8 @@ public class ReviewService {
             throw new MemberNotFoundException(revieweeId);
         }
 
-        // TODO: 이 두 개의 쿼리를 어떻게든 하나로 묶는 게 나을까?
         List<RevieweeStatisticsMapping> statistics = this.reviewRepository.getRevieweeStatistics(revieweeId);
-        double averageScore = this.reviewRepository.calculateAverageScoreByRevieweeId(revieweeId);
+        double averageScore = statistics.isEmpty() ? 0.0 : statistics.get(0).getScoreAverage();
 
         Map<EvaluationType, Map<Integer, Long>> evaluationDetailCountsByEvaluationType = new HashMap<>();
         for (RevieweeStatisticsMapping mapping : statistics) {
@@ -146,31 +170,6 @@ public class ReviewService {
             );
         }
         return new RevieweeResponseDto(revieweeId, averageScore, reviewResponseDtos);
-    }
-
-    private boolean isDuplicateEvaluationPresent(List<ReviewEvaluationDto> evaluations) {
-        if (evaluations == null) {
-            return true;
-        }
-
-        // TODO: iteration 때문에 성능상 약간 좀 안 좋을 수 있음 - 이걸 DB에서 검증하도록 하는 게 나을까?
-        Map<EvaluationType, Set<Integer>> evaluationIdsByEvaluationType = new HashMap<>();
-        for (ReviewEvaluationDto evaluationDto : evaluations) {
-            EvaluationType evaluationType = evaluationDto.getEvaluationType();
-            Integer evaluationId = evaluationDto.getEvaluationDetailId();
-            if (evaluationIdsByEvaluationType.containsKey(evaluationType)) {
-                Set<Integer> ids = evaluationIdsByEvaluationType.get(evaluationType);
-                if (ids.contains(evaluationId)) {
-                    return true;
-                }
-                ids.add(evaluationId);
-            } else {
-                Set<Integer> idSet = new HashSet<>();
-                idSet.add(evaluationId);
-                evaluationIdsByEvaluationType.put(evaluationType, idSet);
-            }
-        }
-        return false;
     }
 
     private void updateMemberReviewScore(Long revieweeId) {

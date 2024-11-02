@@ -12,6 +12,8 @@ import com.hf.healthfriend.domain.review.repository.dto.RevieweeStatisticsMappin
 import com.hf.healthfriend.testutil.SampleEntityGenerator;
 import com.hf.healthfriend.testutil.TestConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,6 +54,7 @@ class TestReviewRepository {
     Member sampleBeginner2;
     Matching sampleMatching1;
     Matching sampleMatching2;
+    Matching sampleMatching3;
 
     @BeforeEach
     void beforeEach() {
@@ -70,23 +73,41 @@ class TestReviewRepository {
 
         Matching matching2 = new Matching(beginner2, advanced, "에이블짐", "서울시 영등포구 당산역", LocalDateTime.now().plusDays(1));
         this.sampleMatching2 = this.matchingRepository.save(matching2);
+
+        Matching matching3 = new Matching(beginner1, beginner2, "aa", "aa", LocalDateTime.now().plusDays(1));
+        this.sampleMatching3 = this.matchingRepository.save(matching3);
     }
 
     @DisplayName("findByRevieweeId - success")
     @Test
     void findByRevieweeId_success() {
         // Given
-        Review review1 = SampleEntityGenerator.generateSampleReview(this.sampleMatching1, this.sampleBeginner1, this.sampleAdvanced, List.of(
-                new ReviewEvaluation(EvaluationType.GOOD, 1),
-                new ReviewEvaluation(EvaluationType.GOOD, 2),
-                new ReviewEvaluation(EvaluationType.NOT_GOOD, 1)
-        ));
+        Review review1 = SampleEntityGenerator.generateSampleReview(
+                this.sampleMatching1,
+                this.sampleBeginner1,
+                this.sampleAdvanced,
+                4,
+                List.of(
+                        new ReviewEvaluation(EvaluationType.GOOD, 1),
+                        new ReviewEvaluation(EvaluationType.GOOD, 2),
+                        new ReviewEvaluation(EvaluationType.NOT_GOOD, 1)
+                ));
         this.reviewRepository.save(review1);
-        Review review2 = SampleEntityGenerator.generateSampleReview(this.sampleMatching2, this.sampleBeginner2, this.sampleAdvanced, List.of(
-                new ReviewEvaluation(EvaluationType.GOOD, 1),
-                new ReviewEvaluation(EvaluationType.NOT_GOOD, 1)
-        ));
+        Review review2 = SampleEntityGenerator.generateSampleReview(
+                this.sampleMatching2,
+                this.sampleBeginner2,
+                this.sampleAdvanced,
+                List.of(
+                        new ReviewEvaluation(EvaluationType.GOOD, 1),
+                        new ReviewEvaluation(EvaluationType.NOT_GOOD, 1)
+                ));
         this.reviewRepository.save(review2);
+
+        // 이 데이터는 이 테스트 쿼리 결과에 반영되지 않음. 이 데이터를 예상대로 포함하지 않는가 체크
+        Review irrelevantReview = SampleEntityGenerator.generateSampleReview(
+                this.sampleMatching3, this.sampleBeginner1, this.sampleBeginner2, 5
+        );
+        this.reviewRepository.save(irrelevantReview);
 
         // When
         List<RevieweeStatisticsMapping> result = this.reviewRepository.getRevieweeStatistics(this.sampleAdvanced.getId());
@@ -99,21 +120,54 @@ class TestReviewRepository {
         }
 
         // Then
-        List<RevieweeStatisticsMapping> onlyGood = result.stream()
+        // Expected:
+        //     - score: 3.5
+        //     - GOOD 1 count: 2
+        //     - GOOD 2 count: 1
+        //     - NOT_GOOD 1 count: 2
+
+        // 리턴된 Mapping의 모든 scoreAverage가 (review1.score + review2.score) / 2
+        result.forEach((r) ->
+                assertThat(r.getScoreAverage()).isEqualTo((double) (review1.getScore() + review2.getScore()) / 2, Offset.offset(0.01)));
+
+        // GOOD 1 개수는 2개
+        List<Long> onlyGood1Count = result.stream()
                 .filter((r) -> r.getEvaluationType() == EvaluationType.GOOD)
+                .filter((r) -> r.getEvaluationDetailId() == 1)
+                .map(RevieweeStatisticsMapping::getEvaluationDetailCount)
                 .toList();
-        assertThat(onlyGood.get(0).getEvaluationDetailId()).isEqualTo(1);
-        assertThat(onlyGood.get(0).getEvaluationDetailCount()).isEqualTo(2);
+        assertThat(onlyGood1Count).size().isEqualTo(1);
+        assertThat(onlyGood1Count.get(0)).isEqualTo(2);
 
-        assertThat(onlyGood.get(1).getEvaluationDetailId()).isEqualTo(2);
-        assertThat(onlyGood.get(1).getEvaluationDetailCount()).isEqualTo(1);
+        // GOOD 2 개수는 1개
+        List<Long> onlyGood2Count = result.stream()
+                .filter((r) -> r.getEvaluationType() == EvaluationType.GOOD)
+                .filter((r) -> r.getEvaluationDetailId() == 2)
+                .map(RevieweeStatisticsMapping::getEvaluationDetailCount)
+                .toList();
+        assertThat(onlyGood2Count).size().isEqualTo(1);
+        assertThat(onlyGood2Count.get(0)).isEqualTo(1);
 
-        List<RevieweeStatisticsMapping> onlyNotGood = result.stream()
+        // NOT_GOOD 1 개수는 2개
+        List<Long> onlyNotGood1Count = result.stream()
                 .filter((r) -> r.getEvaluationType() == EvaluationType.NOT_GOOD)
+                .filter((r) -> r.getEvaluationDetailId() == 1)
+                .map(RevieweeStatisticsMapping::getEvaluationDetailCount)
                 .toList();
-        assertThat(onlyNotGood).size().isEqualTo(1);
-        assertThat(onlyNotGood.get(0).getEvaluationDetailId()).isEqualTo(1);
-        assertThat(onlyNotGood.get(0).getEvaluationDetailCount()).isEqualTo(2);
+        assertThat(onlyNotGood1Count).size().isEqualTo(1);
+        assertThat(onlyNotGood1Count.get(0)).isEqualTo(2);
+
+        // GOOD-1, GOOD-2, NOT_GOOD-1 외의 다른 평가는 없어야 함
+        for (RevieweeStatisticsMapping mapping : result) {
+            EvaluationType evaluationType = mapping.getEvaluationType();
+            Integer evaluationDetailId = mapping.getEvaluationDetailId();
+            if (!(evaluationType == EvaluationType.GOOD && evaluationDetailId == 1
+                    || evaluationType == EvaluationType.GOOD && evaluationDetailId == 2
+                    || evaluationType == EvaluationType.NOT_GOOD && evaluationDetailId == 1)) {
+                Assertions.fail("mapping.evaluationType=" + mapping.getEvaluationType()
+                        + ", mapping.evaluationDetailId=" + mapping.getEvaluationDetailId());
+            }
+        }
     }
 
     @DisplayName("calculateAverageScoreByRevieweeId - success")
@@ -131,7 +185,7 @@ class TestReviewRepository {
         log.info("result={}", result);
 
         // Then
-        assertThat(result).isEqualTo(((double)review1.getScore() + review2.getScore()) / 2);
+        assertThat(result).isEqualTo(((double) review1.getScore() + review2.getScore()) / 2);
     }
 
     @DisplayName("existsByMatchingIdAndReviewerId - return true")

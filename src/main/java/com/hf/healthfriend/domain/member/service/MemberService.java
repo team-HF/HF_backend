@@ -7,6 +7,7 @@ import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
 import com.hf.healthfriend.domain.member.dto.response.MemberUpdateResponseDto;
+import com.hf.healthfriend.domain.member.dto.response.ProfileResponseDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.DuplicateMemberCreationException;
 import com.hf.healthfriend.domain.member.exception.FitnessLevelUpdateException;
@@ -14,6 +15,9 @@ import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
+import com.hf.healthfriend.domain.member.repository.dto.ProfileResultMapping;
+import com.hf.healthfriend.domain.review.dto.response.SimpleReviewResponseDto;
+import com.hf.healthfriend.domain.spec.dto.SpecDto;
 import com.hf.healthfriend.global.util.file.FileUrlResolver;
 import com.hf.healthfriend.global.util.file.MultipartFileUploader;
 import com.hf.healthfriend.global.util.mapping.BeanMapper;
@@ -27,7 +31,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -164,5 +170,21 @@ public class MemberService {
         return memberDto.toBuilder()
                 .profileImageUrl(this.fileUrlResolver.resolveFileUrl(member.getProfileImageUrl()))
                 .build();
+    }
+
+    /**
+     * 매칭 과정에서 다른 사람의 회원 정보를 조회할 때 필요한 데이터를 반환하는 메소드.
+     * 회원 정보와 매칭 횟수 등을 조회할 수 있다.
+     *
+     * @param memberId 프로필을 조회할 회원의 ID
+     * @return 프로필 정보가 담긴 DTO
+     */
+    public ProfileResponseDto getProfileOfMember(Long memberId) {
+//        List<ProfileResultMapping> mappings = this.memberJpaRepository.findProfileByMemberId(memberId);
+//        if (mappings.isEmpty()) {
+//            throw new MemberNotFoundException(memberId);
+//        }
+
+        throw new UnsupportedOperationException();
     }
 }

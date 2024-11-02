@@ -19,6 +19,8 @@ import com.hf.healthfriend.domain.review.repository.ReviewRepository;
 import com.hf.healthfriend.domain.review.repository.dto.RevieweeStatisticsMapping;
 import com.hf.healthfriend.testutil.SampleEntityGenerator;
 import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -188,17 +190,17 @@ class TestReviewService {
         when(this.memberRepository.existsById(reviewee.getId())).thenReturn(true);
         when(this.reviewRepository.getRevieweeStatistics(reviewee.getId()))
                 .thenReturn(List.of(
-                        new RevieweeStatisticsMapping(
-                                EvaluationType.GOOD, 1, 2L
+                        new RevieweeStatisticsMappingImpl(
+                                3.5, EvaluationType.GOOD, 1, 2L
                         ),
-                        new RevieweeStatisticsMapping(
-                                EvaluationType.GOOD, 2, 1L
+                        new RevieweeStatisticsMappingImpl(
+                                3.5, EvaluationType.GOOD, 2, 1L
                         ),
-                        new RevieweeStatisticsMapping(
-                                EvaluationType.GOOD, 1, 2L
+                        new RevieweeStatisticsMappingImpl(
+                                3.5, EvaluationType.GOOD, 1, 2L
                         ),
-                        new RevieweeStatisticsMapping(
-                                EvaluationType.GOOD, 2, 1L
+                        new RevieweeStatisticsMappingImpl(
+                                3.5, EvaluationType.GOOD, 2, 1L
                         )
                 ));
         when(this.reviewRepository.calculateAverageScoreByRevieweeId(reviewee.getId()))
@@ -235,5 +237,14 @@ class TestReviewService {
                 assertThat(expectedCount).isEqualTo(v);
             });
         });
+    }
+
+    @AllArgsConstructor
+    @Getter
+    static class RevieweeStatisticsMappingImpl implements RevieweeStatisticsMapping {
+        Double scoreAverage;
+        EvaluationType evaluationType;
+        Integer evaluationDetailId;
+        Long evaluationDetailCount;
     }
 }

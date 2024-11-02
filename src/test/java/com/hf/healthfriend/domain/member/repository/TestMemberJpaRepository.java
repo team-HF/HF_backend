@@ -1,16 +1,16 @@
 package com.hf.healthfriend.domain.member.repository;
 
-import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.testutil.SampleEntityGenerator;
+import com.hf.healthfriend.testutil.TestConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 
-import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -18,8 +18,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 
 @Slf4j
-@SpringBootTest
-@Transactional
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import(TestConfig.class)
 public class TestMemberJpaRepository {
 
     @Autowired
@@ -60,17 +61,5 @@ public class TestMemberJpaRepository {
         Optional<Member> findMemberOp = this.memberJpaRepository.findByLoginId(loginId + "SUFFIX");
 
         assertThat(findMemberOp).isEmpty();
-    }
-
-    private void setRequiredFieldsOfMemberWithWeirdData(Member member) {
-        member.setNickname("sample-nickname");
-        member.setBirthDate(LocalDate.of(1997, 9, 16));
-        member.setGender(Gender.MALE);
-        member.setIntroduction("안심하세요. 도둑입니다.");
-        member.setFitnessLevel(FitnessLevel.ADVANCED);
-        member.setCompanionStyle(CompanionStyle.GROUP);
-        member.setFitnessObjective(FitnessObjective.RUNNING);
-        member.setFitnessEagerness(FitnessEagerness.EAGER);
-        member.setFitnessKind(FitnessKind.FUNCTIONAL);
     }
 }

@@ -145,6 +145,10 @@ public class Member implements UserDetails {
         this.password = password;
     }
 
+    public void addSpec(Spec spec) {
+        this.specs.add(spec);
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(this.role.name()));
