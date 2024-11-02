@@ -15,9 +15,10 @@ import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
-import com.hf.healthfriend.domain.member.repository.dto.ProfileResultMapping;
+import com.hf.healthfriend.domain.member.repository.dto.ProfileQueryResultDto;
+import com.hf.healthfriend.domain.review.dto.response.RevieweeResponseDto;
 import com.hf.healthfriend.domain.review.dto.response.SimpleReviewResponseDto;
-import com.hf.healthfriend.domain.spec.dto.SpecDto;
+import com.hf.healthfriend.domain.review.service.ReviewService;
 import com.hf.healthfriend.global.util.file.FileUrlResolver;
 import com.hf.healthfriend.global.util.file.MultipartFileUploader;
 import com.hf.healthfriend.global.util.mapping.BeanMapper;
@@ -31,9 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -45,6 +44,7 @@ public class MemberService {
     private final FileUrlResolver fileUrlResolver;
     private final MultipartFileUploader multipartFileUploader;
     private final BeanMapper beanMapper;
+    private final ReviewService reviewService;
 
     /**
      * MemberCreationRequestDto에 있는 데이터를 가지고 새로운 Member를 생성한다.
@@ -180,11 +180,19 @@ public class MemberService {
      * @return 프로필 정보가 담긴 DTO
      */
     public ProfileResponseDto getProfileOfMember(Long memberId) {
-//        List<ProfileResultMapping> mappings = this.memberJpaRepository.findProfileByMemberId(memberId);
-//        if (mappings.isEmpty()) {
-//            throw new MemberNotFoundException(memberId);
-//        }
+        ProfileQueryResultDto profileResult = this.memberJpaRepository.findProfileByMemberId(memberId)
+                .orElseThrow(() -> new MemberNotFoundException(memberId));
+        RevieweeResponseDto reviewDto = this.reviewService.getRevieweeInfo(memberId);
 
-        throw new UnsupportedOperationException();
+        return ProfileResponseDto.builder()
+                .memberId(profileResult.memberId())
+                .introduction(profileResult.introduction())
+                .specs(profileResult.specs())
+                .reviews(reviewDto.reviewDetails()
+                        .stream()
+                        .map((r) -> new SimpleReviewResponseDto(r.evaluationType(), r.reviewDetailsPerEvaluationType()))
+                        .toList())
+                .averageReviewScore(reviewDto.averageScore())
+                .build();
     }
 }

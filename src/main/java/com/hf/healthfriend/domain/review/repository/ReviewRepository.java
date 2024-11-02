@@ -46,6 +46,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewCus
                         WHERE r.reviewee_id = :revieweeId
                         GROUP BY re2.evaluation_type, re2.evaluation_detail_id
                 ) re
+                ORDER BY re.evaluation_type, re.evaluation_detail_count DESC
             """, nativeQuery = true)
     List<RevieweeStatisticsMapping> getRevieweeStatistics(Long revieweeId);
 }
