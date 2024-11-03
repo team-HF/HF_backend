@@ -6,6 +6,7 @@ import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
 import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
+import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
 import com.hf.healthfriend.domain.member.dto.response.MemberUpdateResponseDto;
 import com.hf.healthfriend.domain.member.service.MemberService;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
@@ -161,8 +162,19 @@ public class MemberController {
             @ApiResponse(responseCode = "200", description = "멤버 추천 목록 조회 성공"),
             @ApiResponse(responseCode = "400", description = "멤버 추천 목록 조회 실패")
     })
-    @GetMapping("/recommendMembers")
+    @GetMapping("/recommend")
     public ResponseEntity<ApiBasicResponse<List<MemberRecommendResponse>>> getRecommendMembers(MembersRecommendRequest request, int page) {
         return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.recommendMember(request,page), HttpStatus.OK));
+    }
+
+    @Operation(summary = "프로필 검색 목록 조회", responses = {
+            @ApiResponse(responseCode = "200", description = "프로필 검색 목록 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "프로필 검색 목록 조회 실패")
+    })
+    @GetMapping("/search")
+    public ResponseEntity<ApiBasicResponse<List<MemberSearchResponse>>> getSearchedMembers(@RequestParam String keyword,
+                                                                                           @RequestParam(value = "page", defaultValue = "1") int page,
+                                                                                           @RequestParam(defaultValue = "3") int size) {
+        return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.searchMembers(keyword,page,size), HttpStatus.OK));
     }
 }

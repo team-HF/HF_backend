@@ -1,19 +1,24 @@
 package com.hf.healthfriend.domain.member.repository.querydsl;
 
 
-import com.hf.healthfriend.domain.member.constant.*;
+import com.hf.healthfriend.domain.follow.entity.QFollow;
+import com.hf.healthfriend.domain.member.constant.MemberSortType;
 import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
+import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
 import com.hf.healthfriend.domain.member.entity.QMember;
 import com.hf.healthfriend.domain.member.repository.dto.ProfileQueryResultDto;
 import com.hf.healthfriend.domain.spec.dto.SpecDto;
 import com.hf.healthfriend.domain.spec.entity.QSpec;
+import com.hf.healthfriend.domain.wish.entity.QWish;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.group.GroupBy;
+import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,12 +30,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static com.querydsl.core.types.ExpressionUtils.count;
+
 @Slf4j
 @Repository
 @RequiredArgsConstructor
 public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     private final QMember member = QMember.member;
     private final QSpec spec = QSpec.spec;
+    private final QFollow follow = QFollow.follow;
+    private final QWish wish = QWish.wish;
     private final JPAQueryFactory queryFactory;
 
     @Override
@@ -38,21 +47,48 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
         BooleanBuilder builder = filter(request);
         List<String> fitnessTypeList = fitnessTypesToList(request); // fitnessTypeList 업데이트는 별도의 메서드로 분리
         OrderSpecifier<?>[] orderSpecifier = getSortType(request);
-        return queryFactory
-                .selectFrom(member)
+        List<MemberRecommendResponse> result = queryFactory
+                .select(Projections.constructor(MemberRecommendResponse.class,
+                        member.profileImageUrl,
+                        member.nickname,
+                        member.matchedCount,
+                        member.introduction))
+                .from(member)
                 .where(builder)
                 .groupBy(member)
                 .orderBy(orderSpecifier)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .fetch()
-                .stream().map(member -> MemberRecommendResponse.builder()
-                        .profileImageUrl(member.getProfileImageUrl())
-                        .introduction(member.getIntroduction())
-                        .matchingCount(member.getMatchedCount())
-                        .nickName(member.getNickname())
-                        .fitnessType(fitnessTypeList)
-                        .build()).toList();
+                .fetch();
+        return result.stream()
+                .map(dto -> new MemberRecommendResponse(
+                        dto.profileImageUrl(),
+                        dto.nickName(),
+                        dto.matchingCount(),
+                        dto.introduction(),
+                        fitnessTypeList))
+                .toList();
+    }
+
+    @Override
+    public List<MemberSearchResponse> searchMembers(String keyword, Pageable pageable) {
+        BooleanBuilder builder = searchFilter(keyword);
+        return queryFactory
+                .select(Projections.bean(MemberSearchResponse.class,
+                        member.profileImageUrl,
+                        member.introduction,
+                        member.nickname,
+                        ExpressionUtils.as(
+                                JPAExpressions.select(count(follow.followId))
+                                        .from(follow)
+                                        .where(follow.followee.eq(member)),
+                                "followerCount")))
+                .from(member)
+                .where(builder)
+                .groupBy(member)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
     }
 
     public OrderSpecifier<?>[] getSortType(MembersRecommendRequest request) {
@@ -62,9 +98,15 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
             case SCORE -> {
                 return new OrderSpecifier<?>[]{member.reviewScore.desc()};
             }
-            // TODO : 찜하기 기능이 구현되면 이어서 작업
-            case HEART_COUNT -> {
-                return new OrderSpecifier<?>[]{};
+            case WISH_COUNT -> {
+                return new OrderSpecifier<?>[]{
+                        new OrderSpecifier<>(Order.DESC,
+                                JPAExpressions
+                                        .select(count(wish.wisher))
+                                        .from(wish)
+                                        .where(wish.wished.id.eq(member.id))
+                        )
+                };
             }
             // TODO : 채팅 기능이 구현되면 이어서 작업
             case RESPONSE_RATE -> {
@@ -109,6 +151,13 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
         if (items != null)
             for (T item : items)
                 fitnessTypeList.add(item.name());
+    }
+
+    public BooleanBuilder searchFilter(String keyword) {
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(member.introduction.containsIgnoreCase(keyword)
+                .or(member.nickname.containsIgnoreCase(keyword)));
+        return builder;
     }
 
     @Override
