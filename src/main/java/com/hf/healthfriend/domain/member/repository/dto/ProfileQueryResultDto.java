@@ -7,6 +7,7 @@ import java.util.List;
 public record ProfileQueryResultDto(
         Long memberId,
         String introduction,
-        List<SpecDto> specs
+        List<SpecDto> specs,
+        Double averageReviewScore
 ) {
 }

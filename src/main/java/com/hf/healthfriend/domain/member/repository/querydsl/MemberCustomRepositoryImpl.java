@@ -134,7 +134,8 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                                                 this.spec.title,
                                                 this.spec.description
                                         )
-                                )
+                                ),
+                                this.member.reviewScore
                         )
                 ));
         if (result.size() > 1) {

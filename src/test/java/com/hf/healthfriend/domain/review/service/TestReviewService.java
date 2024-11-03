@@ -16,11 +16,9 @@ import com.hf.healthfriend.domain.review.dto.response.RevieweeResponseDto;
 import com.hf.healthfriend.domain.review.entity.Review;
 import com.hf.healthfriend.domain.review.entity.ReviewEvaluation;
 import com.hf.healthfriend.domain.review.repository.ReviewRepository;
-import com.hf.healthfriend.domain.review.repository.dto.RevieweeStatisticsMapping;
+import com.hf.healthfriend.domain.review.repository.dto.RevieweeStatisticsQueryResultDto;
 import com.hf.healthfriend.testutil.SampleEntityGenerator;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -190,17 +188,17 @@ class TestReviewService {
         when(this.memberRepository.existsById(reviewee.getId())).thenReturn(true);
         when(this.reviewRepository.getRevieweeStatistics(reviewee.getId()))
                 .thenReturn(List.of(
-                        new RevieweeStatisticsMappingImpl(
-                                3.5, EvaluationType.GOOD, 1, 2L
+                        new RevieweeStatisticsQueryResultDto(
+                                EvaluationType.GOOD, 1, 2L
                         ),
-                        new RevieweeStatisticsMappingImpl(
-                                3.5, EvaluationType.GOOD, 2, 1L
+                        new RevieweeStatisticsQueryResultDto(
+                                EvaluationType.GOOD, 2, 1L
                         ),
-                        new RevieweeStatisticsMappingImpl(
-                                3.5, EvaluationType.GOOD, 1, 2L
+                        new RevieweeStatisticsQueryResultDto(
+                                EvaluationType.GOOD, 1, 2L
                         ),
-                        new RevieweeStatisticsMappingImpl(
-                                3.5, EvaluationType.GOOD, 2, 1L
+                        new RevieweeStatisticsQueryResultDto(
+                                EvaluationType.GOOD, 2, 1L
                         )
                 ));
 
@@ -223,7 +221,6 @@ class TestReviewService {
         // Then
         log.info("result={}", result);
 
-        assertThat(result.averageScore()).isEqualTo(3.5);
         assertThat(result.memberId()).isEqualTo(reviewee.getId());
         result.reviewDetails().forEach((re) -> {
             assertThat(re.totalCountPerEvaluationType()).isEqualTo(3L);
@@ -235,14 +232,5 @@ class TestReviewService {
                 assertThat(expectedCount).isEqualTo(v);
             });
         });
-    }
-
-    @AllArgsConstructor
-    @Getter
-    static class RevieweeStatisticsMappingImpl implements RevieweeStatisticsMapping {
-        Double scoreAverage;
-        EvaluationType evaluationType;
-        Integer evaluationDetailId;
-        Long evaluationDetailCount;
     }
 }

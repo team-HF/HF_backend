@@ -20,7 +20,7 @@ import com.hf.healthfriend.domain.review.exception.DuplicateReviewException;
 import com.hf.healthfriend.domain.review.exception.InvalidEvaluationsException;
 import com.hf.healthfriend.domain.review.exception.ReviewBeforeMeetingException;
 import com.hf.healthfriend.domain.review.repository.ReviewRepository;
-import com.hf.healthfriend.domain.review.repository.dto.RevieweeStatisticsMapping;
+import com.hf.healthfriend.domain.review.repository.dto.RevieweeStatisticsQueryResultDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -138,11 +138,10 @@ public class ReviewService {
             throw new MemberNotFoundException(revieweeId);
         }
 
-        List<RevieweeStatisticsMapping> statistics = this.reviewRepository.getRevieweeStatistics(revieweeId);
-        double averageScore = statistics.isEmpty() ? 0.0 : statistics.get(0).getScoreAverage();
+        List<RevieweeStatisticsQueryResultDto> statistics = this.reviewRepository.getRevieweeStatistics(revieweeId);
 
         Map<EvaluationType, Map<Integer, Long>> evaluationDetailCountsByEvaluationType = new HashMap<>();
-        for (RevieweeStatisticsMapping mapping : statistics) {
+        for (RevieweeStatisticsQueryResultDto mapping : statistics) {
             EvaluationType evaluationType = mapping.getEvaluationType();
             if (!evaluationDetailCountsByEvaluationType.containsKey(evaluationType)) {
                 evaluationDetailCountsByEvaluationType.put(evaluationType, new HashMap<>());
@@ -169,7 +168,7 @@ public class ReviewService {
                     )
             );
         }
-        return new RevieweeResponseDto(revieweeId, averageScore, reviewResponseDtos);
+        return new RevieweeResponseDto(revieweeId, reviewResponseDtos);
     }
 
     private void updateMemberReviewScore(Long revieweeId) {

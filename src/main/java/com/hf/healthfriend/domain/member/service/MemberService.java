@@ -192,7 +192,7 @@ public class MemberService {
                         .stream()
                         .map((r) -> new SimpleReviewResponseDto(r.evaluationType(), r.reviewDetailsPerEvaluationType()))
                         .toList())
-                .averageReviewScore(reviewDto.averageScore())
+                .averageReviewScore(profileResult.averageReviewScore())
                 .build();
     }
 }

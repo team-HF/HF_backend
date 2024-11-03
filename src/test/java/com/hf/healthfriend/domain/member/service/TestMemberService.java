@@ -451,6 +451,10 @@ class TestMemberService {
         this.reviewRepository.save(review1);
         this.reviewRepository.save(review2);
 
+        dummyMember1.setReviewScore((double)(review1.getScore() + review2.getScore()) / 2);
+
+        // flush
+
         // When
         ProfileResponseDto result = this.memberService.getProfileOfMember(dummyMember1.getId());
 

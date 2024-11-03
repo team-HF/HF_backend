@@ -119,7 +119,7 @@ public class Member implements UserDetails {
     private List<Review> reviewsReceived = new ArrayList<>();
 
     @Column(name = "review_score")
-    private double reviewScore;
+    private double reviewScore = 0.0;
 
     @Column(name = "matched_count")
     private long matchedCount;
