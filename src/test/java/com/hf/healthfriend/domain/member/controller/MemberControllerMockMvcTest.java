@@ -6,10 +6,16 @@ import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberUpdateResponseDto;
+import com.hf.healthfriend.domain.member.dto.response.ProfileResponseDto;
 import com.hf.healthfriend.domain.member.exception.DuplicateMemberCreationException;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.member.service.MemberService;
+import com.hf.healthfriend.domain.review.constants.EvaluationType;
+import com.hf.healthfriend.domain.review.dto.response.ReviewDetailPerEvaluationType;
+import com.hf.healthfriend.domain.review.dto.response.SimpleReviewResponseDto;
+import com.hf.healthfriend.domain.spec.dto.SpecDto;
+import com.hf.healthfriend.global.config.BeanConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,12 +24,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -39,6 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc(addFilters = false)
 @MockBean(JpaMetamodelMappingContext.class)
 @MockBean(MemberRepository.class)
+@Import(BeanConfig.class)
 class MemberControllerMockMvcTest {
 
     @Autowired
@@ -300,6 +309,145 @@ class MemberControllerMockMvcTest {
                             "statusCodeSeries": 4,
                             "errorCode": 200,
                             "errorName": "MEMBER_OF_THE_MEMBER_ID_NOT_FOUND"
+                        }
+                        """));
+    }
+
+    @DisplayName("GET /hf/members/{memberId}/profile - success")
+    @Test
+    void getProfile_success() throws Exception {
+        // Given
+        final Long memberId = 20000L;
+        when(this.memberService.getProfileOfMember(memberId)).thenReturn(
+                ProfileResponseDto.builder()
+                        .memberId(memberId)
+                        .introduction("안녕하세요!")
+                        .specs(
+                                List.of(
+                                        SpecDto.builder()
+                                                .specId(1002L)
+                                                .startDate(LocalDate.of(2022, 3, 1))
+                                                .endDate(null)
+                                                .isCurrent(true)
+                                                .title("스포애니 전문 트레이너")
+                                                .description("스포애니에서 현재까지 근무 중")
+                                                .build(),
+                                        SpecDto.builder()
+                                                .specId(1001L)
+                                                .startDate(LocalDate.of(2021, 4, 1))
+                                                .endDate(null)
+                                                .isCurrent(false)
+                                                .title("보디빌딩 대회 국방부장관상")
+                                                .description("수상 이력입니다. (endDate null, isCurrent false일 경우 수상 이력)")
+                                                .build(),
+                                        SpecDto.builder()
+                                                .specId(1000L)
+                                                .startDate(LocalDate.of(2019, 3, 1))
+                                                .endDate(LocalDate.of(2020, 12, 1))
+                                                .isCurrent(false)
+                                                .title("15 전투비행단 체력단련실 지박령")
+                                                .description("")
+                                                .build()
+                                )
+                        )
+                        .reviews(
+                                List.of(
+                                        new SimpleReviewResponseDto(
+                                                EvaluationType.GOOD,
+                                                List.of(
+                                                        new ReviewDetailPerEvaluationType(
+                                                                1, 12L
+                                                        ),
+                                                        new ReviewDetailPerEvaluationType(
+                                                                2, 9L
+                                                        )
+                                                )
+                                        ),
+                                        new SimpleReviewResponseDto(
+                                                EvaluationType.NOT_GOOD,
+                                                List.of(
+                                                        new ReviewDetailPerEvaluationType(
+                                                                3, 8L
+                                                        ),
+                                                        new ReviewDetailPerEvaluationType(
+                                                                1, 5L
+                                                        )
+                                                )
+                                        )
+                                )
+                        )
+                        .averageReviewScore(3.5)
+                        .build()
+        );
+
+        this.mockMvc.perform(get("/hf/members/{memberId}/profile", memberId)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print()).andDo(log())
+                // TODO: PR #97과 병합되면 Spec의 startDate, endDate에서 day 부분은 제거
+                .andExpect(content().json("""
+                        {
+                          "statusCode": 200,
+                          "statusCodeSeries": 2,
+                          "message": "회원 프로필 받아오기 성공",
+                          "content": {
+                            "memberId": 20000,
+                            "introduction": "안녕하세요!",
+                            "specs": [
+                              {
+                                "specId": 1002,
+                                "startDate": "2022-03-01",
+                                "endDate": null,
+                                "isCurrent": true,
+                                "title": "스포애니 전문 트레이너",
+                                "description": "스포애니에서 현재까지 근무 중"
+                              },
+                              {
+                                "specId": 1001,
+                                "startDate": "2021-04-01",
+                                "endDate": null,
+                                "isCurrent": false,
+                                "title": "보디빌딩 대회 국방부장관상",
+                                "description": "수상 이력입니다. (endDate null, isCurrent false일 경우 수상 이력)"
+                              },
+                              {
+                                "specId": 1000,
+                                "startDate": "2019-03-01",
+                                "endDate": "2020-12-01",
+                                "isCurrent": false,
+                                "title": "15 전투비행단 체력단련실 지박령",
+                                "description": ""
+                              }
+                            ],
+                            "reviews": [
+                              {
+                                "evaluationType": "GOOD",
+                                "reviewDetailsPerEvaluationType": [
+                                  {
+                                    "reviewDetailId": 1,
+                                    "reviewDetailCount": 12
+                                  },
+                                  {
+                                    "reviewDetailId": 2,
+                                    "reviewDetailCount": 9
+                                  }
+                                ]
+                              },
+                              {
+                                "evaluationType": "NOT_GOOD",
+                                "reviewDetailsPerEvaluationType": [
+                                  {
+                                    "reviewDetailId": 3,
+                                    "reviewDetailCount": 8
+                                  },
+                                  {
+                                    "reviewDetailId": 1,
+                                    "reviewDetailCount": 5
+                                  }
+                                ]
+                              }
+                            ],
+                            "averageReviewScore": 3.5
+                          }
                         }
                         """));
     }
