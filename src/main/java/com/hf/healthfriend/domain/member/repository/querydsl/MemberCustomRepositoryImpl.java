@@ -3,6 +3,8 @@ package com.hf.healthfriend.domain.member.repository.querydsl;
 
 import static com.querydsl.core.types.ExpressionUtils.count;
 import static com.querydsl.jpa.JPAExpressions.select;
+
+import com.hf.healthfriend.domain.follow.entity.QFollow;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
@@ -30,6 +32,7 @@ import java.util.function.Function;
 public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     private final QMember member = QMember.member;
     private final QFollow follow = QFollow.follow;
+    private final QWish wish = QWish.wish;
     private final JPAQueryFactory queryFactory;
 
     @Override
