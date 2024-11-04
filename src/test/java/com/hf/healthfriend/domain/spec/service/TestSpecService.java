@@ -8,7 +8,6 @@ import com.hf.healthfriend.domain.spec.dto.SpecDto;
 import com.hf.healthfriend.domain.spec.dto.request.SpecUpdateRequestDto;
 import com.hf.healthfriend.domain.spec.dto.response.SpecUpdateResponseDto;
 import com.hf.healthfriend.testutil.SampleEntityGenerator;
-import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

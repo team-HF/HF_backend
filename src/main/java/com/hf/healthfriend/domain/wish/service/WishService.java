@@ -5,7 +5,7 @@ import static com.hf.healthfriend.global.exception.ErrorCode.MEMBER_OF_THE_MEMBE
 import static com.hf.healthfriend.global.exception.ErrorCode.NON_EXIST_WISH;
 
 import com.hf.healthfriend.domain.member.entity.Member;
-import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
+import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.wish.dto.response.WishResponse;
 import com.hf.healthfriend.domain.wish.entity.Wish;
 import com.hf.healthfriend.domain.wish.repository.WishRepository;
@@ -25,15 +25,15 @@ import org.springframework.stereotype.Service;
 public class WishService {
 
     private final WishRepository wishRepository;
-    private final MemberJpaRepository memberJpaRepository;
+    private final MemberRepository memberRepository;
 
     public Long save(long wisherId, long wishedId){
 
         if (wishRepository.existsByWishedIdAndWisherId(wishedId,wisherId))
             throw new CustomException(BAD_WISH_REQUEST,HttpStatus.BAD_REQUEST);
 
-        if(memberJpaRepository.existsById(wisherId) &&
-        memberJpaRepository.existsById(wishedId)){
+        if(memberRepository.existsById(wisherId) &&
+        memberRepository.existsById(wishedId)){
             Wish wish = new Wish(
                     new Member(wisherId),
                     new Member(wishedId));

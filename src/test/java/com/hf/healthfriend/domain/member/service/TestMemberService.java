@@ -8,7 +8,7 @@ import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.FitnessLevelUpdateException;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
-import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
+import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.spec.dto.SpecDto;
 import com.hf.healthfriend.testutil.SampleEntityGenerator;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +50,7 @@ class TestMemberService {
     private MemberService memberService;
 
     @Autowired
-    private MemberJpaRepository memberJpaRepository;
+    private MemberRepository memberRepository;
 
     @DisplayName("createMember - 빠진 데이터 없이 모두 입력")
     @Test
@@ -95,7 +95,7 @@ class TestMemberService {
         assertThat(responseDto.getFitnessObjective()).isEqualTo(FitnessObjective.RUNNING);
         assertThat(responseDto.getFitnessKind()).isEqualTo(FitnessKind.FUNCTIONAL);
 
-        Member member = this.memberJpaRepository.findByEmail("sample@gmail.com").orElseThrow();
+        Member member = this.memberRepository.findByEmail("sample@gmail.com").orElseThrow();
 
         log.info("Member from repository={}", member);
 
@@ -317,7 +317,7 @@ class TestMemberService {
     @ParameterizedTest
     void updateMember_success(MemberUpdateRequestDto updateDto) {
         Member sampleMember = SampleEntityGenerator.generateSampleMember("sample@gmail.com");
-        this.memberJpaRepository.save(sampleMember);
+        this.memberRepository.save(sampleMember);
 
         Map<String, Object> updateValueMap = Arrays.stream(MemberUpdateRequestDto.class.getDeclaredMethods())
                 .filter((m) -> m.getName().startsWith("get"))
@@ -380,7 +380,7 @@ class TestMemberService {
     void updateMember_updateFitnessLevelNotAllowed_FitnessLevelUpdateException() {
         Member sampleMember = SampleEntityGenerator.generateSampleMember("sample@gmail.com");
         sampleMember.setFitnessLevel(FitnessLevel.ADVANCED);
-        this.memberJpaRepository.save(sampleMember);
+        this.memberRepository.save(sampleMember);
 
         MemberUpdateRequestDto updateDto = MemberUpdateRequestDto.builder()
                 .fitnessLevel(FitnessLevel.BEGINNER)

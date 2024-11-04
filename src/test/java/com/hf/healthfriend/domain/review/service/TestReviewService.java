@@ -7,7 +7,6 @@ import com.hf.healthfriend.domain.matching.repository.MatchingRepository;
 import com.hf.healthfriend.domain.member.constant.FitnessLevel;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
-import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.review.constants.EvaluationType;
 import com.hf.healthfriend.domain.review.dto.request.ReviewCreationRequestDto;
@@ -56,9 +55,6 @@ class TestReviewService {
 
     @Mock
     MemberRepository memberRepository;
-
-    @Mock
-    MemberJpaRepository memberJpaRepository;
 
     Map<Long, Member> dummyMembers;
     Map<Long, Matching> dummyMatchings;

@@ -2,15 +2,18 @@ package com.hf.healthfriend.domain.member.repository.querydsl;
 
 
 import static com.querydsl.core.types.ExpressionUtils.count;
-import static com.querydsl.jpa.JPAExpressions.select;
 
 import com.hf.healthfriend.domain.follow.entity.QFollow;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
 import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
+import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.entity.QMember;
+import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
+import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
 import com.hf.healthfriend.domain.wish.entity.QWish;
+import com.hf.healthfriend.global.util.mapping.BeanMapper;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.ExpressionUtils;
@@ -19,6 +22,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -34,6 +38,8 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     private final QFollow follow = QFollow.follow;
     private final QWish wish = QWish.wish;
     private final JPAQueryFactory queryFactory;
+    private final EntityManager em;
+    private final BeanMapper beanMapper;
 
     @Override
     public List<MemberRecommendResponse> recommendMembers(MembersRecommendRequest request, Pageable pageable) {
@@ -152,5 +158,17 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
         builder.and(member.introduction.containsIgnoreCase(keyword)
                 .or(member.nickname.containsIgnoreCase(keyword)));
         return builder;
+    }
+
+    @Override
+    public Member update(Long memberId, MemberUpdateDto updateDto) {
+        Member member = this.em.find(Member.class, memberId);
+        if (member == null) {
+            throw new MemberNotFoundException(memberId);
+        }
+
+        this.beanMapper.copyProperties(updateDto, member);
+
+        return member;
     }
 }

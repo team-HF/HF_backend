@@ -23,6 +23,7 @@ public class SampleEntityGenerator {
     @Deprecated
     public static Member generateSampleMember(String email, String nickname, String phoneNumber) {
         Member member = new Member(email);
+        member.setEmail(email);
         member.setNickname(nickname);
         member.setBirthDate(LocalDate.of(1997, 9, 16));
         member.setName("김샘플");

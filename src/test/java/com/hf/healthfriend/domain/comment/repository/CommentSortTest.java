@@ -7,7 +7,7 @@ import com.hf.healthfriend.domain.like.constant.LikeType;
 import com.hf.healthfriend.domain.like.entity.Like;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.entity.Member;
-import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
+import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
 import com.hf.healthfriend.testutil.TestConfig;
@@ -42,7 +42,7 @@ public class CommentSortTest {
     private CommentCustomRepositoryImpl commentCustomRepository;
 
     @Autowired
-    private MemberJpaRepository memberRepository;
+    private MemberRepository memberRepository;
 
     @Autowired
     private PostRepository postRepository;

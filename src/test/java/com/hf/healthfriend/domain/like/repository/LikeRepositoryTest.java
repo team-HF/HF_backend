@@ -2,7 +2,6 @@ package com.hf.healthfriend.domain.like.repository;
 
 import com.hf.healthfriend.domain.like.constant.LikeType;
 import com.hf.healthfriend.domain.like.entity.Like;
-import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.post.constant.PostCategory;
@@ -18,7 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
