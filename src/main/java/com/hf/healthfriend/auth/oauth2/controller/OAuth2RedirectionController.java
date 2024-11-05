@@ -21,6 +21,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -173,6 +175,9 @@ public class OAuth2RedirectionController {
         ResponseCookie emailCookie =
                 this.cookieUtils.buildJavaScriptAccessibleResponseCookie(CookieConstants.COOKIE_NAME_EMAIL.getString(),
                         grantedTokenInfo.getEmail());
+        ResponseCookie nameCookie =
+                this.cookieUtils.buildJavaScriptAccessibleResponseCookie(CookieConstants.COOKIE_NAME_NAME.getString(),
+                        URLEncoder.encode(grantedTokenInfo.getName(), StandardCharsets.UTF_8));
         ResponseCookie newMemberCookie =
                 this.cookieUtils.buildJavaScriptAccessibleResponseCookie(CookieConstants.COOKIE_NAME_IS_NEW_MEMBER.getString(),
                         String.valueOf(!memberExists));
@@ -181,6 +186,7 @@ public class OAuth2RedirectionController {
         headers.add(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
         headers.add(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
         headers.add(HttpHeaders.SET_COOKIE, emailCookie.toString());
+        headers.add(HttpHeaders.SET_COOKIE, nameCookie.toString());
         headers.add(HttpHeaders.SET_COOKIE, newMemberCookie.toString());
         headers.add(HttpHeaders.LOCATION, this.clientOrigin + REDIRECTION_PATH);
 
