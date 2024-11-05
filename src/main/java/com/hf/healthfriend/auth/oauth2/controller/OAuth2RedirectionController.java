@@ -86,6 +86,8 @@ public class OAuth2RedirectionController {
                                             - refresh_token: Refresh Token을 담은 HTTP-only, Secure, Same-site: None 쿠키
                                             - access_token: Access Token을 담은 Secure, Same-site: None 쿠키
                                             - email: 카카오 Authorization Server로부터 가져온 email을 담은 Secure, Same-site: None 쿠키
+                                            - name: 카카오 Authorization Server로부터 가져온 회원의 이름, Secure, Same-site: None 쿠키
+                                            name은 URI 인코딩이 되어 있기 때문에 디코딩해야 함 ("%EB%B0%95%EA%B2%BD... 형식")
                                             - is_new_member: 신규 회원일 경우 true, 그렇지 않으면 false, Secure, Same-site: None 쿠키
                                             """
                             )
@@ -131,6 +133,8 @@ public class OAuth2RedirectionController {
                                             - refresh_token: Refresh Token을 담은 HTTP-only, Secure, Same-site: None 쿠키
                                             - access_token: Access Token을 담은 Secure, Same-site: None 쿠키
                                             - email: 구글 Authorization Server로부터 가져온 email을 담은 Secure, Same-site: None 쿠키
+                                            - name: 구글 Authorization Server로부터 가져온 회원의 이름, Secure, Same-site: None 쿠키
+                                            name은 URI 인코딩이 되어 있기 때문에 디코딩해야 함 ("%EB%B0%95%EA%B2%BD... 형식")
                                             - is_new_member: 신규 회원일 경우 true, 그렇지 않으면 false, Secure, Same-site: None 쿠키
                                             """
                             )
