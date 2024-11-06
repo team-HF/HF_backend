@@ -29,11 +29,26 @@ class TestMemberRepository {
     @Autowired
     MemberRepository memberRepository;
 
-    @DisplayName("save - 기본값만 가지고 제대로 Save 되는지 확인")
+    @DisplayName("save - 단순 success 테스트")
     @Test
     void save() {
         Member member = SampleEntityGenerator.generateSampleMember("sample@gmail.com");
         assertThatNoException().isThrownBy(() -> this.memberRepository.save(member));
+    }
+
+    @DisplayName("save - 운동 스타일 등 필수가 아닌 값 누락시켜도 정상적으로 저장됨")
+    @Test
+    void save_withOnlyRequiredFields() {
+        Member memberWithRequiredFields = new Member("member@gmail.com");
+        memberWithRequiredFields.setName("김멤버");
+        memberWithRequiredFields.setNickname("닉네임");
+        memberWithRequiredFields.setCd1("01");
+        memberWithRequiredFields.setCd2("110");
+        memberWithRequiredFields.setCd3("200");
+        memberWithRequiredFields.setBirthDate(LocalDate.of(1997, 9, 16));
+        memberWithRequiredFields.setGender(Gender.MALE);
+        memberWithRequiredFields.setIntroduction("Hello!");
+        assertThatNoException().isThrownBy(() -> this.memberRepository.save(memberWithRequiredFields));
     }
 
     @DisplayName("findById - 성공 예상")
