@@ -17,10 +17,15 @@ import com.hf.healthfriend.global.exception.CustomException;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
 import com.hf.healthfriend.global.exception.ErrorCode;
 import jakarta.transaction.Transactional;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RScoredSortedSet;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -28,6 +33,7 @@ import org.springframework.data.domain.PageRequest;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -41,11 +47,19 @@ public class PostService {
     private final LikeRepository likeRepository;
     private final RedissonClient redissonClient;
 
-    public Long save(PostWriteRequest postWriteRequest) {
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
+    public Long save(PostWriteRequest postWriteRequest, MultipartFile imageFile) {
         Long memberId = postWriteRequest.getWriterId();
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
-        Post post = postWriteRequest.toEntity(member);
+
+        String imagePath = null;
+        if(imageFile != null && !imageFile.isEmpty()) {
+            imagePath = imageFile.getOriginalFilename();
+        }
+        Post post = postWriteRequest.toEntity(member,imagePath);
         return postRepository.save(post).getPostId();
     }
 
@@ -83,6 +97,12 @@ public class PostService {
         RScoredSortedSet<Long> sortedSet = redissonClient.getScoredSortedSet("popular_posts");
         List<Long> postIdList = new ArrayList<>( sortedSet.readAll().stream().toList());
         return postRepository.getPopularList(postIdList,fitnessLevel,keyword,pageable);
+    }
+
+    private String saveImageFile(MultipartFile file) throws IOException {
+        Path filePath = Paths.get(uploadDir, file.getOriginalFilename());
+        Files.write(filePath, file.getBytes());
+        return filePath.toString();
     }
 
 

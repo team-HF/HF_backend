@@ -13,6 +13,7 @@ public record PostGetResponse(
         Long memberId,
         String title,
         String content,
+        String imagePath,
         LocalDateTime createDate,
         Long viewCount,
         Long likeCount,
@@ -25,6 +26,7 @@ public record PostGetResponse(
                 .memberId(post.getMember().getId())
                 .title(post.getTitle())
                 .content(post.getContent())
+                .imagePath(post.getImagePath())
                 .createDate(post.getCreationTime())
                 .viewCount(post.getViewCount())
                 .likeCount(post.getLikesCount())

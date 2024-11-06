@@ -52,6 +52,8 @@ public class Post extends BaseTimeEntity {
     @Builder.Default
     private Long likesCount = 0L;
 
+    private String imagePath;
+
     public void delete(){
         this.isDeleted=true;
     }
