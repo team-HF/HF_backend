@@ -7,11 +7,13 @@ import com.hf.healthfriend.domain.matching.dto.response.MatchingListResponseDto;
 import com.hf.healthfriend.domain.matching.dto.response.PageResponseDto;
 import com.hf.healthfriend.domain.matching.dto.response.ProfileOfMemberInMatchingResponseDto;
 import com.hf.healthfriend.domain.matching.service.MatchingService;
+import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +34,14 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(MatchingController.class)
@@ -84,7 +90,7 @@ class MatchingControllerMockMvcTest {
         this.sampleResponses = Collections.unmodifiableList(list);
     }
 
-    @DisplayName("GET /hf/members/{memberId}/matchings - ALL")
+    @DisplayName("GET /hf/members/{memberId}/matchings - success")
     @CsvSource(value = {
             "1000,null,null,null,null",
             "1000,ALL,ALL,1,4",
@@ -121,7 +127,7 @@ class MatchingControllerMockMvcTest {
                         .content(queryResult.getContent())
                         .build());
 
-        // Then
+        // When
         String responseBodyAsString = this.mockMvc.perform(get("/hf/members/{memberId}/matchings", memberId)
                         .param("matchingFetchType", fetchType == null ? null : fetchType.name())
                         .param("matchingStatusCondition", statusCondition == null ? null : statusCondition.name())
@@ -133,6 +139,7 @@ class MatchingControllerMockMvcTest {
                 .andReturn().getResponse().getContentAsString();
         JSONObject responseBody = new JSONObject(responseBodyAsString);
 
+        // Then
         assertThat(responseBody.getInt("statusCode")).isEqualTo(200);
 
         // Page 검증
@@ -163,5 +170,26 @@ class MatchingControllerMockMvcTest {
             return List.of();
         }
         return original.subList(offset, Math.min(offset + pageSize, original.size()));
+    }
+
+    @DisplayName("GET /hf/members/{memberId}/matchings - 404 - 존재하지 않는 회원")
+    @Test
+    void getMatchingList_404_MEMBER_NOT_FOUND() throws Exception {
+        doThrow(new MemberNotFoundException(1000L))
+                .when(this.matchingService)
+                .searchMatchingListOfMember(any(), any(), any(), anyInt(), anyInt());
+
+        this.mockMvc.perform(get("/hf/members/{memberId}/matchings", 1000))
+                .andDo(print()).andDo(log())
+                .andExpect(status().isNotFound())
+                .andExpect(content().json("""
+                        {
+                            "statusCode": 40401,
+                            "statusCodeSeries": 4,
+                            "errorCode": "MAT001",
+                            "errorName": "MEMBER_NOT_FOUND",
+                            "message": "해당 회원이 존재하지 않습니다"
+                        }
+                        """));
     }
 }
