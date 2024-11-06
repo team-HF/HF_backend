@@ -17,8 +17,9 @@ public class CommentDto {
     private String content;
     private LocalDateTime creationTime;
     private LocalDateTime lastModified;
+    private String writerProfileUrl;
 
-    public static CommentDto of(Comment entity) {
+    public static CommentDto of(Comment entity, String writerProfileUrl) {
         return CommentDto.builder()
                 .commentId(entity.getCommentId())
                 .postId(entity.getPost().getPostId())
@@ -26,6 +27,7 @@ public class CommentDto {
                 .content(entity.getContent())
                 .creationTime(entity.getCreationTime())
                 .lastModified(entity.getLastModified())
+                .writerProfileUrl(writerProfileUrl)
                 .build();
     }
 }

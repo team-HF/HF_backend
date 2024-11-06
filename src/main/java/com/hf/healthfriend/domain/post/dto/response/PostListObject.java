@@ -16,6 +16,7 @@ public record PostListObject(
         long commentCount,
         String fitnessLevel,
         // TODO : dto에서 빼기, 프로필 추가
-        long totalPageSize
+        long totalPageSize,
+        String memberProfileUrl
 ) {
 }

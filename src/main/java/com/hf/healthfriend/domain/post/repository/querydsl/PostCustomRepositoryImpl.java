@@ -4,6 +4,7 @@ import com.hf.healthfriend.domain.member.constant.FitnessLevel;
 import com.hf.healthfriend.domain.post.constant.PostCategory;
 import com.hf.healthfriend.domain.post.dto.response.PostListObject;
 import com.hf.healthfriend.domain.post.entity.QPost;
+import com.hf.healthfriend.global.util.file.FileUrlResolver;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -18,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostCustomRepositoryImpl implements PostCustomRepository {
 
+    private final FileUrlResolver fileUrlResolver;
     private final JPAQueryFactory queryFactory;
     private final QPost post = QPost.post;
 
@@ -49,6 +51,7 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
                             .fitnessLevel(post.getMember().getFitnessLevel().name())
                             .likeCount(post.getLikesCount())
                             .totalPageSize(getTotalPageSize())
+                            .memberProfileUrl(fileUrlResolver.resolveFileUrl(post.getMember().getProfileImageUrl()))
                             .build();
                 }).toList();
     }
@@ -87,6 +90,7 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
                             .fitnessLevel(post.getMember().getFitnessLevel().name())
                             .likeCount(post.getLikesCount())
                             .totalPageSize(totalPageSize)
+                            .memberProfileUrl(fileUrlResolver.resolveFileUrl(post.getMember().getProfileImageUrl()))
                             .build();
                 }).toList();
     }

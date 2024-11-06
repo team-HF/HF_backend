@@ -15,6 +15,8 @@ import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
+import com.hf.healthfriend.global.util.file.FileUrlResolver;
+import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -32,6 +34,7 @@ public class CommentService {
     private final CommentJpaRepository commentJpaRepository;
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
+    private final FileUrlResolver fileUrlResolver;
 
     public CommentCreationResponseDto createComment(Long postId, CommentCreationRequestDto requestDto)
             throws DataIntegrityViolationException {
@@ -61,9 +64,8 @@ public class CommentService {
             throw new PostNotFoundException(postId, "postId에 해당하는 Post가 없음");
         }
 
-        return this.commentJpaRepository.findCommentsByPostIdWithSorting(postId,sortType)
-                .stream()
-                .map(CommentDto::of)
+        return commentJpaRepository.findCommentsByPostIdWithSorting(postId, sortType).stream()
+                .map(comment -> CommentDto.of(comment, fileUrlResolver.resolveFileUrl(comment.getWriter().getProfileImageUrl())))
                 .toList();
     }
 
@@ -72,14 +74,13 @@ public class CommentService {
             throw new MemberNotFoundException(writerId, "writerId에 해당하는 Member가 없음");
         }
 
-        return this.commentRepository.findCommentsByWriterId(writerId)
-                .stream()
-                .map(CommentDto::of)
+        return this.commentRepository.findCommentsByWriterId(writerId).stream()
+                .map(comment -> CommentDto.of(comment, fileUrlResolver.resolveFileUrl(comment.getWriter().getProfileImageUrl())))
                 .toList();
     }
 
     public CommentDto updateComment(Long commentId, CommentUpdateDto updateDto) throws CommentNotFoundException {
         Comment updatedComment = this.commentRepository.updateComment(commentId, updateDto);
-        return CommentDto.of(updatedComment);
+        return CommentDto.of(updatedComment, fileUrlResolver.resolveFileUrl(updatedComment.getWriter().getProfileImageUrl()));
     }
 }
