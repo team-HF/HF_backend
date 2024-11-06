@@ -4,7 +4,9 @@ import com.hf.healthfriend.domain.member.constant.CompanionStyle;
 import com.hf.healthfriend.domain.member.constant.FitnessEagerness;
 import com.hf.healthfriend.domain.member.constant.FitnessKind;
 import com.hf.healthfriend.domain.member.constant.FitnessLevel;
+import lombok.Builder;
 
+@Builder
 public record ProfileOfMemberInMatchingResponseDto(
         Long memberId,
         String nickname,

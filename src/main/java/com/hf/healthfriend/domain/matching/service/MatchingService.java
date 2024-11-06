@@ -2,8 +2,11 @@ package com.hf.healthfriend.domain.matching.service;
 
 import com.hf.healthfriend.domain.matching.constant.MatchingFetchType;
 import com.hf.healthfriend.domain.matching.constant.MatchingStatus;
+import com.hf.healthfriend.domain.matching.constant.MatchingStatusCondition;
 import com.hf.healthfriend.domain.matching.dto.MatchingResponseDto;
 import com.hf.healthfriend.domain.matching.dto.request.MatchingRequestDto;
+import com.hf.healthfriend.domain.matching.dto.response.MatchingListResponseDto;
+import com.hf.healthfriend.domain.matching.dto.response.PageResponseDto;
 import com.hf.healthfriend.domain.matching.entity.Matching;
 import com.hf.healthfriend.domain.matching.repository.MatchingRepository;
 import com.hf.healthfriend.domain.member.entity.Member;
@@ -11,6 +14,8 @@ import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -83,22 +88,42 @@ public class MatchingService {
                 .toList();
     }
 
-    public List<MatchingResponseDto> getMatchingOfMember(Long memberId, MatchingFetchType fetchType) {
-        Member member = this.memberRepository.findById(memberId)
-                .orElseThrow(NoSuchElementException::new);
-        return switch (fetchType) {
-            case ALL -> convertStreamToMatchingResponseDtoList(
-                    Stream.concat(member.getMatchingRequests().stream(), member.getMatchingsReceived().stream())
-            );
-            case WHAT_I_REQUESTED -> convertStreamToMatchingResponseDtoList(member.getMatchingRequests().stream());
-            case WHAT_I_RECEIVED -> convertStreamToMatchingResponseDtoList(member.getMatchingsReceived().stream());
-        };
-    }
-
-    private List<MatchingResponseDto> convertStreamToMatchingResponseDtoList(Stream<Matching> matchingStream) {
-        return matchingStream
-                .sorted(MATCHING_LIST_SORT_COMPARATOR)
-                .map(MatchingResponseDto::of)
-                .toList();
+    /**
+     * 특정 회원의 매칭 리스트를 조건에 맞게 가져온다.
+     *
+     * @param memberId 매칭을 조회하려는 회원의 ID
+     * @param fetchType 회원이 신청한 매칭인지, 회원이 신청받은 매칭인지, 혹은 둘 다인지 조건
+     *                  <p>ALL: 둘 다 가져옴
+     *                  <p>WHAT_I_REQUESTED: memberId에 해당하는 회원이 신청한 매칭
+     *                  <p>WHAT_I_RECEIVED: memberId에 해당하는 회원이 신청받은 매칭<br>
+     * @param statusCondition 가져오려는 매칭의 상태
+     *                        <p>ALL: 필터링 없이 모든 매칭을 가져옴
+     *                        <p>FINISHED: 종료된 매칭을 가져옴 (MatchingStatus.FINISHED)
+     *                        <p>IN_PROGRESS: 진행 중인 매칭을 가져옴 (MatchingStatus.ACCEPTED)
+     *                        <p>HALTED: 중단된 매칭을 가져옴 (MatchingStatus.REJECTED, MatchingStatus.UNEXPECTEDLY_HALTED)<br>
+     * @param page 가져오려는 매칭 리스트의 페이지. 1부터 시작하며, 페이지 범위를 벗어날 경우 empty list를 반환한다.
+     * @param pageSize 가져오려는 매칭 리스트의 페이지 크기.
+     * @return 쿼리 결과가 반영된 PageResponseDto 객체.
+     * @throws MemberNotFoundException memberId에 해당하는 회원이 존재하지 않을 경우 예외 발생
+     */
+    public PageResponseDto<MatchingListResponseDto> searchMatchingListOfMember(Long memberId,
+                                                                               MatchingFetchType fetchType,
+                                                                               MatchingStatusCondition statusCondition,
+                                                                               int page,
+                                                                               int pageSize) {
+        if (!this.memberRepository.existsById(memberId)) {
+            throw new MemberNotFoundException(memberId);
+        }
+        Page<MatchingListResponseDto> result = this.matchingRepository.findByMemberIdWithConditions(memberId,
+                fetchType,
+                statusCondition,
+                PageRequest.of(page - 1, pageSize));
+        return PageResponseDto.<MatchingListResponseDto>builder()
+                .page(page)
+                .pageSize(pageSize)
+                .totalElementCount(result.getTotalElements())
+                .totalPageCount(result.getTotalPages())
+                .content(result.getContent())
+                .build();
     }
 }
