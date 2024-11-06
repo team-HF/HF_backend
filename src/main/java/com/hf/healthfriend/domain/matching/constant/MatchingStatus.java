@@ -4,5 +4,6 @@ public enum MatchingStatus {
     PENDING,
     ACCEPTED,
     REJECTED,
+    UNEXPECTEDLY_HALTED,
     FINISHED
 }
