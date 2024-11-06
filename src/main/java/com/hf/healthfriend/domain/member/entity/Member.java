@@ -59,13 +59,13 @@ public class Member implements UserDetails {
     @Column(name = "profile_url")
     private String profileImageUrl;
 
-    @Column(name = "cd1")
+    @Column(name = "cd1", nullable = false)
     private String cd1;
 
-    @Column(name = "cd2")
+    @Column(name = "cd2", nullable = false)
     private String cd2;
 
-    @Column(name = "cd3")
+    @Column(name = "cd3", nullable = false)
     private String cd3;
 
     @Column(name = "birth_date", nullable = false)
@@ -79,23 +79,23 @@ public class Member implements UserDetails {
     @Column(name = "introduction", nullable = false)
     private String introduction;
 
-    @Column(name = "fitness_level", nullable = false)
+    @Column(name = "fitness_level")
     @Enumerated(EnumType.STRING)
     private FitnessLevel fitnessLevel;
 
-    @Column(name = "companion_style", nullable = false)
+    @Column(name = "companion_style")
     @Enumerated(EnumType.STRING)
     private CompanionStyle companionStyle;
 
-    @Column(name = "fitness_eagerness", nullable = false)
+    @Column(name = "fitness_eagerness")
     @Enumerated(EnumType.STRING)
     private FitnessEagerness fitnessEagerness;
 
-    @Column(name = "fitness_objective", nullable = false)
+    @Column(name = "fitness_objective")
     @Enumerated(EnumType.STRING)
     private FitnessObjective fitnessObjective;
 
-    @Column(name = "fitness_kind", nullable = false)
+    @Column(name = "fitness_kind")
     @Enumerated(EnumType.STRING)
     private FitnessKind fitnessKind;
 
