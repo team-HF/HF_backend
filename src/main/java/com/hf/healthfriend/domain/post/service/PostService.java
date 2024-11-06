@@ -50,14 +50,14 @@ public class PostService {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
-    public Long save(PostWriteRequest postWriteRequest, MultipartFile imageFile) {
+    public Long save(PostWriteRequest postWriteRequest, MultipartFile imageFile) throws IOException {
         Long memberId = postWriteRequest.getWriterId();
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
 
         String imagePath = null;
         if(imageFile != null && !imageFile.isEmpty()) {
-            imagePath = imageFile.getOriginalFilename();
+            imagePath = saveImageFile(imageFile);
         }
         Post post = postWriteRequest.toEntity(member,imagePath);
         return postRepository.save(post).getPostId();
