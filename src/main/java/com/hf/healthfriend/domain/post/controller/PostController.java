@@ -17,6 +17,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +41,7 @@ public class PostController {
     @PostMapping("/posts")
     public ResponseEntity<ApiBasicResponse<Long>> create(
             @Valid @RequestBody PostWriteRequest postWriteRequest,
-            @RequestPart("file") MultipartFile file) {
+            @RequestPart("file") MultipartFile file) throws IOException {
         Long postId = postService.save(postWriteRequest, file);
         return ResponseEntity.ok(ApiBasicResponse.of(postId, HttpStatus.OK));
     }

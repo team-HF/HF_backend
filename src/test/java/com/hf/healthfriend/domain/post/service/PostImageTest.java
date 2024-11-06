@@ -5,14 +5,20 @@ import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.post.dto.request.PostWriteRequest;
 import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
+import com.hf.healthfriend.domain.post.service.PostService;
+import com.hf.healthfriend.global.util.file.FileUrlResolver;
+import com.hf.healthfriend.global.util.file.MultipartFileUploader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockMultipartFile;
-import java.util.Optional;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import java.io.IOException;
+import java.util.Optional;
+import org.springframework.web.multipart.MultipartFile;
 
 import static com.hf.healthfriend.domain.post.constant.PostCategory.GYM_RECOMMENDATION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,13 +36,19 @@ public class PostImageTest {
     @Mock
     private PostRepository postRepository;
 
+    @Mock
+    private FileUrlResolver fileUrlResolver;
+
+    @Mock
+    private MultipartFileUploader multipartFileUploader;
+
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void testSavePostWithImage() {
+    public void testSavePostWithImage() throws IOException {
         // Given
         PostWriteRequest request = PostWriteRequest.builder()
                 .category(GYM_RECOMMENDATION.name())
@@ -48,22 +60,31 @@ public class PostImageTest {
         Member member = new Member(1L);
 
         MockMultipartFile imageFile = new MockMultipartFile(
-                "file", "test-image.jpg", "image/jpeg", "Test Image Content".getBytes()
+                "file", "test-image.jpg", "image/jpeg", "test".getBytes()
         );
 
         when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
-        // thenAnswer은 호출된 메서드의 인자에 따라 동적으로 값을 반환한다
+        when(fileUrlResolver.generateFilePath(anyString(), anyString())).thenReturn("/files/image/test-image.jpg");
+        when(fileUrlResolver.resolveFileUrl(anyString())).thenReturn("http://localhost/files/image/test-image.jpg");
+
+        doNothing().when(multipartFileUploader).uploadFile(anyString(), any(MultipartFile.class));
+
+        /**
+         * thenAnswer : thenReturn보다 더 유동적으로 반환값 설정 가능
+         * ReflectionTestUtils : Setter가 없어도 값 주입 가능
+         */
         when(postRepository.save(any(Post.class))).thenAnswer(invocation -> {
             Post post = invocation.getArgument(0);
-            //ReflectionTestUtils를 사용하면 setter 없이도 id 값을 설정할 수 있다.
             ReflectionTestUtils.setField(post, "postId", 1L);
             return post;
         });
+
         // When
         Long postId = postService.save(request, imageFile);
 
         // Then
         assertEquals(1L, postId);
         verify(postRepository, times(1)).save(any(Post.class));
+        verify(multipartFileUploader, times(1)).uploadFile(anyString(), eq(imageFile));
     }
 }

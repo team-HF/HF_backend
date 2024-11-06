@@ -16,6 +16,8 @@ import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.global.exception.CustomException;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
 import com.hf.healthfriend.global.exception.ErrorCode;
+import com.hf.healthfriend.global.util.file.FileUrlResolver;
+import com.hf.healthfriend.global.util.file.MultipartFileUploader;
 import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -47,6 +49,9 @@ public class PostService {
     private final LikeRepository likeRepository;
     private final RedissonClient redissonClient;
 
+    private final FileUrlResolver fileUrlResolver;
+    private final MultipartFileUploader multipartFileUploader;
+
     @Value("${file.upload-dir}")
     private String uploadDir;
 
@@ -57,9 +62,10 @@ public class PostService {
 
         String imagePath = null;
         if(imageFile != null && !imageFile.isEmpty()) {
-            imagePath = saveImageFile(imageFile);
+            log.info("filePath={}",imageFile.getOriginalFilename());
+            imagePath = storeProfileImage(imageFile);
         }
-        Post post = postWriteRequest.toEntity(member,imagePath);
+        Post post = postWriteRequest.toEntity(member,fileUrlResolver.resolveFileUrl(imagePath));
         return postRepository.save(post).getPostId();
     }
 
@@ -77,7 +83,8 @@ public class PostService {
             post.updateViewCount(post.getViewCount());
         }
         List<CommentDto> commentList = commentService.getCommentsOfPost(postId,sortType);
-        return PostGetResponse.of(post, commentList);
+        String imagePath = fileUrlResolver.resolveFileUrl(post.getImagePath());
+        return PostGetResponse.of(post, commentList,imagePath);
     }
 
     public void delete(Long postId) {
@@ -99,10 +106,16 @@ public class PostService {
         return postRepository.getPopularList(postIdList,fitnessLevel,keyword,pageable);
     }
 
-    private String saveImageFile(MultipartFile file) throws IOException {
-        Path filePath = Paths.get(uploadDir, file.getOriginalFilename());
-        Files.write(filePath, file.getBytes());
-        return filePath.toString();
+    private String storeProfileImage(MultipartFile profileImage) {
+        String originalFilename = profileImage.getOriginalFilename();
+        String filePath = this.fileUrlResolver.generateFilePath(originalFilename, "image");
+        try {
+            multipartFileUploader.uploadFile(filePath, profileImage);
+            return filePath;
+        } catch (IOException e) {
+            log.error("[FATAL] 파일 출력 중 Error 발생", e);
+            return null;
+        }
     }
 
 

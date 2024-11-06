@@ -19,14 +19,14 @@ public record PostGetResponse(
         Long likeCount,
         List<CommentDto> comments
 ) {
-    public static PostGetResponse of(Post post, List<CommentDto> comments) {
+    public static PostGetResponse of(Post post, List<CommentDto> comments, String imagePath) {
         return PostGetResponse.builder()
                 .postId(post.getPostId())
                 .postCategory(post.getCategory().name())
                 .memberId(post.getMember().getId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .imagePath(post.getImagePath())
+                .imagePath(imagePath)
                 .createDate(post.getCreationTime())
                 .viewCount(post.getViewCount())
                 .likeCount(post.getLikesCount())
