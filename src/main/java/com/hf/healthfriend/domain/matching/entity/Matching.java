@@ -90,6 +90,8 @@ public class Matching {
         }
         this.status = MatchingStatus.FINISHED;
         this.finishTime = LocalDateTime.now();
+        this.requester.incrementMatchedCount();
+        this.targetMember.incrementMatchedCount();
     }
 
     public int sizeOfReviews() {

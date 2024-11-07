@@ -180,4 +180,8 @@ public class Member implements UserDetails {
     public void delete() {
         this.isDeleted = true;
     }
+
+    public void incrementMatchedCount() {
+        this.matchedCount++;
+    }
 }
