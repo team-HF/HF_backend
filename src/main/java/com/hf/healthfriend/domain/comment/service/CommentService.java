@@ -15,11 +15,15 @@ import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
+import com.hf.healthfriend.global.exception.CustomException;
+import com.hf.healthfriend.global.exception.ErrorCode;
 import com.hf.healthfriend.global.util.file.FileUrlResolver;
 import java.util.ArrayList;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,11 +42,21 @@ public class CommentService {
 
     public CommentCreationResponseDto createComment(Long postId, CommentCreationRequestDto requestDto)
             throws DataIntegrityViolationException {
+        if (requestDto.getParentCommentId()!=null && !commentJpaRepository.existsByCommentIdAndIsDeletedFalse(requestDto.getParentCommentId())) {
+            throw new CustomException(ErrorCode.NON_EXIST_PARENT_COMMENT, HttpStatus.NOT_FOUND);
+        }
+
+        Comment parentComment = Optional.ofNullable(requestDto.getParentCommentId())
+                .map(parentId -> Comment.builder().commentId(parentId).build())
+                .orElse(null);
+
         Comment toSave = new Comment(
                 Post.builder().postId(postId).build(),
                 new Member(requestDto.getWriterId()),
-                requestDto.getContent()
+                requestDto.getContent(),
+                parentComment
         );
+
         Comment newComment = this.commentRepository.save(toSave);
         log.info("[Comment Creation] postId={}, commenterId={}", postId, requestDto.getWriterId());
 
@@ -52,6 +66,7 @@ public class CommentService {
                 .writerId(newComment.getWriter().getId())
                 .content(newComment.getContent())
                 .creationTime(newComment.getCreationTime())
+                .parentCommentId(requestDto.getParentCommentId())
                 .build();
     }
 
@@ -65,7 +80,7 @@ public class CommentService {
         }
 
         return commentJpaRepository.findCommentsByPostIdWithSorting(postId, sortType).stream()
-                .map(comment -> CommentDto.of(comment, fileUrlResolver.resolveFileUrl(comment.getWriter().getProfileImageUrl())))
+                .map(this::toCommentDtoWithReplies)
                 .toList();
     }
 
@@ -75,12 +90,20 @@ public class CommentService {
         }
 
         return this.commentRepository.findCommentsByWriterId(writerId).stream()
-                .map(comment -> CommentDto.of(comment, fileUrlResolver.resolveFileUrl(comment.getWriter().getProfileImageUrl())))
+                .map(this::toCommentDtoWithReplies)
                 .toList();
     }
 
     public CommentDto updateComment(Long commentId, CommentUpdateDto updateDto) throws CommentNotFoundException {
         Comment updatedComment = this.commentRepository.updateComment(commentId, updateDto);
-        return CommentDto.of(updatedComment, fileUrlResolver.resolveFileUrl(updatedComment.getWriter().getProfileImageUrl()));
+        return toCommentDtoWithReplies(updatedComment);
+    }
+
+    // TODO : 이거 배치 로딩 적용 전후 쿼리수 비교해보자
+    private CommentDto toCommentDtoWithReplies(Comment comment) {
+        List<CommentDto> replies = comment.getReplies().stream()
+                .map(this::toCommentDtoWithReplies)
+                .toList();
+        return CommentDto.of(comment,fileUrlResolver.resolveFileUrl(comment.getWriter().getProfileImageUrl()), replies);
     }
 }

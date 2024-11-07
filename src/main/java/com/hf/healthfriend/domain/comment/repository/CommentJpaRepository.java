@@ -35,5 +35,5 @@ public interface CommentJpaRepository extends JpaRepository<Comment, Long>, Comm
             """)
     List<Comment> findByWriterId(@Param("writerId") long writerId);
 
-    Long countByPost_PostId(Long postId);
+    boolean existsByCommentIdAndIsDeletedFalse(Long id);
 }

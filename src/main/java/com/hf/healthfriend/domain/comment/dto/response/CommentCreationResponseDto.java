@@ -10,6 +10,7 @@ public record CommentCreationResponseDto(
         long postId,
         long writerId,
         String content,
-        LocalDateTime creationTime
+        LocalDateTime creationTime,
+        Long parentCommentId
 ) {
 }

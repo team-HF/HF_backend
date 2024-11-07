@@ -1,6 +1,5 @@
 package com.hf.healthfriend.global.exception;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -36,7 +35,10 @@ public enum ErrorCode {
     //WISH
     FORBIDDEN_WISH_DELETE(40302,"찜을 삭제할 권한이 없습니다."),
     NON_EXIST_WISH(40403,"존재하지 않는 찜입니다."),
-    BAD_WISH_REQUEST(40404,"이미 존재하는 찜입니다.");
+    BAD_WISH_REQUEST(40404,"이미 존재하는 찜입니다."),
+
+    //COMMENT
+    NON_EXIST_PARENT_COMMENT(40405,"존재하지 않는 댓글에 대한 답글입니다.");
     private final int code;
     private final String message;
 

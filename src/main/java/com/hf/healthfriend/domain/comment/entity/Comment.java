@@ -41,6 +41,13 @@ public class Comment extends BaseTimeEntity {
     @Column(name = "content")
     private String content;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_comment_id")
+    private Comment parentComment;
+
+    @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL)
+    private List<Comment> replies = new ArrayList<>();
+
     @Column(name = "is_deleted")
     @Builder.Default
     private boolean isDeleted = false;
@@ -49,6 +56,14 @@ public class Comment extends BaseTimeEntity {
         this.post = post;
         this.writer = writer;
         this.content = content;
+        this.isDeleted = false;
+    }
+
+    public Comment(@NotNull Post post, @NotNull Member writer, String content, Comment parentComment) {
+        this.post = post;
+        this.writer = writer;
+        this.content = content;
+        this.parentComment = parentComment;
         this.isDeleted = false;
     }
 
