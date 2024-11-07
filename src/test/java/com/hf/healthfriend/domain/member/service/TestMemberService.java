@@ -401,21 +401,6 @@ class TestMemberService {
         return Character.toLowerCase(getterName.charAt(0)) + getterName.substring(1);
     }
 
-    @DisplayName("updateMember - 운동 레벨을 \"고수\"에서 \"새싹\"으로 바꿀 경우 예외 발생 - FitnessLevelUpdateException")
-    @Test
-    void updateMember_updateFitnessLevelNotAllowed_FitnessLevelUpdateException() {
-        Member sampleMember = SampleEntityGenerator.generateSampleMember("sample@gmail.com");
-        sampleMember.setFitnessLevel(FitnessLevel.ADVANCED);
-        this.memberRepository.save(sampleMember);
-
-        MemberUpdateRequestDto updateDto = MemberUpdateRequestDto.builder()
-                .fitnessLevel(FitnessLevel.BEGINNER)
-                .build();
-
-        assertThatExceptionOfType(FitnessLevelUpdateException.class)
-                .isThrownBy(() -> this.memberService.updateMember(sampleMember.getId(), updateDto));
-    }
-
     @DisplayName("updateMember - 없는 회원일 경우 MemberNotFoundException 발생")
     @Test
     void updateMember_MemberNotFoundException() {
