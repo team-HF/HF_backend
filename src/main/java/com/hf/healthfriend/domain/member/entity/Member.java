@@ -3,6 +3,7 @@ package com.hf.healthfriend.domain.member.entity;
 import com.hf.healthfriend.domain.follow.entity.Follow;
 import com.hf.healthfriend.domain.matching.entity.Matching;
 import com.hf.healthfriend.domain.member.constant.*;
+import com.hf.healthfriend.domain.member.domain.Tier;
 import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.review.entity.Review;
 import com.hf.healthfriend.domain.spec.entity.Spec;
@@ -183,5 +184,9 @@ public class Member implements UserDetails {
 
     public void incrementMatchedCount() {
         this.matchedCount++;
+    }
+
+    public Tier getTier() {
+        return Tier.create(this.fitnessLevel, this.matchedCount);
     }
 }
