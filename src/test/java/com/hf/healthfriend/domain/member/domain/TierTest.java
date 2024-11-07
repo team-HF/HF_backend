@@ -12,10 +12,10 @@ class TierTest {
     @DisplayName("Tier.create")
     @CsvSource(value = {
             "BEGINNER,0,1", "BEGINNER,1,1", "BEGINNER,4,1", "BEGINNER,5,2",
-            "BEGINNER,6,2", "BEGINNER,9,3", "BEGINNER,13,3", "BEGINNER,14,4",
+            "BEGINNER,6,2", "BEGINNER,10,3", "BEGINNER,13,3", "BEGINNER,15,4",
             "BEGINNER,19,4", "BEGINNER,20,5", "BEGINNER,21,5", "BEGINNER,29,5",
-            "ADVANCED,20,1", "ADVANCED,20,1", "ADVANCED,24,1", "ADVANCED,25,2",
-            "ADVANCED,29,3", "ADVANCED,34,4", "ADVANCED,39,4", "ADVANCED,40,5",
+            "ADVANCED,20,1", "ADVANCED,21,1", "ADVANCED,24,1", "ADVANCED,25,2",
+            "ADVANCED,30,3", "ADVANCED,35,4", "ADVANCED,39,4", "ADVANCED,40,5",
             "ADVANCED,41,5", "ADVANCED,45,5,", "ADVANCED,1354153,5"
     }, delimiter = ',')
     @ParameterizedTest

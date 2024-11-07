@@ -13,7 +13,7 @@ import java.util.Objects;
 @ToString
 public class Tier {
     private static final Long[] TIER_MILESTONE = {
-            5L, 9L, 14L, 20L
+            5L, 10L, 15L, 20L
     };
 
     private final FitnessLevel fitnessLevel;
