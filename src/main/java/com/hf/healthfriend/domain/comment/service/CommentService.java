@@ -71,7 +71,13 @@ public class CommentService {
     }
 
     public void deleteComment(Long commentId) throws CommentNotFoundException {
+        if(!commentJpaRepository.existsByCommentIdAndIsDeletedFalse(commentId)) {
+            throw new CustomException(ErrorCode.NON_EXIST_COMMENT, HttpStatus.NOT_FOUND);
+        }
         this.commentRepository.deleteById(commentId);
+        if (commentJpaRepository.isParentComment(commentId)) {
+            commentJpaRepository.deleteRepliesOfParentComment(commentId);
+        }
     }
 
     public List<CommentDto> getCommentsOfPost(Long postId, CommentSortType sortType) {
@@ -99,7 +105,6 @@ public class CommentService {
         return toCommentDtoWithReplies(updatedComment);
     }
 
-    // TODO : 이거 배치 로딩 적용 전후 쿼리수 비교해보자
     private CommentDto toCommentDtoWithReplies(Comment comment) {
         List<CommentDto> replies = comment.getReplies().stream()
                 .map(this::toCommentDtoWithReplies)
