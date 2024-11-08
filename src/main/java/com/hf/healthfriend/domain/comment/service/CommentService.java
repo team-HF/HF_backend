@@ -79,7 +79,7 @@ public class CommentService {
             throw new PostNotFoundException(postId, "postId에 해당하는 Post가 없음");
         }
 
-        return commentJpaRepository.findCommentsByPostIdWithSorting(postId, sortType).stream()
+        return commentJpaRepository.findParentCommentsByPostIdWithSorting(postId, sortType).stream()
                 .map(this::toCommentDtoWithReplies)
                 .toList();
     }
@@ -104,6 +104,7 @@ public class CommentService {
         List<CommentDto> replies = comment.getReplies().stream()
                 .map(this::toCommentDtoWithReplies)
                 .toList();
+        log.info("댓글 {} 조회", comment.getCommentId());
         return CommentDto.of(comment,fileUrlResolver.resolveFileUrl(comment.getWriter().getProfileImageUrl()), replies);
     }
 }
