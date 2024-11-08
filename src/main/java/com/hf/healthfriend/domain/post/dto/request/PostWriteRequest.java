@@ -26,8 +26,9 @@ public class PostWriteRequest{
     String content;
     @NotNull(message="작성자 아이디는 필수값입니다. ")
     Long writerId;
+    String imagePath;
 
-    public Post toEntity(Member member,String imagePath){
+    public Post toEntity(Member member){
         PostCategory postCategory = PostCategory.valueOf(category);
         return Post.builder()
                 .category(postCategory)

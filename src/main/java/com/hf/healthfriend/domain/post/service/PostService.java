@@ -50,22 +50,12 @@ public class PostService {
     private final RedissonClient redissonClient;
 
     private final FileUrlResolver fileUrlResolver;
-    private final MultipartFileUploader multipartFileUploader;
 
-    @Value("${file.upload-dir}")
-    private String uploadDir;
-
-    public Long save(PostWriteRequest postWriteRequest, MultipartFile imageFile) throws IOException {
+    public Long save(PostWriteRequest postWriteRequest){
         Long memberId = postWriteRequest.getWriterId();
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
-
-        String imagePath = null;
-        if(imageFile != null && !imageFile.isEmpty()) {
-            log.info("filePath={}",imageFile.getOriginalFilename());
-            imagePath = storeProfileImage(imageFile);
-        }
-        Post post = postWriteRequest.toEntity(member,fileUrlResolver.resolveFileUrl(imagePath));
+        Post post = postWriteRequest.toEntity(member);
         return postRepository.save(post).getPostId();
     }
 
@@ -104,18 +94,6 @@ public class PostService {
         RScoredSortedSet<Long> sortedSet = redissonClient.getScoredSortedSet("popular_posts");
         List<Long> postIdList = new ArrayList<>( sortedSet.readAll().stream().toList());
         return postRepository.getPopularList(postIdList,fitnessLevel,keyword,pageable);
-    }
-
-    private String storeProfileImage(MultipartFile profileImage) {
-        String originalFilename = profileImage.getOriginalFilename();
-        String filePath = this.fileUrlResolver.generateFilePath(originalFilename, "image");
-        try {
-            multipartFileUploader.uploadFile(filePath, profileImage);
-            return filePath;
-        } catch (IOException e) {
-            log.error("[FATAL] 파일 출력 중 Error 발생", e);
-            return null;
-        }
     }
 
 
