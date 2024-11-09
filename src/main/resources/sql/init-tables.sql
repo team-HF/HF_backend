@@ -46,25 +46,25 @@ SET FOREIGN_KEY_CHECKS = 1;
 CREATE TABLE members
 (
     member_id         BIGINT PRIMARY KEY AUTO_INCREMENT,
-    login_id          VARCHAR(40) UNIQUE                 NOT NULL, -- 정책 확인 후 VARCHAR 크기 재조정
-    password          VARCHAR(40),                                 -- 소셜 로그인 시 NULL
-    name              VARCHAR(10)                        NOT NULL,
-    email             VARCHAR(40) UNIQUE                 NOT NULL, -- 소셜 로그인 시 member_id와 email 같음
+    login_id          VARCHAR(40) UNIQUE      NOT NULL,   -- 정책 확인 후 VARCHAR 크기 재조정
+    password          VARCHAR(40),                        -- 소셜 로그인 시 NULL
+    name              VARCHAR(10)             NOT NULL,
+    email             VARCHAR(40) UNIQUE      NOT NULL,   -- 소셜 로그인 시 member_id와 email 같음
     role              ENUM ('ROLE_MEMBER', 'ROLE_ADMIN') DEFAULT 'ROLE_MEMBER',
     creation_time     DATETIME                           DEFAULT NOW(),
-    nickname          VARCHAR(20)                        NOT NULL, -- 닉네임 최대 8자인데 2자 에누리
+    nickname          VARCHAR(20)             NOT NULL,   -- 닉네임 최대 8자인데 2자 에누리
     profile_url       VARCHAR(255),
-    cd1               CHAR(2)                            NOT NULL,
-    cd2               CHAR(3)                            NOT NULL,
-    cd3               CHAR(3)                            NOT NULL,
-    birth_date        DATE                               NOT NULL,
-    gender            ENUM ('MALE', 'FEMALE')            NOT NULL, -- 추후 정책에 따라 Gender 추가 가능
-    introduction      TEXT                               NOT NULL, -- 추후 재조정
-    fitness_level     ENUM ('ADVANCED', 'BEGINNER')      NOT NULL,
-    companion_style   ENUM ('SMALL', 'GROUP')            NOT NULL,
-    fitness_eagerness ENUM ('EAGER', 'LAZY')             NOT NULL,
-    fitness_objective ENUM ('BULK_UP', 'RUNNING')        NOT NULL, -- 추후 ENUM 값 수정
-    fitness_kind      ENUM ('HIGH_STRESS', 'FUNCTIONAL') NOT NULL, -- 추후 ENUM 값 수정
+    cd1               CHAR(2)                 NOT NULL,
+    cd2               CHAR(3)                 NOT NULL,
+    cd3               CHAR(3)                 NOT NULL,
+    birth_date        DATE                    NOT NULL,
+    gender            ENUM ('MALE', 'FEMALE') NOT NULL,   -- 추후 정책에 따라 Gender 추가 가능
+    introduction      TEXT                    NOT NULL,   -- 추후 재조정
+    fitness_level     ENUM ('ADVANCED', 'BEGINNER'),
+    companion_style   ENUM ('SMALL', 'GROUP'),
+    fitness_eagerness ENUM ('EAGER', 'LAZY'),
+    fitness_objective ENUM ('BULK_UP', 'RUNNING'),        -- 추후 ENUM 값 수정
+    fitness_kind      ENUM ('HIGH_STRESS', 'FUNCTIONAL'), -- 추후 ENUM 값 수정
     review_score      DOUBLE                             DEFAULT 0.0,
     matched_count     BIGINT                             DEFAULT 0,
     is_deleted        BOOLEAN                            DEFAULT FALSE
