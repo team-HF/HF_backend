@@ -1,4 +1,6 @@
-package com.hf.healthfriend.global.util.file;
+package com.hf.healthfriend.global.file;
+
+import com.hf.healthfriend.global.file.image.ImageExtension;
 
 /**
  * 파일의 정확한 위치를 나타내는 URL을 생성해 주는 interface.
@@ -19,9 +21,25 @@ public interface FileUrlResolver {
     String generateFilePath(String filename, String... paths);
 
     /**
+     * UUID로 파일명을 생성하고, 파일명을 통해 저장할 파일의 경로를 생성해 주는 메소드
+     * @param paths 저장할 파일의 경로
+     * @return 파일이 저장될 경로 + 파일명 e.g. /image/my-profile.jpg
+     */
+    String generateFilePathWithUuid(ImageExtension extension, String... paths);
+
+    /**
      * filePath로부터 웹에서 접근할 수 있는 URL을 생성해 준다.
      * @param filePath 파일이 저장된 경로. "/"으로 시작해야 하며 파일명까지 붙여줘야 한다. e.g. /image/my-profile.jpg
      * @return 파일에 접근할 수 있는 URL 경로
      */
     String resolveFileUrl(String filePath);
+
+    /**
+     * 파일을 업로드할 URL을 생성하는 메소드.
+     * AWS S3를 사용할 경우, Presigned URL을 반환한다.
+     * @param filename 업로드할 파일의 이름.
+     * @param paths 저장할 파일의 경로
+     * @return 업로드할 파일의 URL
+     */
+    String generateUploadUrl(String filename, String... paths);
 }

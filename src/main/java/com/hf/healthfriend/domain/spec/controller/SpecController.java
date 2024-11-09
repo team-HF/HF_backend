@@ -29,6 +29,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/hf")
+@Deprecated
 public class SpecController {
     private final SpecService specService;
 

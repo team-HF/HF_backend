@@ -8,6 +8,9 @@ import com.hf.healthfriend.domain.follow.entity.QFollow;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
+import com.hf.healthfriend.domain.member.entity.Member;
+import com.hf.healthfriend.domain.member.entity.QMember;
+import com.hf.healthfriend.domain.spec.entity.QSpec;
 import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
 import com.hf.healthfriend.domain.member.entity.QMember;
 import com.hf.healthfriend.domain.wish.entity.QWish;
@@ -25,12 +28,14 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 @Repository
 @RequiredArgsConstructor
 public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     private final QMember member = QMember.member;
+    private final QSpec spec = QSpec.spec;
     private final QFollow follow = QFollow.follow;
     private final QWish wish = QWish.wish;
     private final JPAQueryFactory queryFactory;
@@ -145,6 +150,15 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
         if (items != null)
             for (T item : items)
                 fitnessTypeList.add(item.name());
+    }
+
+    @Override
+    public Optional<Member> findByMemberId(Long memberId) {
+        Member findMember = this.queryFactory.selectFrom(this.member)
+                .fetchJoin().on(this.spec.member.id.eq(this.member.id))
+                .where(this.spec.isDeleted.isFalse(), this.member.id.eq(memberId), this.member.isDeleted.isFalse())
+                .fetchOne();
+        return Optional.ofNullable(findMember);
     }
 
     public BooleanBuilder searchFilter(String keyword) {
