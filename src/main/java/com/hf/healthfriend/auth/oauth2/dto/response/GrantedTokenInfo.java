@@ -15,5 +15,6 @@ public class GrantedTokenInfo {
     private final String refreshToken;
     private final LocalDateTime expirationTime;
     private final String email;
+    private final String name;
     private final AuthServer authServer;
 }

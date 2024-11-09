@@ -60,14 +60,18 @@ public class RestTemplateKakaoTokenSupport implements KakaoOAuth2TokenSupport {
 
         JSONObject responseBody =
                 new JSONObject(responseEntity.getBody());
+        log.trace("Response\n{}", responseBody);
 
         String accessToken = responseBody.getString("access_token");
+
+        JSONObject kakaoUserInfoAsJson = fetchKakaoUserInfoAsJson(accessToken);
 
         return new GrantedTokenInfo(
                 accessToken,
                 responseBody.getString("refresh_token"),
                 recordNow.plus(responseBody.getInt("expires_in"), ChronoUnit.SECONDS),
-                requestEmail(accessToken),
+                kakaoUserInfoAsJson.getString("email"),
+                kakaoUserInfoAsJson.getString("name"),
                 AuthServer.KAKAO
         );
     }
@@ -86,13 +90,17 @@ public class RestTemplateKakaoTokenSupport implements KakaoOAuth2TokenSupport {
 
     @Override
     public String requestEmail(String accessToken) {
+        JSONObject jsonObject = fetchKakaoUserInfoAsJson(accessToken);
+        return jsonObject.getString("email");
+    }
+
+    private JSONObject fetchKakaoUserInfoAsJson(String accessToken) {
         RequestEntity<String> requestEntity = RequestEntity.post(KAKAO_INFO_REQUEST_URL)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
-                .body("property_keys=[\"kakao_account.email\"]");
+                .body("property_keys=[\"kakao_account.email\",\"kakao_account.name\"]");
         ResponseEntity<String> responseEntity = this.restTemplate.exchange(requestEntity, String.class);
-        JSONObject jsonObject = new JSONObject(responseEntity.getBody());
-        return jsonObject.getJSONObject("kakao_account").getString("email");
+        return new JSONObject(responseEntity.getBody()).getJSONObject("kakao_account");
     }
 
     @Override

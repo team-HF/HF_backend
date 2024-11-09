@@ -71,7 +71,9 @@ public class RestTemplateGoogleTokenSupport implements GoogleOAuth2TokenSupport 
             log.warn("Refresh Token 파싱 중 문제 발생", e);
         }
         int expiresIn = responseBody.getInt("expires_in");
-        String email = requestEmail(accessToken);
+        JSONObject userInfoAsJson = fetchGoogleUserInfoAsJson(accessToken);
+        String email = userInfoAsJson.getString("email");
+        String name = userInfoAsJson.getString("given_name");
 
         if (log.isTraceEnabled()) {
             log.trace("accessToken={}", accessToken);
@@ -84,6 +86,7 @@ public class RestTemplateGoogleTokenSupport implements GoogleOAuth2TokenSupport 
                 refreshToken,
                 recordNow.plus(expiresIn, ChronoUnit.SECONDS), // TODO: 시간 단위가 뭔지 알아내야 함
                 email,
+                name,
                 AuthServer.GOOGLE
         );
     }
@@ -106,6 +109,11 @@ public class RestTemplateGoogleTokenSupport implements GoogleOAuth2TokenSupport 
 
     @Override
     public String requestEmail(String accessToken) {
+        JSONObject responseBody = fetchGoogleUserInfoAsJson(accessToken);
+        return responseBody.getString("email");
+    }
+
+    private JSONObject fetchGoogleUserInfoAsJson(String accessToken) {
         RequestEntity<Void> requestEntity = RequestEntity.get(GOOGLE_USER_INFO_URL)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                 .build();
@@ -115,8 +123,7 @@ public class RestTemplateGoogleTokenSupport implements GoogleOAuth2TokenSupport 
             log.trace("Full response body for request user info (for email)");
             System.out.println(responseBody);
         }
-
-        return responseBody.getString("email");
+        return responseBody;
     }
 
     private static final String GOOGLE_TOKEN_VALIDATION_URL = "https://www.googleapis.com/oauth2/v1/tokeninfo";
