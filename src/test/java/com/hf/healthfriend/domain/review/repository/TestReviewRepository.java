@@ -4,7 +4,7 @@ import com.hf.healthfriend.domain.matching.entity.Matching;
 import com.hf.healthfriend.domain.matching.repository.MatchingRepository;
 import com.hf.healthfriend.domain.member.constant.FitnessLevel;
 import com.hf.healthfriend.domain.member.entity.Member;
-import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
+import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.review.constants.EvaluationType;
 import com.hf.healthfriend.domain.review.entity.Review;
 import com.hf.healthfriend.domain.review.entity.ReviewEvaluation;
@@ -43,7 +43,7 @@ class TestReviewRepository {
     ReviewRepository reviewRepository;
 
     @Autowired
-    MemberJpaRepository memberRepository;
+    MemberRepository memberRepository;
 
     @Autowired
     MatchingRepository matchingRepository;

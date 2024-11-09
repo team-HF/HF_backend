@@ -13,7 +13,6 @@ import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.DuplicateMemberCreationException;
 import com.hf.healthfriend.domain.member.exception.FitnessLevelUpdateException;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
-import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
 import com.hf.healthfriend.domain.member.repository.dto.ProfileQueryResultDto;
@@ -40,7 +39,6 @@ import java.util.List;
 @Transactional
 public class MemberService {
     private final MemberRepository memberRepository;
-    private final MemberJpaRepository memberJpaRepository;
     private final SpecService specService;
     private final FileUrlResolver fileUrlResolver;
     private final BeanMapper beanMapper;
@@ -89,7 +87,7 @@ public class MemberService {
     }
 
     public MemberDto findMember(Long memberId) throws MemberNotFoundException {
-        Member findMember = this.memberJpaRepository.findByMemberId(memberId)
+        Member findMember = this.memberRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
         return buildDto(findMember);
     }
@@ -148,7 +146,7 @@ public class MemberService {
 
     public List<MemberRecommendResponse> recommendMember(MembersRecommendRequest request, int pageNumber){
         Pageable pageable = PageRequest.of(pageNumber - 1, 6);
-        return memberJpaRepository.recommendMembers(request, pageable);
+        return memberRepository.recommendMembers(request, pageable);
     }
 
     private MemberDto buildDto(Member member) {
@@ -162,7 +160,7 @@ public class MemberService {
 
     public List<MemberSearchResponse> searchMembers(String keyword, int pageNumber, int size){
         Pageable pageable = PageRequest.of(pageNumber - 1, size);
-        return memberJpaRepository.searchMembers(keyword, pageable);
+        return memberRepository.searchMembers(keyword, pageable);
     }
 
     /**
@@ -173,7 +171,7 @@ public class MemberService {
      * @return 프로필 정보가 담긴 DTO
      */
     public ProfileResponseDto getProfileOfMember(Long memberId) {
-        ProfileQueryResultDto profileResult = this.memberJpaRepository.findProfileByMemberId(memberId)
+        ProfileQueryResultDto profileResult = this.memberRepository.findProfileByMemberId(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
         RevieweeResponseDto reviewDto = this.reviewService.getRevieweeInfo(memberId);
 

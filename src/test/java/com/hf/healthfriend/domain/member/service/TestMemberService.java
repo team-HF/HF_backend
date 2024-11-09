@@ -11,7 +11,7 @@ import com.hf.healthfriend.domain.member.dto.response.ProfileResponseDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.FitnessLevelUpdateException;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
-import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
+import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.review.constants.EvaluationType;
 import com.hf.healthfriend.domain.review.entity.Review;
 import com.hf.healthfriend.domain.review.entity.ReviewEvaluation;
@@ -59,7 +59,7 @@ class TestMemberService {
     private MemberService memberService;
 
     @Autowired
-    private MemberJpaRepository memberJpaRepository;
+    private MemberRepository memberRepository;
 
     @Autowired
     private ReviewRepository reviewRepository;
@@ -121,7 +121,7 @@ class TestMemberService {
 
         assertThat(responseDto.getSpecIds()).size().isNotZero();
 
-        Member member = this.memberJpaRepository.findByEmail("sample@gmail.com").orElseThrow();
+        Member member = this.memberRepository.findByEmail("sample@gmail.com").orElseThrow();
 
         log.info("Member from repository={}", member);
 
@@ -343,7 +343,7 @@ class TestMemberService {
     @ParameterizedTest
     void updateMember_success(MemberUpdateRequestDto updateDto) {
         Member sampleMember = SampleEntityGenerator.generateSampleMember("sample@gmail.com");
-        this.memberJpaRepository.save(sampleMember);
+        this.memberRepository.save(sampleMember);
 
         Map<String, Object> updateValueMap = Arrays.stream(MemberUpdateRequestDto.class.getDeclaredMethods())
                 .filter((m) -> m.getName().startsWith("get"))
@@ -406,7 +406,7 @@ class TestMemberService {
     void updateMember_updateFitnessLevelNotAllowed_FitnessLevelUpdateException() {
         Member sampleMember = SampleEntityGenerator.generateSampleMember("sample@gmail.com");
         sampleMember.setFitnessLevel(FitnessLevel.ADVANCED);
-        this.memberJpaRepository.save(sampleMember);
+        this.memberRepository.save(sampleMember);
 
         MemberUpdateRequestDto updateDto = MemberUpdateRequestDto.builder()
                 .fitnessLevel(FitnessLevel.BEGINNER)
@@ -436,9 +436,9 @@ class TestMemberService {
         Spec spec2 = SampleEntityGenerator.generateSampleSpec(dummyMember1);
         dummyMember1.addSpec(spec1);
         dummyMember1.addSpec(spec2);
-        this.memberJpaRepository.save(dummyMember1);
-        this.memberJpaRepository.save(dummyMember2);
-        this.memberJpaRepository.save(dummyMember3);
+        this.memberRepository.save(dummyMember1);
+        this.memberRepository.save(dummyMember2);
+        this.memberRepository.save(dummyMember3);
 
         Matching matching1 = new Matching(dummyMember1, dummyMember2, "a", "a", LocalDateTime.now().plusDays(1));
         Matching matching2 = new Matching(dummyMember1, dummyMember3, "a", "a", LocalDateTime.now().plusDays(2));

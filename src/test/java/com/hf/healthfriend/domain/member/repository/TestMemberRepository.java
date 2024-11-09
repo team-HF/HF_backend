@@ -24,16 +24,16 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(TestConfig.class)
-public class TestMemberJpaRepository {
+class TestMemberRepository {
 
     @Autowired
-    MemberJpaRepository memberJpaRepository;
+    MemberRepository memberRepository;
 
     @DisplayName("save - 기본값만 가지고 제대로 Save 되는지 확인")
     @Test
     void save() {
         Member member = SampleEntityGenerator.generateSampleMember("sample@gmail.com");
-        assertThatNoException().isThrownBy(() -> this.memberJpaRepository.save(member));
+        assertThatNoException().isThrownBy(() -> this.memberRepository.save(member));
     }
 
     @DisplayName("findById - 성공 예상")
@@ -42,9 +42,9 @@ public class TestMemberJpaRepository {
         String loginId = "sample@gmail.com";
 
         Member member = SampleEntityGenerator.generateSampleMember(loginId);
-        this.memberJpaRepository.save(member);
+        this.memberRepository.save(member);
 
-        Member findMember = this.memberJpaRepository.findByLoginId(loginId).orElseThrow(NoSuchElementException::new);
+        Member findMember = this.memberRepository.findByLoginId(loginId).orElseThrow(NoSuchElementException::new);
 
         log.info("findMember={}", findMember);
 
@@ -59,9 +59,9 @@ public class TestMemberJpaRepository {
         String loginId = "sample-member";
 
         Member member = SampleEntityGenerator.generateSampleMember(loginId);
-        this.memberJpaRepository.save(member);
+        this.memberRepository.save(member);
 
-        Optional<Member> findMemberOp = this.memberJpaRepository.findByLoginId(loginId + "SUFFIX");
+        Optional<Member> findMemberOp = this.memberRepository.findByLoginId(loginId + "SUFFIX");
 
         assertThat(findMemberOp).isEmpty();
     }
@@ -78,11 +78,11 @@ public class TestMemberJpaRepository {
         Member dummyMember2 = SampleEntityGenerator.generateSampleMember("member2@sample.com", "sample");
         Spec irrelevantSpec = SampleEntityGenerator.generateSampleSpec(dummyMember2);
         dummyMember2.addSpec(irrelevantSpec);
-        this.memberJpaRepository.save(dummyMember1);
-        this.memberJpaRepository.save(dummyMember2);
+        this.memberRepository.save(dummyMember1);
+        this.memberRepository.save(dummyMember2);
 
         // When
-        Optional<ProfileQueryResultDto> findProfileOp = this.memberJpaRepository.findProfileByMemberId(dummyMember1.getId());
+        Optional<ProfileQueryResultDto> findProfileOp = this.memberRepository.findProfileByMemberId(dummyMember1.getId());
 
         log.info("result.memberId={}, result.introduction={}", findProfileOp.get().memberId(), findProfileOp.get().introduction());
         for (SpecDto specDto : findProfileOp.get().specs()) {

@@ -36,7 +36,7 @@ public class MemberCustomRepositoryImlTest {
     private MemberCustomRepositoryImpl memberCustomRepository;
 
     @Autowired
-    private MemberJpaRepository memberRepository;
+    private MemberRepository memberRepository;
 
     @Autowired
     private FollowRepository followRepository;

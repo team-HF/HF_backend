@@ -2,7 +2,7 @@ package com.hf.healthfriend.domain.post;
 
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.entity.Member;
-import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
+import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.post.constant.PostCategory;
 import com.hf.healthfriend.domain.post.dto.response.PostListObject;
 import com.hf.healthfriend.domain.post.entity.Post;
@@ -21,8 +21,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,7 +34,7 @@ class PostFilteringTest {
     private PostRepository postRepository;
 
     @Autowired
-    private MemberJpaRepository memberRepository;
+    private MemberRepository memberRepository;
 
     @Autowired
     private TestEntityManager entityManager;

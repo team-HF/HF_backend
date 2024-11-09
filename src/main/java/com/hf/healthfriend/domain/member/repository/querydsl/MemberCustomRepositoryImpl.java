@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.member.repository.querydsl;
 
+import static com.querydsl.core.types.ExpressionUtils.count;
 
 import com.hf.healthfriend.domain.follow.entity.QFollow;
 import com.hf.healthfriend.domain.member.constant.MemberSortType;
@@ -9,11 +10,15 @@ import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.entity.QMember;
 import com.hf.healthfriend.domain.spec.entity.QSpec;
 import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
+import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.entity.QMember;
+import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
+import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
 import com.hf.healthfriend.domain.member.repository.dto.ProfileQueryResultDto;
 import com.hf.healthfriend.domain.spec.dto.SpecDto;
 import com.hf.healthfriend.domain.spec.entity.QSpec;
 import com.hf.healthfriend.domain.wish.entity.QWish;
+import com.hf.healthfriend.global.util.mapping.BeanMapper;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.types.ExpressionUtils;
@@ -23,6 +28,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -44,6 +50,8 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     private final QFollow follow = QFollow.follow;
     private final QWish wish = QWish.wish;
     private final JPAQueryFactory queryFactory;
+    private final EntityManager em;
+    private final BeanMapper beanMapper;
 
     @Override
     public List<MemberRecommendResponse> recommendMembers(MembersRecommendRequest request, Pageable pageable) {
@@ -173,6 +181,17 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     }
 
     @Override
+    public Member update(Long memberId, MemberUpdateDto updateDto) {
+        Member member = this.em.find(Member.class, memberId);
+        if (member == null) {
+            throw new MemberNotFoundException(memberId);
+        }
+
+        this.beanMapper.copyProperties(updateDto, member);
+
+        return member;
+    }
+
     public Optional<ProfileQueryResultDto> findProfileByMemberId(Long memberId) {
         List<ProfileQueryResultDto> result = this.queryFactory.selectFrom(this.member)
                 .leftJoin(this.spec).on(this.spec.member.eq(this.member))
