@@ -15,7 +15,7 @@ import com.hf.healthfriend.domain.review.dto.response.RevieweeResponseDto;
 import com.hf.healthfriend.domain.review.entity.Review;
 import com.hf.healthfriend.domain.review.entity.ReviewEvaluation;
 import com.hf.healthfriend.domain.review.repository.ReviewRepository;
-import com.hf.healthfriend.domain.review.repository.dto.RevieweeStatisticsMapping;
+import com.hf.healthfriend.domain.review.repository.dto.RevieweeStatisticsQueryResultDto;
 import com.hf.healthfriend.testutil.SampleEntityGenerator;
 import jakarta.persistence.Id;
 import lombok.extern.slf4j.Slf4j;
@@ -184,21 +184,19 @@ class TestReviewService {
         when(this.memberRepository.existsById(reviewee.getId())).thenReturn(true);
         when(this.reviewRepository.getRevieweeStatistics(reviewee.getId()))
                 .thenReturn(List.of(
-                        new RevieweeStatisticsMapping(
+                        new RevieweeStatisticsQueryResultDto(
                                 EvaluationType.GOOD, 1, 2L
                         ),
-                        new RevieweeStatisticsMapping(
+                        new RevieweeStatisticsQueryResultDto(
                                 EvaluationType.GOOD, 2, 1L
                         ),
-                        new RevieweeStatisticsMapping(
+                        new RevieweeStatisticsQueryResultDto(
                                 EvaluationType.GOOD, 1, 2L
                         ),
-                        new RevieweeStatisticsMapping(
+                        new RevieweeStatisticsQueryResultDto(
                                 EvaluationType.GOOD, 2, 1L
                         )
                 ));
-        when(this.reviewRepository.calculateAverageScoreByRevieweeId(reviewee.getId()))
-                .thenReturn(3.5);
 
         Map<EvaluationType, Map<Integer, Long>> expectedMap = Map.of(
                 EvaluationType.GOOD,
@@ -219,7 +217,6 @@ class TestReviewService {
         // Then
         log.info("result={}", result);
 
-        assertThat(result.averageScore()).isEqualTo(3.5);
         assertThat(result.memberId()).isEqualTo(reviewee.getId());
         result.reviewDetails().forEach((re) -> {
             assertThat(re.totalCountPerEvaluationType()).isEqualTo(3L);

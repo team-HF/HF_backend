@@ -2,7 +2,7 @@ package com.hf.healthfriend.domain.review.repository.querydsl;
 
 import com.hf.healthfriend.domain.review.entity.QReview;
 import com.hf.healthfriend.domain.review.entity.QReviewEvaluation;
-import com.hf.healthfriend.domain.review.repository.dto.RevieweeStatisticsMapping;
+import com.hf.healthfriend.domain.review.repository.dto.RevieweeStatisticsQueryResultDto;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -29,22 +29,6 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
             new OrderSpecifier<>(Order.ASC, this.reviewEvaluation.evaluationType);
 
     @Override
-    public List<RevieweeStatisticsMapping> getRevieweeStatistics(Long revieweeId) {
-        return this.queryFactory.select(
-                        Projections.constructor(RevieweeStatisticsMapping.class,
-                                this.reviewEvaluation.evaluationType,
-                                this.reviewEvaluation.evaluationDetailId,
-                                this.reviewEvaluation.reviewEvaluationId.count()
-                                        .as(EVALUATION_DETAIL_COUNT_ALIAS)))
-                .from(this.reviewEvaluation)
-                .innerJoin(this.review).on(this.reviewEvaluation.review.eq(this.review))
-                .where(this.review.reviewee.id.eq(revieweeId))
-                .groupBy(this.reviewEvaluation.evaluationType, this.reviewEvaluation.evaluationDetailId)
-                .orderBy(EVALUATION_DETAIL_COUNT_ALIAS.desc(), this.orderByEvaluationType)
-                .fetch();
-    }
-
-    @Override
     public double calculateAverageScoreByRevieweeId(Long revieweeId) {
         Double result = this.queryFactory.select(
                         this.review.score.avg())
@@ -66,5 +50,26 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
                 .where(builder)
                 .fetchFirst();
         return fetchOne != null;
+    }
+
+    private final NumberPath<Long> evaluationCountAlias =
+            Expressions.numberPath(Long.class, "evaluationDetailCount");
+
+    @Override
+    public List<RevieweeStatisticsQueryResultDto> getRevieweeStatistics(Long revieweeId) {
+        return this.queryFactory.select(
+                        Projections.constructor(
+                                RevieweeStatisticsQueryResultDto.class,
+                                this.reviewEvaluation.evaluationType,
+                                this.reviewEvaluation.evaluationDetailId,
+                                this.reviewEvaluation.count().as(this.evaluationCountAlias)
+                        )
+                )
+                .from(this.reviewEvaluation)
+                .innerJoin(this.review).on(this.review.eq(this.reviewEvaluation.review))
+                .where(this.review.reviewee.id.eq(revieweeId))
+                .groupBy(this.reviewEvaluation.evaluationType, this.reviewEvaluation.evaluationDetailId)
+                .orderBy(this.reviewEvaluation.evaluationType.asc(), this.evaluationCountAlias.desc())
+                .fetch();
     }
 }

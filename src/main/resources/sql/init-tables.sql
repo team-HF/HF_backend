@@ -13,10 +13,7 @@ BEGIN
     DECLARE done INT DEFAULT FALSE;
     DECLARE tname VARCHAR(64);
 
-    DECLARE table_cur CURSOR FOR SELECT
-                                     table_name
-                                 FROM information_schema.tables
-                                 WHERE table_schema = 'hf';
+    DECLARE table_cur CURSOR FOR SELECT table_name FROM information_schema.tables WHERE table_schema = 'hf';
 
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
     OPEN table_cur;
@@ -69,6 +66,7 @@ CREATE TABLE members
     fitness_objective ENUM ('BULK_UP', 'RUNNING')        NOT NULL, -- 추후 ENUM 값 수정
     fitness_kind      ENUM ('HIGH_STRESS', 'FUNCTIONAL') NOT NULL, -- 추후 ENUM 값 수정
     review_score      DOUBLE                             DEFAULT 0.0,
+    matched_count     BIGINT                             DEFAULT 0,
     is_deleted        BOOLEAN                            DEFAULT FALSE
 );
 

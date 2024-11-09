@@ -73,7 +73,10 @@ public class MemberExceptionHandlerControllerAdvice {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<BasicErrorResponse> validationException(MethodArgumentNotValidException e) {
-        log.error("ValidationException occurred", e);
+        log.info("ValidationException occurred", e);
+        if (log.isDebugEnabled()) {
+            log.debug("{}", e.getBindingResult());
+        }
         return new ResponseEntity<>(
                 BasicErrorResponse.builder()
                         .errorCode(MemberErrorCode.MEMBER_CREATION_VALIDATION_ERROR.code())
