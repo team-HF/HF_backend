@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.util.Objects;
+
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @ToString
@@ -30,5 +32,18 @@ public class Tier {
             tier++;
         }
         return new Tier(fitnessLevel, TIER_MILESTONE.length + 1);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Tier tier1 = (Tier) o;
+        return fitnessLevel == tier1.fitnessLevel && Objects.equals(tier, tier1.tier);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fitnessLevel, tier);
     }
 }

@@ -137,7 +137,7 @@ public class Member implements UserDetails {
     private Double reviewScore = 0.0;
 
     @Column(name = "matched_count")
-    private Long matchedCount;
+    private Long matchedCount = 0L;
 
     public Member(long memberId) {
         this.id = memberId;

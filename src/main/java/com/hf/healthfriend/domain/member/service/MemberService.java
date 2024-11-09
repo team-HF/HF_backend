@@ -89,7 +89,7 @@ public class MemberService {
     public MemberDto findMember(Long memberId) throws MemberNotFoundException {
         Member findMember = this.memberRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
-        return buildDto(findMember);
+        return MemberDto.of(findMember);
     }
 
     public MemberDto findMemberByLoginId(String loginId) throws MemberNotFoundException {
@@ -100,7 +100,7 @@ public class MemberService {
     public MemberDto findMemberByEmail(String email) throws MemberNotFoundException {
         Member findMember = this.memberRepository.findByEmail(email)
                 .orElseThrow(() -> new MemberNotFoundException(email));
-        return buildDto(findMember);
+        return MemberDto.of(findMember);
     }
 
     public MemberUpdateResponseDto updateMember(Long memberId, MemberUpdateRequestDto requestDto) throws MemberNotFoundException {
@@ -147,15 +147,6 @@ public class MemberService {
     public List<MemberRecommendResponse> recommendMember(MembersRecommendRequest request, int pageNumber){
         Pageable pageable = PageRequest.of(pageNumber - 1, 6);
         return memberRepository.recommendMembers(request, pageable);
-    }
-
-    private MemberDto buildDto(Member member) {
-        MemberDto memberDto = this.beanMapper.generateBean(member, MemberDto.class);
-        List<SpecDto> specsOfMember = this.specService.getSpecsOfMember(member.getId());
-        return memberDto.toBuilder()
-                .profileImageUrl(this.fileUrlResolver.resolveFileUrl(member.getProfileImageUrl()))
-                .specs(specsOfMember)
-                .build();
     }
 
     public List<MemberSearchResponse> searchMembers(String keyword, int pageNumber, int size){
