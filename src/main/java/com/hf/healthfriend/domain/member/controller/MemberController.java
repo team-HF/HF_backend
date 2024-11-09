@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -44,16 +45,95 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
-            summary = "회원 생성"
+            summary = "회원 생성",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(
+                            schema = @Schema(implementation = MemberCreationRequestDto.class),
+                            examples = @ExampleObject("""
+                                    {
+                                        "id": "new@gmail.com",
+                                        "name": "김샘플",
+                                        "nickname": "새로운인간",
+                                        "profileImageFileExtension": "jpg",
+                                        "birthDate": "1997-09-16",
+                                        "gender": "MALE",
+                                        "cd1": "01",
+                                        "cd2": "110",
+                                        "cd3": "112",
+                                        "introduction": "안녕하세요",
+                                        "fitnessLevel": "BEGINNER",
+                                        "companionStyle": "GROUP",
+                                        "fitnessEagerness": "EAGER",
+                                        "fitnessObjective": "BULK_UP",
+                                        "fitnessKind": "FUNCTIONAL",
+                                        "specs": [
+                                            {
+                                                "startDate": "2017-11-23",
+                                                "endDate": "2018-11-12",
+                                                "isCurrent": false,
+                                                "title": "경력1",
+                                                "description": "종료된 경력"
+                                            },
+                                            {
+                                                "startDate": "2024-08-24",
+                                                "endDate": null,
+                                                "isCurrent": true,
+                                                "title": "경력2",
+                                                "description": "현재 진행 중인 경력"
+                                            },
+                                            {
+                                                "startDate": "2020-11-23",
+                                                "endDate": null,
+                                                "isCurrent": false,
+                                                "title": "수상1",
+                                                "description": ""
+                                            }
+                                        ]
+                                    }
+                                    """)
+                    )
+            )
     )
     @ApiResponses({
             @ApiResponse(
                     description = "회원 생성 성공",
                     responseCode = "201",
                     headers = @Header(name = "Location", description = "생성된 회원의 리소스 경로"),
-                    content = @Content(schema = @Schema(implementation = MemberCreationResponseSchema.class))
+                    content = @Content(
+                            schema = @Schema(implementation = MemberCreationResponseSchema.class),
+                            examples = @ExampleObject("""
+                                    {
+                                        "statusCode": 201,
+                                        "statusCodeSeries": 2,
+                                        "message": null,
+                                        "content": {
+                                            "memberId": 1000,
+                                            "loginId": "new@gmail.com",
+                                            "email": "new@gmail.com",
+                                            "role": "ROLE_MEMBER",
+                                            "creationTime": "2024-10-29T15:08:06.022Z",
+                                            "nickname": "새로운인간",
+                                            "birthDate": "1997-09-16",
+                                            "gender": "MALE",
+                                            "introduction": "안녕하세요",
+                                            "profileImageUploadUrl": "http://hf-aws-bucket.s3.aws.amazon.com?accessKey=acc#!$",
+                                            "fitnessLevel": "ADVANCED",
+                                            "companionStyle": "SMALL",
+                                            "fitnessEagerness": "EAGER",
+                                            "fitnessObjective": "BULK_UP",
+                                            "fitnessKind": "HIGH_STRESS",
+                                            "specIds": [
+                                                10000,
+                                                10001,
+                                                10002
+                                            ]
+                                        }
+                                    }
+                                    """)
+                    )
             ),
             @ApiResponse(
                     description = "회원 중복 등록 에러 / Error Code: 201",
@@ -90,7 +170,7 @@ public class MemberController {
             )
     })
     public ResponseEntity<ApiBasicResponse<MemberCreationResponseDto>> createMember(
-            @ModelAttribute @Valid MemberCreationRequestDto requestBody) throws URISyntaxException {
+            @RequestBody @Valid MemberCreationRequestDto requestBody) throws URISyntaxException {
         log.info("Request Body:\n{}", requestBody);
 
         MemberCreationResponseDto result = this.memberService.createMember(requestBody);
@@ -128,9 +208,55 @@ public class MemberController {
         return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.findMember(memberId), HttpStatus.OK));
     }
 
-    @PatchMapping(value = "/{memberId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = "application/json")
+    @PatchMapping(value = "/{memberId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = "application/json")
     @Operation(
-            summary = "회원 업데이트"
+            summary = "회원 업데이트",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(
+                            schema = @Schema(implementation = MemberUpdateRequestDto.class),
+                            examples = @ExampleObject("""
+                                    {
+                                        "cd1": "10",
+                                        "cd2": "111",
+                                        "cd3": "123",
+                                        "introduction": "수정된 소개",
+                                        "fitnessLevel": "EAGER",
+                                        "companionStyle": "GROUP",
+                                        "fitnessEagerness": "EAGER",
+                                        "fitnessObjective": "BULK_UP",
+                                        "fitnessKind": "FUNCTIONAL",
+                                        "profileImageFileExtension": null,
+                                        "specUpdate": [
+                                            {
+                                                "specUpdateType": "INSERT",
+                                                "spec": {
+                                                    "startDate": "2020-10-21",
+                                                    "endDate": "2022-10-21",
+                                                    "title": "새 스펙",
+                                                    "description": "스펙",
+                                                    "isCurrent": false
+                                                }
+                                            },
+                                            {
+                                                "specUpdateType": "UPDATE",
+                                                "specId": 100,
+                                                "spec": {
+                                                    "startDate": "2020-10-21",
+                                                    "endDate": "2022-10-21",
+                                                    "title": "스포애니 전문 트레이너",
+                                                    "description": "원래는 에이블짐 트레이너였음",
+                                                    "isCurrent": false
+                                                }
+                                            },
+                                            {
+                                                "specUpdateType": "DELETE",
+                                                "specId": 101
+                                            }
+                                        ]
+                                    }
+                                    """)
+                    )
+            )
     )
     @ApiResponses({
             @ApiResponse(
@@ -156,7 +282,7 @@ public class MemberController {
             )
     })
     public ResponseEntity<ApiBasicResponse<MemberUpdateResponseDto>> updateMember(@PathVariable("memberId") Long memberId,
-                                                                                  @ModelAttribute MemberUpdateRequestDto dto) {
+                                                                                  @RequestBody @Valid MemberUpdateRequestDto dto) {
         MemberUpdateResponseDto resultDto = this.memberService.updateMember(memberId, dto);
         return ResponseEntity.ok(ApiBasicResponse.of(resultDto, HttpStatus.OK));
     }

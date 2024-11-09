@@ -10,32 +10,32 @@ import java.util.List;
 import java.util.Map;
 
 public class SingleAuthorityOAuth2Principal implements OAuth2AuthenticatedPrincipal {
-    private final String name;
+    private final String principal;
     private final Map<String, Object> attributes;
     private final List<GrantedAuthority> authority;
 
-    public SingleAuthorityOAuth2Principal(String name, String authority) {
-        this(name, new SimpleGrantedAuthority(authority));
+    public SingleAuthorityOAuth2Principal(String principal, String authority) {
+        this(principal, new SimpleGrantedAuthority(authority));
     }
 
-    public SingleAuthorityOAuth2Principal(String name, Role role) {
-        this(name, role.name());
+    public SingleAuthorityOAuth2Principal(String principal, Role role) {
+        this(principal, role.name());
     }
 
-    public SingleAuthorityOAuth2Principal(String name, GrantedAuthority authority) {
-        this(name, Map.of(), authority);
+    public SingleAuthorityOAuth2Principal(String principal, GrantedAuthority authority) {
+        this(principal, Map.of(), authority);
     }
 
-    public SingleAuthorityOAuth2Principal(String name, Map<String, Object> attributes, Role role) {
-        this(name, attributes, role.name());
+    public SingleAuthorityOAuth2Principal(String principal, Map<String, Object> attributes, Role role) {
+        this(principal, attributes, role.name());
     }
 
-    public SingleAuthorityOAuth2Principal(String name, Map<String, Object> attributes, String authority) {
-        this(name, attributes, new SimpleGrantedAuthority(authority));
+    public SingleAuthorityOAuth2Principal(String principal, Map<String, Object> attributes, String authority) {
+        this(principal, attributes, new SimpleGrantedAuthority(authority));
     }
 
-    public SingleAuthorityOAuth2Principal(String name, Map<String, Object> attributes, GrantedAuthority authority) {
-        this.name = name;
+    public SingleAuthorityOAuth2Principal(String principal, Map<String, Object> attributes, GrantedAuthority authority) {
+        this.principal = principal;
         this.attributes = attributes;
         this.authority = List.of(authority);
     }
@@ -52,6 +52,6 @@ public class SingleAuthorityOAuth2Principal implements OAuth2AuthenticatedPrinci
 
     @Override
     public String getName() {
-        return this.name;
+        return this.principal;
     }
 }
