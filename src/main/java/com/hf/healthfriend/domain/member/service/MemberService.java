@@ -20,8 +20,6 @@ import com.hf.healthfriend.domain.member.repository.dto.ProfileQueryResultDto;
 import com.hf.healthfriend.domain.review.dto.response.RevieweeResponseDto;
 import com.hf.healthfriend.domain.review.dto.response.SimpleReviewResponseDto;
 import com.hf.healthfriend.domain.review.service.ReviewService;
-import com.hf.healthfriend.global.util.file.FileUrlResolver;
-import com.hf.healthfriend.global.util.file.MultipartFileUploader;
 import com.hf.healthfriend.domain.spec.dto.SpecDto;
 import com.hf.healthfriend.domain.spec.service.SpecService;
 import com.hf.healthfriend.global.file.FileUrlResolver;

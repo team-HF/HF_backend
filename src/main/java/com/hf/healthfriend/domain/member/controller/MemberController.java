@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.member.controller;
 
+import com.hf.healthfriend.domain.member.controller.schema.ProfileResponseSchema;
 import com.hf.healthfriend.domain.member.dto.MemberDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
@@ -8,12 +9,15 @@ import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
 import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
 import com.hf.healthfriend.domain.member.dto.response.MemberUpdateResponseDto;
+import com.hf.healthfriend.domain.member.dto.response.ProfileResponseDto;
 import com.hf.healthfriend.domain.member.service.MemberService;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
 import com.hf.healthfriend.global.spec.ApiErrorResponse;
 import com.hf.healthfriend.global.spec.schema.MemberCreationResponseSchema;
 import com.hf.healthfriend.global.spec.schema.MemberResponseSchema;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -289,7 +293,119 @@ public class MemberController {
     })
     @GetMapping("/recommend")
     public ResponseEntity<ApiBasicResponse<List<MemberRecommendResponse>>> getRecommendMembers(MembersRecommendRequest request, int page) {
-        return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.recommendMember(request,page), HttpStatus.OK));
+        return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.recommendMember(request, page), HttpStatus.OK));
+    }
+
+    @GetMapping("/{memberId}/profile")
+    @Operation(
+            summary = "매칭을 위한 회원 프로필 조회",
+            parameters = @Parameter(
+                    name = "조회하고자 하는 회원의 프로필",
+                    required = true,
+                    examples = @ExampleObject("20000"),
+                    in = ParameterIn.PATH
+            ),
+            responses = {
+                    @ApiResponse(
+                            description = "경력은 startDate 기준 내림차순, 리뷰는 reviewDetailCount 기준 내림차순",
+                            responseCode = "200",
+                            content = @Content(
+                                    schema = @Schema(implementation = ProfileResponseSchema.class),
+                                    examples = @ExampleObject("""
+                                            {
+                                                "statusCode": 200,
+                                                "statusCodeSeries": 2,
+                                                "message": "회원 프로필 받아오기 성공",
+                                                "content": {
+                                                    "memberId": "20000",
+                                                    "introduction": "안녕하세요!",
+                                                    "specs": [
+                                                        {
+                                                            "specId": 1002,
+                                                            "startDate": "2022-03",
+                                                            "endDate": null,
+                                                            "isCurrent": true,
+                                                            "title": "스포애니 전문 트레이너",
+                                                            "description": "스포애니에서 현재까지 근무 중"
+                                                        },
+                                                        {
+                                                            "specId": 1001,
+                                                            "startDate": "2021-04",
+                                                            "endDate": null,
+                                                            "isCurrent": false,
+                                                            "title": "보디빌딩 대회 국방부장관상",
+                                                            "description": "수상 이력입니다. (endDate null, isCurrent false일 경우 수상 이력)"
+                                                        },
+                                                        {
+                                                            "specId": 1000,
+                                                            "startDate": "2019-03",
+                                                            "endDate": "2020-12",
+                                                            "isCurrent": false,
+                                                            "title": "15 전투비행단 체력단련실 지박령",
+                                                            "description": ""
+                                                        }
+                                                    ],
+                                                    "reviews": [
+                                                        {
+                                                            "evaluationType": "GOOD",
+                                                            "reviewDetailsPerEvaluationType": [
+                                                                {
+                                                                    "reviewDetailId": 1,
+                                                                    "reviewDetailCount": 12
+                                                                },
+                                                                {
+                                                                    "reviewDetailId": 2,
+                                                                    "reviewDetailCount": 9
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "evaluationType": "NOT_GOOD",
+                                                            "reviewDetailsPerEvaluationType": [
+                                                                {
+                                                                    "reviewDetailId": 3,
+                                                                    "reviewDetailCount": 8
+                                                                },
+                                                                {
+                                                                    "reviewDetailId": 1,
+                                                                    "reviewDetailCount": 5
+                                                                }
+                                                            ]
+                                                        }
+                                                    ],
+                                                    "averageReviewScore": 3.5
+                                                }
+                                            }
+                                            """)
+                            )
+                    ),
+                    @ApiResponse(
+                            description = "찾고자 하는 회원이 존재하지 않음",
+                            responseCode = "404",
+                            content = @Content(
+                                    schema = @Schema(implementation = ApiErrorResponse.class),
+                                    examples = @ExampleObject("""
+                                            {
+                                                "statusCode": 404,
+                                                "statusCodeSeries": 4,
+                                                "errorCode": 200,
+                                                "errorName": "MEMBER_OF_THE_MEMBER_ID_NOT_FOUND",
+                                                "message": "memberId에 해당하는 회원이 없습니다"
+                                            }
+                                            """)
+                            )
+                    )
+            }
+    )
+    public ResponseEntity<ApiBasicResponse<ProfileResponseDto>> getProfileOfMember(@PathVariable("memberId") Long memberId) {
+        ProfileResponseDto result = this.memberService.getProfileOfMember(memberId);
+        return ResponseEntity.ok(
+                ApiBasicResponse.of(
+                        result,
+                        HttpStatus.OK,
+                        "회원 프로필 받아오기 성공"
+                )
+        );
     }
 
     @Operation(summary = "프로필 검색 목록 조회", responses = {
