@@ -1,14 +1,12 @@
 package com.hf.healthfriend.domain.member.service;
 
+import com.hf.healthfriend.domain.member.constant.FitnessLevel;
+import com.hf.healthfriend.domain.member.domain.Tier;
 import com.hf.healthfriend.domain.member.dto.MemberDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
 import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
-import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
-import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
-import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
-import com.hf.healthfriend.domain.member.dto.response.MemberUpdateResponseDto;
-import com.hf.healthfriend.domain.member.dto.response.ProfileResponseDto;
+import com.hf.healthfriend.domain.member.dto.response.*;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.DuplicateMemberCreationException;
 import com.hf.healthfriend.domain.member.exception.FitnessLevelUpdateException;
@@ -19,7 +17,6 @@ import com.hf.healthfriend.domain.member.repository.dto.ProfileQueryResultDto;
 import com.hf.healthfriend.domain.review.dto.response.RevieweeResponseDto;
 import com.hf.healthfriend.domain.review.dto.response.SimpleReviewResponseDto;
 import com.hf.healthfriend.domain.review.service.ReviewService;
-import com.hf.healthfriend.domain.spec.dto.SpecDto;
 import com.hf.healthfriend.domain.spec.service.SpecService;
 import com.hf.healthfriend.global.file.FileUrlResolver;
 import com.hf.healthfriend.global.util.mapping.BeanMapper;
@@ -89,7 +86,7 @@ public class MemberService {
     public MemberDto findMember(Long memberId) throws MemberNotFoundException {
         Member findMember = this.memberRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
-        return buildDto(findMember);
+        return MemberDto.of(findMember);
     }
 
     public MemberDto findMemberByLoginId(String loginId) throws MemberNotFoundException {
@@ -100,7 +97,7 @@ public class MemberService {
     public MemberDto findMemberByEmail(String email) throws MemberNotFoundException {
         Member findMember = this.memberRepository.findByEmail(email)
                 .orElseThrow(() -> new MemberNotFoundException(email));
-        return buildDto(findMember);
+        return MemberDto.of(findMember);
     }
 
     public MemberUpdateResponseDto updateMember(Long memberId, MemberUpdateRequestDto requestDto) throws MemberNotFoundException {
@@ -135,12 +132,15 @@ public class MemberService {
         if (requestDto.getFitnessLevel() == null) {
             return;
         }
-        switch (requestDto.getFitnessLevel()) {
-            case ADVANCED -> {
-                // TODO: 매칭 횟수 10번 미만일 경우 validation 에러
+
+        if (requestDto.getFitnessLevel() == FitnessLevel.ADVANCED) {
+            Member member = this.memberRepository.findById(memberId)
+                    .orElseThrow(() -> new MemberNotFoundException(memberId));
+            Tier tier = member.getTier();
+            if (tier.getFitnessLevel() != FitnessLevel.BEGINNER
+                    || tier.getTier() == 5) {
+                throw new FitnessLevelUpdateException("새싹에서 고수로 변경할 때 새싹 레벨 5여야 합니다.");
             }
-            case BEGINNER ->
-                throw new FitnessLevelUpdateException("고수에서 새싹으로 변경 불가");
         }
     }
 
@@ -149,16 +149,7 @@ public class MemberService {
         return memberRepository.recommendMembers(request, pageable);
     }
 
-    private MemberDto buildDto(Member member) {
-        MemberDto memberDto = this.beanMapper.generateBean(member, MemberDto.class);
-        List<SpecDto> specsOfMember = this.specService.getSpecsOfMember(member.getId());
-        return memberDto.toBuilder()
-                .profileImageUrl(this.fileUrlResolver.resolveFileUrl(member.getProfileImageUrl()))
-                .specs(specsOfMember)
-                .build();
-    }
-
-    public List<MemberSearchResponse> searchMembers(String keyword, int pageNumber, int size){
+    public List<MemberSearchResponse> searchMembers(String keyword, int pageNumber, int size) {
         Pageable pageable = PageRequest.of(pageNumber - 1, size);
         return memberRepository.searchMembers(keyword, pageable);
     }

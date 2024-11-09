@@ -1,6 +1,7 @@
 package com.hf.healthfriend.domain.member.dto;
 
 import com.hf.healthfriend.domain.member.constant.*;
+import com.hf.healthfriend.domain.member.domain.Tier;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.spec.dto.SpecDto;
 import com.hf.healthfriend.global.util.mapping.BeanMapping;
@@ -43,5 +44,32 @@ public class MemberDto {
     private FitnessEagerness fitnessEagerness;
     private FitnessObjective fitnessObjective;
     private FitnessKind fitnessKind;
-    private List<SpecDto> specs;
+    private Long matchedCount;
+    private Tier tier;
+
+    public static MemberDto of(Member member) {
+        return MemberDto.builder()
+                .memberId(member.getId())
+                .loginId(member.getLoginId())
+                .role(member.getRole())
+                .name(member.getName())
+                .email(member.getEmail())
+                .creationTime(member.getCreationTime())
+                .nickname(member.getNickname())
+                .profileImageUrl(member.getProfileImageUrl())
+                .cd1(member.getCd1())
+                .cd2(member.getCd2())
+                .cd3(member.getCd3())
+                .birthDate(member.getBirthDate())
+                .gender(member.getGender())
+                .introduction(member.getIntroduction())
+                .fitnessLevel(member.getFitnessLevel())
+                .companionStyle(member.getCompanionStyle())
+                .fitnessEagerness(member.getFitnessEagerness())
+                .fitnessObjective(member.getFitnessObjective())
+                .fitnessKind(member.getFitnessKind())
+                .matchedCount(member.getMatchedCount())
+                .tier(member.getTier())
+                .build();
+    }
 }
