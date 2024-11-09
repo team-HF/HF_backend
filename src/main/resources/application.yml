@@ -41,7 +41,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: beans
+        include: beans, health
 
 local-file-upload: true
 
@@ -67,8 +67,8 @@ spring:
       on-profile: no-auth
 
   jpa:
-#    hibernate:
-#      ddl-auto: update
+    hibernate:
+      ddl-auto: update
     properties:
       hibernate:
         show_sql: true

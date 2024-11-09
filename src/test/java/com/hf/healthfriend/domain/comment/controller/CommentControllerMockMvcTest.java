@@ -7,6 +7,7 @@ import com.hf.healthfriend.domain.comment.dto.CommentDto;
 import com.hf.healthfriend.domain.comment.dto.request.CommentCreationRequestDto;
 import com.hf.healthfriend.domain.comment.dto.response.CommentCreationResponseDto;
 import com.hf.healthfriend.domain.comment.service.CommentService;
+import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(CommentController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @MockBean(JpaMetamodelMappingContext.class)
+@MockBean(MemberRepository.class)
 class CommentControllerMockMvcTest {
 
     @Autowired

@@ -1,10 +1,12 @@
 package com.hf.healthfriend.domain.member.entity;
 
+import com.hf.healthfriend.domain.follow.entity.Follow;
 import com.hf.healthfriend.domain.matching.entity.Matching;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.review.entity.Review;
 import com.hf.healthfriend.domain.spec.entity.Spec;
+import com.hf.healthfriend.domain.wish.entity.Wish;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -112,17 +114,29 @@ public class Member implements UserDetails {
     @OneToMany(mappedBy = "targetMember", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Matching> matchingsReceived = new ArrayList<>();
 
+    @OneToMany(mappedBy = "wished", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Wish> wishedList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "wisher", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Wish> wisherList = new ArrayList<>();
+
     @OneToMany(mappedBy = "reviewer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviewsWrote = new ArrayList<>();
 
     @OneToMany(mappedBy = "reviewee", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviewsReceived = new ArrayList<>();
 
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Follow> following = new ArrayList<>();
+
+    @OneToMany(mappedBy = "followee", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Follow> followers = new ArrayList<>();
+
     @Column(name = "review_score")
-    private double reviewScore;
+    private Double reviewScore;
 
     @Column(name = "matched_count")
-    private long matchedCount;
+    private Long matchedCount;
 
     public Member(long memberId) {
         this.id = memberId;

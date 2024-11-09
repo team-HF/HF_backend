@@ -13,9 +13,9 @@ import com.hf.healthfriend.domain.post.dto.request.PostWriteRequest;
 import com.hf.healthfriend.domain.post.dto.response.PostGetResponse;
 import com.hf.healthfriend.domain.post.dto.response.PostListObject;
 import com.hf.healthfriend.domain.post.entity.Post;
-import com.hf.healthfriend.domain.post.exception.CustomException;
-import com.hf.healthfriend.domain.post.exception.PostErrorCode;
+import com.hf.healthfriend.global.exception.CustomException;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
+import com.hf.healthfriend.global.exception.ErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -52,14 +51,14 @@ public class PostService {
 
     public Long update(PostWriteRequest postWriteRequest, Long postId){
         Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
-                .orElseThrow(() -> new CustomException(PostErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
         post.update(postWriteRequest.getTitle(), postWriteRequest.getContent(), PostCategory.valueOf(postWriteRequest.getCategory()));
         return post.getPostId();
     }
 
     public PostGetResponse get(Long postId, boolean canUpdateViewCount, CommentSortType sortType) {
         Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
-                .orElseThrow(() -> new CustomException(PostErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
         if(canUpdateViewCount) {
             post.updateViewCount(post.getViewCount());
         }
@@ -69,18 +68,18 @@ public class PostService {
 
     public void delete(Long postId) {
         Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
-                .orElseThrow(() -> new CustomException(PostErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
         post.delete();
         likeRepository.deleteLikeByPostId(postId);
     }
 
-    public List<PostListObject> getList(int pageNumber, FitnessLevel fitnessLevel, PostCategory postCategory, String keyword) {
-        Pageable pageable = PageRequest.of(pageNumber - 1, 5);
+    public List<PostListObject> getList(int pageNumber, int size,FitnessLevel fitnessLevel, PostCategory postCategory, String keyword) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, size);
         return postRepository.getList(fitnessLevel, postCategory, keyword, pageable);
     }
 
-    public List<PostListObject> getPopularList(int pageNumber, FitnessLevel fitnessLevel, String keyword) {
-        Pageable pageable = PageRequest.of(pageNumber - 1, 5);
+    public List<PostListObject> getPopularList(int pageNumber, int size,FitnessLevel fitnessLevel, String keyword) {
+        Pageable pageable = PageRequest.of(pageNumber - 1, size);
         RScoredSortedSet<Long> sortedSet = redissonClient.getScoredSortedSet("popular_posts");
         List<Long> postIdList = new ArrayList<>( sortedSet.readAll().stream().toList());
         return postRepository.getPopularList(postIdList,fitnessLevel,keyword,pageable);

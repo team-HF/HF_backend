@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.server.resource.introspection.OpaqueT
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Auth Server에 따라 적합한 Introspector에게 맡김
@@ -33,8 +34,8 @@ public class DelegatingOpaqueTokenIntrospector implements OpaqueTokenIntrospecto
                 return delegator.introspect(token);
             } catch (MemberNotFoundException e) {
                 // Token의 Owner가 우리 서비스에 등록되지 않을 경우 (DB에 없을 경우) 발생
-                log.warn("등록되지 않은 사용자: {}", e.getLoginId());
-                return new SingleAuthorityOAuth2Principal(e.getLoginId(), Role.ROLE_NON_MEMBER);
+                log.warn("등록되지 않은 사용자: {}", e.getMemberId());
+                return new SingleAuthorityOAuth2Principal(null, Map.of("email", e.getLoginId()), Role.ROLE_NON_MEMBER);
             } catch (Exception e) { // TODO: 더 세밀한 예외 처리 필요 (아마?)
                 log.warn("{}는 지원하지 않음", delegator.getSupportingAuthServer(), e);
             }
