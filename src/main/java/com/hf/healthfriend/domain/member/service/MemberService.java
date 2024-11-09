@@ -8,6 +8,7 @@ import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
 import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
 import com.hf.healthfriend.domain.member.dto.response.MemberUpdateResponseDto;
+import com.hf.healthfriend.domain.member.dto.response.ProfileResponseDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.DuplicateMemberCreationException;
 import com.hf.healthfriend.domain.member.exception.FitnessLevelUpdateException;
@@ -15,6 +16,12 @@ import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
+import com.hf.healthfriend.domain.member.repository.dto.ProfileQueryResultDto;
+import com.hf.healthfriend.domain.review.dto.response.RevieweeResponseDto;
+import com.hf.healthfriend.domain.review.dto.response.SimpleReviewResponseDto;
+import com.hf.healthfriend.domain.review.service.ReviewService;
+import com.hf.healthfriend.global.util.file.FileUrlResolver;
+import com.hf.healthfriend.global.util.file.MultipartFileUploader;
 import com.hf.healthfriend.domain.spec.dto.SpecDto;
 import com.hf.healthfriend.domain.spec.service.SpecService;
 import com.hf.healthfriend.global.file.FileUrlResolver;
@@ -39,6 +46,7 @@ public class MemberService {
     private final SpecService specService;
     private final FileUrlResolver fileUrlResolver;
     private final BeanMapper beanMapper;
+    private final ReviewService reviewService;
 
     /**
      * MemberCreationRequestDto에 있는 데이터를 가지고 새로운 Member를 생성한다.
@@ -159,4 +167,27 @@ public class MemberService {
         return memberJpaRepository.searchMembers(keyword, pageable);
     }
 
+    /**
+     * 매칭 과정에서 다른 사람의 회원 정보를 조회할 때 필요한 데이터를 반환하는 메소드.
+     * 회원 정보와 매칭 횟수 등을 조회할 수 있다.
+     *
+     * @param memberId 프로필을 조회할 회원의 ID
+     * @return 프로필 정보가 담긴 DTO
+     */
+    public ProfileResponseDto getProfileOfMember(Long memberId) {
+        ProfileQueryResultDto profileResult = this.memberJpaRepository.findProfileByMemberId(memberId)
+                .orElseThrow(() -> new MemberNotFoundException(memberId));
+        RevieweeResponseDto reviewDto = this.reviewService.getRevieweeInfo(memberId);
+
+        return ProfileResponseDto.builder()
+                .memberId(profileResult.memberId())
+                .introduction(profileResult.introduction())
+                .specs(profileResult.specs())
+                .reviews(reviewDto.reviewDetails()
+                        .stream()
+                        .map((r) -> new SimpleReviewResponseDto(r.evaluationType(), r.reviewDetailsPerEvaluationType()))
+                        .toList())
+                .averageReviewScore(profileResult.averageReviewScore())
+                .build();
+    }
 }

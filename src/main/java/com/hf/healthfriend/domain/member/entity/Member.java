@@ -133,7 +133,7 @@ public class Member implements UserDetails {
     private List<Follow> followers = new ArrayList<>();
 
     @Column(name = "review_score")
-    private Double reviewScore;
+    private Double reviewScore = 0.0;
 
     @Column(name = "matched_count")
     private Long matchedCount;
@@ -157,6 +157,10 @@ public class Member implements UserDetails {
         this.loginId = loginId;
         this.email = email;
         this.password = password;
+    }
+
+    public void addSpec(Spec spec) {
+        this.specs.add(spec);
     }
 
     @Override

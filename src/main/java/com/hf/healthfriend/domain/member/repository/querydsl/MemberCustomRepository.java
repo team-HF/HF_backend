@@ -2,6 +2,7 @@ package com.hf.healthfriend.domain.member.repository.querydsl;
 
 import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
+import com.hf.healthfriend.domain.member.repository.dto.ProfileQueryResultDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
 import org.springframework.data.domain.Pageable;
@@ -15,4 +16,6 @@ public interface MemberCustomRepository {
     public Optional<Member> findByMemberId(Long memberId);
 
     public List<MemberSearchResponse> searchMembers(String keyword, Pageable pageable);
+
+    public Optional<ProfileQueryResultDto> findProfileByMemberId(Long memberId);
 }

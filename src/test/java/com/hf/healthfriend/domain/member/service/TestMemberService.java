@@ -1,17 +1,26 @@
 package com.hf.healthfriend.domain.member.service;
 
+import com.hf.healthfriend.domain.matching.entity.Matching;
+import com.hf.healthfriend.domain.matching.repository.MatchingRepository;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.dto.MemberDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
+import com.hf.healthfriend.domain.member.dto.response.ProfileResponseDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.FitnessLevelUpdateException;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
+import com.hf.healthfriend.domain.review.constants.EvaluationType;
+import com.hf.healthfriend.domain.review.entity.Review;
+import com.hf.healthfriend.domain.review.entity.ReviewEvaluation;
+import com.hf.healthfriend.domain.review.repository.ReviewRepository;
 import com.hf.healthfriend.domain.spec.dto.SpecDto;
+import com.hf.healthfriend.domain.spec.entity.Spec;
 import com.hf.healthfriend.testutil.SampleEntityGenerator;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -51,6 +60,12 @@ class TestMemberService {
 
     @Autowired
     private MemberJpaRepository memberJpaRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
+
+    @Autowired
+    private MatchingRepository matchingRepository;
 
     @DisplayName("createMember - 빠진 데이터 없이 모두 입력")
     @Test
@@ -408,5 +423,62 @@ class TestMemberService {
                 .build();
         assertThatExceptionOfType(MemberNotFoundException.class)
                 .isThrownBy(() -> this.memberService.updateMember(1521L, updateDto));
+    }
+
+    @DisplayName("getProfileOfMember - 성공")
+    @Test
+    void getProfileOfMember_success() {
+        // Given
+        Member dummyMember1 = SampleEntityGenerator.generateSampleMember("dummy1@gmail.com");
+        Member dummyMember2 = SampleEntityGenerator.generateSampleMember("dummy2@gmail.com");
+        Member dummyMember3 = SampleEntityGenerator.generateSampleMember("dummy3@gmail.com");
+        Spec spec1 = SampleEntityGenerator.generateSampleSpec(dummyMember1);
+        Spec spec2 = SampleEntityGenerator.generateSampleSpec(dummyMember1);
+        dummyMember1.addSpec(spec1);
+        dummyMember1.addSpec(spec2);
+        this.memberJpaRepository.save(dummyMember1);
+        this.memberJpaRepository.save(dummyMember2);
+        this.memberJpaRepository.save(dummyMember3);
+
+        Matching matching1 = new Matching(dummyMember1, dummyMember2, "a", "a", LocalDateTime.now().plusDays(1));
+        Matching matching2 = new Matching(dummyMember1, dummyMember3, "a", "a", LocalDateTime.now().plusDays(2));
+        this.matchingRepository.save(matching1);
+        this.matchingRepository.save(matching2);
+
+        Review review1 = SampleEntityGenerator.generateSampleReview(
+                matching1, dummyMember2, dummyMember1, 2,
+                List.of(
+                        new ReviewEvaluation(EvaluationType.GOOD, 1),
+                        new ReviewEvaluation(EvaluationType.GOOD, 2)
+                )
+        );
+        Review review2 = SampleEntityGenerator.generateSampleReview(
+                matching2, dummyMember3, dummyMember1, 4,
+                List.of(
+                        new ReviewEvaluation(EvaluationType.GOOD, 1),
+                        new ReviewEvaluation(EvaluationType.NOT_GOOD, 2)
+                )
+        );
+        this.reviewRepository.save(review1);
+        this.reviewRepository.save(review2);
+
+        dummyMember1.setReviewScore((double)(review1.getScore() + review2.getScore()) / 2);
+
+        // flush
+
+        // When
+        ProfileResponseDto result = this.memberService.getProfileOfMember(dummyMember1.getId());
+
+        // Then
+        assertThat(result.memberId()).isEqualTo(dummyMember1.getId());
+        assertThat(result.introduction()).isEqualTo(dummyMember1.getIntroduction());
+
+        // Specs
+        assertThat(result.specs().stream().map(SpecDto::getSpecId))
+                .containsExactlyInAnyOrder(spec1.getSpecId(), spec2.getSpecId());
+
+        // Reviews
+        assertThat(result.averageReviewScore()).isEqualTo(3, Offset.offset(0.001));
+        // Review에 관한 추가적인 테스트는 TestReviewService에
     }
 }
