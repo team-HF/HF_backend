@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @Component
 @RequiredArgsConstructor
 @Profile("!no-auth")
@@ -25,6 +27,7 @@ public class KakaoOpaqueTokenIntrospectorDelegator implements OpaqueTokenIntrosp
         MemberDto memberDto = this.memberService.findMemberByEmail(tokenValidationInfo.getEmail());
         return new SingleAuthorityOAuth2Principal(
                 String.valueOf(memberDto.getMemberId()),
+                Map.of("email", memberDto.getEmail()),
                 memberDto.getRole()
         );
     }

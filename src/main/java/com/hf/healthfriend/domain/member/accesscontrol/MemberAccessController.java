@@ -37,11 +37,11 @@ public class MemberAccessController {
         }
         log.trace("id={}", id);
 
-        String authenticatedMemberId = authentication.getName(); // null이면 이미 401이 났을 테니 null이 아닐 것
+        Object emailAttribute = authentication.getTokenAttributes().get("email"); // null이면 이미 401이 났을 테니 null이 아닐 것
 
-        log.trace("authenticatedMemberId={}", authenticatedMemberId);
+        log.trace("emailAttribute={}", emailAttribute);
 
-        return authenticatedMemberId.equals(id.trim());
+        return emailAttribute.equals(id.trim());
     }
 
     @AccessControlTrigger(path = "/hr/members/{memberId}", method = "GET")
