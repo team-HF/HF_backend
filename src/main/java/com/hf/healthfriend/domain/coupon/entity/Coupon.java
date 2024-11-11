@@ -5,8 +5,8 @@ import com.hf.healthfriend.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.Period;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -37,7 +37,7 @@ public abstract class Coupon {
         this.expiration = expiration;
     }
 
-    protected Coupon(Member receiver, Period validPeriod) {
+    protected Coupon(Member receiver, Duration validPeriod) {
         this.receiver = receiver;
         this.expiration = this.creationTime.plus(validPeriod);
     }
