@@ -10,11 +10,12 @@ import com.hf.healthfriend.testutil.SampleEntityGenerator;
 import com.hf.healthfriend.testutil.TestConfig;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -22,8 +23,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.lang.reflect.Field;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Stream;
@@ -42,25 +45,8 @@ class TestMatchingCustomRepositoryImpl {
     @Autowired
     EntityManager em;
 
-    Member mainMember;
-    Map<String, Member> dummyMembersByKey;
-    List<Matching> dummyMatchings;
-
     static final int REQUESTER_NUM = 7;
     static final int REQUEST_TARGET_NUM = 7;
-
-    @BeforeEach
-    void initialData() throws NoSuchFieldException, IllegalAccessException {
-        Member mainMember = SampleEntityGenerator.generateSampleMember("main@gmail.com", "main");
-        this.em.persist(mainMember);
-
-        Map<String, Member> dummyMembers = generateDummyMembers();
-        List<Matching> matchings = generateMatchings(mainMember, dummyMembers);
-
-        this.mainMember = mainMember;
-        this.dummyMembersByKey = dummyMembers;
-        this.dummyMatchings = matchings;
-    }
 
     private Map<String, Member> generateDummyMembers() {
         Map<String, Member> dummyMembers = new HashMap<>();
@@ -210,15 +196,21 @@ class TestMatchingCustomRepositoryImpl {
     void findByMemberIdWithConditions_success(String parameterizedName,
                                               MatchingFetchType fetchType,
                                               MatchingStatusCondition condition,
-                                              Pageable page) {
+                                              Pageable page) throws NoSuchFieldException, IllegalAccessException {
         // Given
-        List<Matching> filteredMatchings = filterBySearchCondtition(this.dummyMatchings, fetchType, condition);
+        Member mainMember = SampleEntityGenerator.generateSampleMember("main@gmail.com", "main");
+        this.em.persist(mainMember);
+
+        Map<String, Member> dummyMembersByKey = generateDummyMembers();
+        List<Matching> dummyMatchings = generateMatchings(mainMember, dummyMembersByKey);
+
+        List<Matching> filteredMatchings = filterBySearchCondtition(dummyMatchings, fetchType, condition, mainMember);
         List<Matching> expectedMatchingList =
                 subListWithoutOverflow(filteredMatchings, (int) page.getOffset(), (int) page.getOffset() + page.getPageSize());
 
         // When
         Page<MatchingListResponseDto> result =
-                this.matchingCustomRepository.findByMemberIdWithConditions(this.mainMember.getId(), fetchType, condition, page);
+                this.matchingCustomRepository.findByMemberIdWithConditions(mainMember.getId(), fetchType, condition, page);
 
         // Then
         log.info("expected matching ids={}", expectedMatchingList.stream().map(Matching::getMatchingId).toList());
@@ -231,11 +223,12 @@ class TestMatchingCustomRepositoryImpl {
 
     private List<Matching> filterBySearchCondtition(List<Matching> original,
                                                     MatchingFetchType fetchType,
-                                                    MatchingStatusCondition condition) {
+                                                    MatchingStatusCondition condition,
+                                                    Member mainMember) {
         return original.stream()
                 .filter((m) -> fetchType == MatchingFetchType.ALL
-                        || (fetchType == MatchingFetchType.WHAT_I_RECEIVED && m.getTargetMember().getId().equals(this.mainMember.getId()))
-                        || (fetchType == MatchingFetchType.WHAT_I_REQUESTED && m.getRequester().getId().equals(this.mainMember.getId())))
+                        || (fetchType == MatchingFetchType.WHAT_I_RECEIVED && m.getTargetMember().getId().equals(mainMember.getId()))
+                        || (fetchType == MatchingFetchType.WHAT_I_REQUESTED && m.getRequester().getId().equals(mainMember.getId())))
                 .filter((m) -> condition == MatchingStatusCondition.ALL
                         || condition.getCorrespondingStatus().contains(m.getStatus()))
                 .toList();
@@ -246,5 +239,82 @@ class TestMatchingCustomRepositoryImpl {
             return List.of();
         }
         return original.subList(fromIndex, Math.min(endIndex, original.size()));
+    }
+
+    @DisplayName("existsDuplicateMatchingRequest - 해당 날짜에 생성된 Matching이 존재할 경우 true")
+    @Test
+    void existsDuplicateMatchingRequest() {
+        // Given
+        Member mainMember = SampleEntityGenerator.generateSampleMember("main@gmail.com", "main");
+        this.em.persist(mainMember);
+
+        Map<String, Member> dummyMembersByKey = generateDummyMembers();
+
+        Member dummyTargetMember = dummyMembersByKey.get("ee" + (REQUESTER_NUM + 1));
+        Matching dummyMatching =
+                new Matching(mainMember, dummyTargetMember, "a", "b", LocalDateTime.now().plusDays(1));
+        this.em.persist(dummyMatching);
+        this.em.flush();
+
+        // When
+        boolean result =
+                this.matchingCustomRepository.existsDuplicateMatchingRequest(mainMember.getId(), LocalDate.now());
+
+        // Then
+        assertThat(result).isTrue();
+    }
+
+    @DisplayName("existsDuplicateMatchingRequest - 중복 허용인 status라도 해당 날짜에 생성된 매칭이면 true")
+    @ValueSource(strings = {
+            "CANCELED",
+            "REJECTED",
+            "UNEXPECTEDLY_HALTED",
+            "FINISHED"
+    })
+    @ParameterizedTest
+    void existsDuplicateMatchingRequest_matchingStatus_false(MatchingStatus matchingStatus) {
+        // Given
+        Member mainMember = SampleEntityGenerator.generateSampleMember("main@gmail.com", "main");
+        this.em.persist(mainMember);
+
+        Map<String, Member> dummyMembersByKey = generateDummyMembers();
+
+        Member dummyTargetMember = dummyMembersByKey.get("ee" + (REQUESTER_NUM + 1));
+        Matching dummyMatching =
+                new Matching(mainMember, dummyTargetMember, "a", "b", LocalDateTime.now().plusDays(1));
+        ReflectionTestUtils.setField(dummyMatching, "status", matchingStatus);
+        this.em.persist(dummyMatching);
+
+        // When
+        boolean result = this.matchingCustomRepository.existsDuplicateMatchingRequest(mainMember.getId(), LocalDate.now());
+
+        // Then
+        assertThat(result).isTrue();
+    }
+
+    @DisplayName("existsDuplicateMatchingRequest - 다른 날짜에 생성되었더라도 진행 중이 매칭이면 true")
+    @ValueSource(
+            strings = {
+                    "ACCEPTED",
+                    "PENDING"
+            }
+    )
+    @ParameterizedTest
+    void existsDuplicateMatchingRequest_generatedAnotherDate(MatchingStatus matchingStatus) {
+        // Given
+        Member mainMember = SampleEntityGenerator.generateSampleMember("main@gmail.com", "main");
+        this.em.persist(mainMember);
+
+        Map<String, Member> dummyMembersByKey = generateDummyMembers();
+
+        Member dummyTargetMember = dummyMembersByKey.get("ee" + (REQUESTER_NUM + 1));
+        Matching dummyMatching =
+                new Matching(mainMember, dummyTargetMember, "a", "b", LocalDateTime.now().plusDays(1));
+        ReflectionTestUtils.setField(dummyMatching, "status", matchingStatus);
+        ReflectionTestUtils.setField(dummyMatching, "creationTime", LocalDateTime.now().minusDays(3));
+        this.em.persist(dummyMatching);
+
+        // When
+        this.matchingCustomRepository.existsDuplicateMatchingRequest(mainMember.getId(), LocalDate.now());
     }
 }
