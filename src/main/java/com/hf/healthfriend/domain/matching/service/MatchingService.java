@@ -8,6 +8,7 @@ import com.hf.healthfriend.domain.matching.dto.request.MatchingRequestDto;
 import com.hf.healthfriend.domain.matching.dto.response.MatchingListResponseDto;
 import com.hf.healthfriend.domain.matching.dto.response.PageResponseDto;
 import com.hf.healthfriend.domain.matching.entity.Matching;
+import com.hf.healthfriend.domain.matching.exception.OutOfLimitMatchingRequestException;
 import com.hf.healthfriend.domain.matching.repository.MatchingRepository;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -45,6 +47,9 @@ public class MatchingService {
     private final MemberRepository memberRepository;
 
     public Long requestMatching(MatchingRequestDto requestDto) {
+        if (this.matchingRepository.existsDuplicateMatchingRequest(requestDto.getRequesterId(), LocalDate.now())) {
+            throw new OutOfLimitMatchingRequestException("매칭 중복");
+        }
         try {
             Matching savedMatching = this.matchingRepository.save(
                     new Matching(
