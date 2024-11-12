@@ -1,7 +1,10 @@
 package com.hf.healthfriend.domain.coupon.service.delegator;
 
+import com.hf.healthfriend.domain.coupon.constant.CouponFetchType;
 import com.hf.healthfriend.domain.coupon.dto.request.GrantCouponDto;
 import com.hf.healthfriend.domain.coupon.dto.request.GrantMatchingCouponDto;
+import com.hf.healthfriend.domain.coupon.dto.response.CouponResponseDto;
+import com.hf.healthfriend.domain.coupon.dto.response.MatchingCouponResponseDto;
 import com.hf.healthfriend.domain.coupon.entity.Coupon;
 import com.hf.healthfriend.domain.coupon.entity.MatchingCoupon;
 import com.hf.healthfriend.domain.coupon.repository.CouponRepository;
@@ -12,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -43,5 +47,10 @@ public class MatchingCouponServiceDelegator implements CouponServiceDelegator {
     @Override
     public boolean supports(Class<?> dtoClass) {
         return TYPES_SUPPORTED.contains(dtoClass);
+    }
+
+    @Override
+    public List<CouponResponseDto> getCoupons(Long memberId, CouponFetchType fetchType) {
+        throw new UnsupportedOperationException();
     }
 }

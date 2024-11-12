@@ -5,6 +5,7 @@ import com.hf.healthfriend.domain.member.entity.Member;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.Duration;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @Entity
 @DiscriminatorValue("m")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class MatchingCoupon extends Coupon {
     private Integer achievedLevel;
     private int grantedMatchingCount;

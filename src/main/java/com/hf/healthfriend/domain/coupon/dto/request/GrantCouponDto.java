@@ -5,8 +5,7 @@ import lombok.*;
 import java.time.temporal.ChronoUnit;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @ToString
 public abstract class GrantCouponDto {

@@ -7,6 +7,9 @@ import lombok.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.Period;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -55,5 +58,14 @@ public abstract class Coupon {
 
     public boolean isExpired() {
         return LocalDateTime.now().isAfter(this.expiration);
+    }
+
+    public int getValidPeriodInDays() {
+        return (int)getValidPeriod(ChronoUnit.DAYS);
+    }
+
+    public long getValidPeriod(TemporalUnit temporalUnit) {
+        return Duration.between(this.creationTime, this.expiration)
+                .get(temporalUnit);
     }
 }
