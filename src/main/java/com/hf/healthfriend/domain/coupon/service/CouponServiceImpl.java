@@ -7,6 +7,8 @@ import com.hf.healthfriend.domain.coupon.entity.Coupon;
 import com.hf.healthfriend.domain.coupon.exception.NoSupportedCouponDelegatorException;
 import com.hf.healthfriend.domain.coupon.repository.CouponRepository;
 import com.hf.healthfriend.domain.coupon.util.CouponDtoMapper;
+import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
+import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
@@ -24,6 +26,7 @@ public class CouponServiceImpl implements CouponService {
     private final List<CouponServiceDelegator> delegators;
     private final CouponRepository couponRepository;
     private final CouponDtoMapper couponDtoMapper;
+    private final MemberRepository memberRepository;
 
     @Override
     public Long grantCoupon(GrantCouponDto dto) {
@@ -38,6 +41,9 @@ public class CouponServiceImpl implements CouponService {
 
     @Override
     public List<CouponResponseDto> getCoupons(Long receiverId, CouponFetchType fetchType) {
+        if (!this.memberRepository.existsById(receiverId)) {
+            throw new MemberNotFoundException(receiverId);
+        }
         List<Coupon> result = this.couponRepository.findByReceiverIdAndFetchType(receiverId, fetchType);
         return result.stream()
                 .map(this.couponDtoMapper::mapToCouponResponseDto)
