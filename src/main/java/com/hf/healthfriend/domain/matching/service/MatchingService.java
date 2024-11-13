@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.matching.service;
 
+import com.hf.healthfriend.domain.coupon.service.CouponService;
 import com.hf.healthfriend.domain.matching.constant.MatchingFetchType;
 import com.hf.healthfriend.domain.matching.constant.MatchingStatus;
 import com.hf.healthfriend.domain.matching.constant.MatchingStatusCondition;
@@ -45,9 +46,15 @@ public class MatchingService {
 
     private final MatchingRepository matchingRepository;
     private final MemberRepository memberRepository;
+    private final CouponService couponService;
 
     public Long requestMatching(MatchingRequestDto requestDto) {
-        if (this.matchingRepository.existsDuplicateMatchingRequest(requestDto.getRequesterId(), LocalDate.now())) {
+        boolean couponUsed = false;
+        if (requestDto.getCouponId() != null) {
+            this.couponService.useCoupon(requestDto.getCouponId());
+            couponUsed = true;
+        }
+        if (!couponUsed && this.matchingRepository.existsDuplicateMatchingRequest(requestDto.getRequesterId(), LocalDate.now())) {
             throw new OutOfLimitMatchingRequestException("매칭 중복");
         }
         try {

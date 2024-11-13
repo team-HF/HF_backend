@@ -4,7 +4,7 @@ import com.hf.healthfriend.domain.coupon.constant.CouponFetchType;
 import com.hf.healthfriend.domain.coupon.dto.request.GrantCouponDto;
 import com.hf.healthfriend.domain.coupon.dto.response.CouponResponseDto;
 import com.hf.healthfriend.domain.coupon.entity.Coupon;
-import com.hf.healthfriend.domain.coupon.exception.NoSupportedCouponDelegatorException;
+import com.hf.healthfriend.domain.coupon.exception.CouponNotFoundException;
 import com.hf.healthfriend.domain.coupon.exception.UnavailableCouponException;
 import com.hf.healthfriend.domain.coupon.repository.CouponRepository;
 import com.hf.healthfriend.domain.coupon.util.CouponDtoMapper;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -52,11 +51,11 @@ public class CouponService {
      *
      * @param couponId 사용할 쿠폰의 ID
      * @throws UnavailableCouponException 기간이 만료되었거나 이미 사용한 쿠폰인 경우와 같이 사용할 수 없는 쿠폰일 경우
-     * @throws NoSuchElementException couponId에 해당하는 쿠폰이 존재하지 않을 경우
+     * @throws CouponNotFoundException couponId에 해당하는 쿠폰이 존재하지 않을 경우
      */
-    public void useCoupon(Long couponId) throws UnavailableCouponException, NoSuchElementException {
+    public void useCoupon(Long couponId) throws UnavailableCouponException, CouponNotFoundException {
         Coupon coupon = this.couponRepository.findById(couponId)
-                .orElseThrow(NoSuchElementException::new);
+                .orElseThrow(() -> new CouponNotFoundException(couponId));
         if (coupon.isNotAvailable()) {
             throw new UnavailableCouponException(couponId);
         }
