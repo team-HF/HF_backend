@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.coupon.entity;
 
+import com.hf.healthfriend.domain.coupon.constant.CouponType;
 import com.hf.healthfriend.domain.coupon.exception.AlreadyUsedCouponException;
 import com.hf.healthfriend.domain.member.entity.Member;
 import jakarta.persistence.*;
@@ -74,4 +75,6 @@ public abstract class Coupon {
     public boolean isNotAvailable() {
         return isUsed() || isExpired();
     }
+
+    public abstract CouponType getCouponType();
 }

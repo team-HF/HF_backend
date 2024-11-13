@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.coupon.entity;
 
+import com.hf.healthfriend.domain.coupon.constant.CouponType;
 import com.hf.healthfriend.domain.coupon.exception.InvalidMatchingCountException;
 import com.hf.healthfriend.domain.member.entity.Member;
 import jakarta.persistence.DiscriminatorValue;
@@ -45,5 +46,10 @@ public class MatchingCoupon extends Coupon {
         if (--this.leftMatchingCount == 0) {
             super.use();
         }
+    }
+
+    @Override
+    public CouponType getCouponType() {
+        return CouponType.MATCHING_COUPON;
     }
 }

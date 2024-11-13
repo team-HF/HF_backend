@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.matching.service;
 
+import com.hf.healthfriend.domain.coupon.constant.CouponType;
 import com.hf.healthfriend.domain.coupon.service.CouponService;
 import com.hf.healthfriend.domain.matching.constant.MatchingFetchType;
 import com.hf.healthfriend.domain.matching.constant.MatchingStatus;
@@ -51,7 +52,7 @@ public class MatchingService {
     public Long requestMatching(MatchingRequestDto requestDto) {
         boolean couponUsed = false;
         if (requestDto.getCouponId() != null) {
-            this.couponService.useCoupon(requestDto.getCouponId());
+            this.couponService.useCoupon(requestDto.getCouponId(), CouponType.MATCHING_COUPON);
             couponUsed = true;
         }
         if (!couponUsed && this.matchingRepository.existsDuplicateMatchingRequest(requestDto.getRequesterId(), LocalDate.now())) {
