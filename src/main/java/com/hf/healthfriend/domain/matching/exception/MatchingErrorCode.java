@@ -4,7 +4,8 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum MatchingErrorCode {
-    MEMBER_NOT_FOUND(40401, "MAT001", "해당 회원이 존재하지 않습니다");
+    MEMBER_NOT_FOUND(40401, "MAT001", "해당 회원이 존재하지 않습니다"),
+    OUT_OF_LIMIT_MATCHING_REQUEST(40001, "MAT002", "중복된 매칭이 있습니다");
 
     private final int status;
     private final String code;
