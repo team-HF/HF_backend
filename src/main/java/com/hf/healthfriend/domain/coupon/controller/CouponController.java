@@ -66,4 +66,20 @@ public class CouponController {
                 ApiBasicResponse.of(result, HttpStatus.OK)
         );
     }
+
+    @PatchMapping("/coupons/{couponId}/read")
+    @Operation(
+            summary = "쿠폰을 읽는다.",
+            description = "쿠폰을 읽으면 쿠폰의 \"NEW\" 표시가 사라짐",
+            responses = @ApiResponse(
+                    description = "쿠폰 읽기 성공",
+                    responseCode = "200"
+            )
+    )
+    public ResponseEntity<ApiBasicResponse<Void>> readCoupon(@PathVariable("couponId") Long couponId) {
+        this.couponService.readCoupon(couponId);
+        return ResponseEntity.ok(
+                ApiBasicResponse.of(HttpStatus.OK)
+        );
+    }
 }

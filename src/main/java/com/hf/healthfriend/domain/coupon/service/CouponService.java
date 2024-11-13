@@ -40,4 +40,8 @@ public class CouponService {
                 .map(this.couponDtoMapper::mapToCouponResponseDto)
                 .toList();
     }
+
+    public void readCoupon(Long couponId) {
+        this.couponRepository.setReadById(couponId);
+    }
 }
