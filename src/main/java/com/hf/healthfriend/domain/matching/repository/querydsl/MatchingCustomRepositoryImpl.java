@@ -1,13 +1,17 @@
 package com.hf.healthfriend.domain.matching.repository.querydsl;
 
 import com.hf.healthfriend.domain.matching.constant.MatchingFetchType;
+import com.hf.healthfriend.domain.matching.constant.MatchingStatus;
 import com.hf.healthfriend.domain.matching.constant.MatchingStatusCondition;
 import com.hf.healthfriend.domain.matching.dto.response.MatchingListResponseDto;
 import com.hf.healthfriend.domain.matching.dto.response.ProfileOfMemberInMatchingResponseDto;
 import com.hf.healthfriend.domain.matching.entity.QMatching;
 import com.hf.healthfriend.domain.member.entity.QMember;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.validation.constraints.NotNull;
@@ -17,6 +21,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -99,5 +105,23 @@ public class MatchingCustomRepositoryImpl implements MatchingCustomRepository {
             builder.and(this.matching.status.in(matchingStatus.getCorrespondingStatus()));
         }
         return builder;
+    }
+
+    @Override
+    public boolean existsDuplicateMatchingRequest(Long memberId, LocalDate date) {
+        BooleanExpression compareDatePart =
+                Expressions.dateTimeOperation(LocalDate.class, Ops.DateTimeOps.DATE, this.matching.creationTime)
+                        .eq(date);
+
+        BooleanBuilder booleanBuilder = new BooleanBuilder(compareDatePart);
+
+        booleanBuilder.or(this.matching.status.in(MatchingStatus.ACCEPTED, MatchingStatus.PENDING));
+        booleanBuilder.and(this.matching.requester.id.eq(memberId));
+
+        Integer result = this.queryFactory.selectOne()
+                .from(this.matching)
+                .where(booleanBuilder)
+                .fetchFirst();
+        return result != null;
     }
 }

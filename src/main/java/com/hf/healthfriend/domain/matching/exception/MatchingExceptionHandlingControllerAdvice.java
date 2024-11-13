@@ -13,14 +13,26 @@ public class MatchingExceptionHandlingControllerAdvice {
     @ExceptionHandler(MemberNotFoundException.class)
     public ResponseEntity<BasicErrorResponse> memberNotFoundException(MemberNotFoundException e) {
         return new ResponseEntity<>(
-                BasicErrorResponse.builder()
-                        .statusCode(MatchingErrorCode.MEMBER_NOT_FOUND.status())
-                        .errorName(MatchingErrorCode.MEMBER_NOT_FOUND.name())
-                        .message(MatchingErrorCode.MEMBER_NOT_FOUND.message())
-                        .statusCodeSeries(4)
-                        .errorCode(MatchingErrorCode.MEMBER_NOT_FOUND.code())
-                        .build(),
+                from(MatchingErrorCode.MEMBER_NOT_FOUND),
                 HttpStatus.NOT_FOUND
         );
+    }
+
+    @ExceptionHandler(OutOfLimitMatchingRequestException.class)
+    public ResponseEntity<BasicErrorResponse> outOfLimitMatchingRequestException(OutOfLimitMatchingRequestException e) {
+        return new ResponseEntity<>(
+                from(MatchingErrorCode.OUT_OF_LIMIT_MATCHING_REQUEST),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    private BasicErrorResponse from(MatchingErrorCode errorCode) {
+        return BasicErrorResponse.builder()
+                .statusCode(errorCode.status())
+                .errorName(errorCode.name())
+                .message(errorCode.message())
+                .statusCodeSeries(4)
+                .errorCode(errorCode.code())
+                .build();
     }
 }
