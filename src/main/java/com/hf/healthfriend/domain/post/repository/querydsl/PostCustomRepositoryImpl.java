@@ -8,6 +8,7 @@ import com.hf.healthfriend.global.util.file.FileUrlResolver;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -105,8 +106,12 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
             builder.and(post.category.eq(postCategory));
         }
         if (keyword != null) {
-            builder.and(post.title.containsIgnoreCase(keyword)
-                    .or(post.content.containsIgnoreCase(keyword)));
+            builder.and(Expressions.booleanTemplate(
+                    "function('match_against', {0}, {1}, {2}) > 0",
+                    post.title,
+                    post.content,
+                    keyword
+            ));
         }
         return builder;
     }
