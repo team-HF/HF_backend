@@ -10,7 +10,7 @@ import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
-import com.hf.healthfriend.global.util.file.FileUrlResolver;
+import com.hf.healthfriend.global.file.FileUrlResolver;
 import com.hf.healthfriend.testutil.SampleEntityGenerator;
 import com.hf.healthfriend.testutil.TestConfig;
 import jakarta.transaction.Transactional;

@@ -17,7 +17,7 @@ import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
 import com.hf.healthfriend.global.exception.CustomException;
 import com.hf.healthfriend.global.exception.ErrorCode;
-import com.hf.healthfriend.global.util.file.FileUrlResolver;
+import com.hf.healthfriend.global.file.FileUrlResolver;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
