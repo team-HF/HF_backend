@@ -1,6 +1,5 @@
 package com.hf.healthfriend.domain.coupon.event.handler;
 
-import com.hf.healthfriend.domain.coupon.dto.request.GrantCouponDto;
 import com.hf.healthfriend.domain.coupon.dto.request.GrantMatchingCouponDto;
 import com.hf.healthfriend.domain.coupon.event.message.MatchingEventMessage;
 import com.hf.healthfriend.domain.coupon.service.CouponService;
