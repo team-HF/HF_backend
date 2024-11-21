@@ -10,13 +10,18 @@ import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
 import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
+import com.hf.healthfriend.global.util.file.FileUrlResolver;
+import com.hf.healthfriend.testutil.SampleEntityGenerator;
 import com.hf.healthfriend.testutil.TestConfig;
+import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -30,7 +35,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @ActiveProfiles("test")
 @Import(TestConfig.class)
+@Transactional
 public class CommentSortTest {
+
+    @MockBean
+    private FileUrlResolver fileUrlResolver;
 
     @Autowired
     private TestEntityManager entityManager;
@@ -52,34 +61,17 @@ public class CommentSortTest {
 
     @BeforeEach
     public void setUp() {
-        testMember = Member.builder()
-                .loginId("testUser")
-                .role(Role.ROLE_MEMBER)
-                .email("test@example.com")
-                .password("password123")
-                .creationTime(LocalDateTime.now())
-                .nickname("TestNickname")
-                .profileImageUrl("http://profile.url")
-                .birthDate(LocalDate.of(1995, 5, 25))
-                .gender(Gender.MALE)
-                .introduction("This is a test introduction")
-                .fitnessLevel(FitnessLevel.BEGINNER)
-                .companionStyle(CompanionStyle.GROUP)
-                .fitnessEagerness(FitnessEagerness.EAGER)
-                .fitnessObjective(FitnessObjective.RUNNING)
-                .fitnessKind(FitnessKind.HIGH_STRESS)
-                .posts(new ArrayList<>())  // 빈 리스트 사용
-                .specs(new ArrayList<>())  // 빈 리스트 사용
-                .build();
+        testMember = SampleEntityGenerator.generateSampleMember("sample@post.writer", "testMember");
 
         memberRepository.save(testMember);
         testPost = Post.builder()
-                .postId(1L)
                 .content("content")
                 .title("title")
                 .member(testMember)
                 .build();
         postRepository.save(testPost);
+        entityManager.flush();
+        entityManager.clear();
 
         for(int i=1; i<=5; i++){
             commentRepository.save(Comment.builder()
@@ -101,7 +93,7 @@ public class CommentSortTest {
         Long postId = testPost.getPostId();
 
         //When
-        List<Comment> comments = commentCustomRepository.findCommentsByPostIdWithSorting(postId, CommentSortType.LATEST);
+        List<Comment> comments = commentCustomRepository.findAllCommentsByPostIdWithSorting(postId, CommentSortType.LATEST);
 
         //Then
         assertThat(comments).hasSize(5);
@@ -122,7 +114,7 @@ public class CommentSortTest {
         commentRepository.save(mostLikedComment);
 
         //When
-        List<Comment> comments = commentCustomRepository.findCommentsByPostIdWithSorting(postId, CommentSortType.MOST_LIKES);
+        List<Comment> comments = commentCustomRepository.findAllCommentsByPostIdWithSorting(postId, CommentSortType.MOST_LIKES);
 
         //Then
         assertThat(comments).hasSize(5);
