@@ -15,13 +15,13 @@ public class PostAccessController {
 
     private final PostRepository postRepository;
 
-    @AccessControlTrigger(path = "/posts/{postId}",method = "PATCH")
+    @AccessControlTrigger(path = "/hf/posts/{postId}",method = "PATCH")
     public boolean canUpdatePost(BearerTokenAuthentication authentication, HttpServletRequest request) {
         ErrorCode errorCode = ErrorCode.FORBIDDEN_UPDATE;
         return checkPostAccess(authentication,request,errorCode);
     }
 
-    @AccessControlTrigger(path = "/posts/{postId}", method = "DELETE")
+    @AccessControlTrigger(path = "/hf/posts/{postId}", method = "DELETE")
     public boolean canDeletePost(BearerTokenAuthentication authentication, HttpServletRequest request) {
         ErrorCode errorCode = ErrorCode.FORBIDDEN_DELETE;
         return checkPostAccess(authentication,request,errorCode);
