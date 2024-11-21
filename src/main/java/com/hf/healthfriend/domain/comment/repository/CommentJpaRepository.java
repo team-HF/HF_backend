@@ -15,14 +15,6 @@ public interface CommentJpaRepository extends JpaRepository<Comment, Long>, Comm
     @Query("""
             SELECT c
             FROM Comment c
-            WHERE c.commentId = :commentId
-                AND c.isDeleted = FALSE
-            """)
-    Optional<Comment> findById(@Param("commentId") Long commentId);
-
-    @Query("""
-            SELECT c
-            FROM Comment c
             WHERE c.post.postId = :postId
                 AND c.isDeleted = FALSE
             """)
@@ -39,9 +31,22 @@ public interface CommentJpaRepository extends JpaRepository<Comment, Long>, Comm
     boolean existsByCommentIdAndIsDeletedFalse(Long id);
 
     @Modifying
-    @Query("UPDATE Comment c SET c.isDeleted = true WHERE c.parentComment.commentId = :parentId")
-    void deleteRepliesOfParentComment(@Param("parentId") Long parentId);
+    @Query(value = "WITH RECURSIVE CommentHierarchy AS (" +
+            "  SELECT comment_id " +
+            "  FROM comment " +
+            "  WHERE comment_id = :parentId " +
+            "  UNION ALL " +
+            "  SELECT c.comment_id " +
+            "  FROM comment c " +
+            "  INNER JOIN CommentHierarchy ch ON c.parent_comment_id = ch.comment_id" +
+            ") " +
+            "UPDATE comment " +
+            "SET is_deleted = true " +
+            "WHERE comment_id IN (SELECT comment_id FROM CommentHierarchy)",
+            nativeQuery = true)
+    void deleteAllReplies(@Param("parentId") Long parentId);
 
-    @Query("SELECT CASE WHEN c.parentComment IS NULL THEN true ELSE false END FROM Comment c WHERE c.commentId = :commentId")
-    boolean isParentComment(@Param("commentId") Long commentId);
+    @Modifying
+    @Query("UPDATE Comment c SET c.isDeleted = true WHERE c.commentId = :commentId")
+    void softDeleteById(Long commentId);
 }

@@ -6,6 +6,6 @@ import com.hf.healthfriend.domain.comment.entity.Comment;
 import java.util.List;
 
 public interface CommentCustomRepository {
-    List<Comment> findParentCommentsByPostIdWithSorting(Long postId, CommentSortType sortType);
+    List<Comment> findAllCommentsByPostIdWithSorting(Long postId, CommentSortType sortType);
 
 }

@@ -61,14 +61,6 @@ public class Comment extends BaseTimeEntity {
         this.isDeleted = false;
     }
 
-    public Comment(@NotNull Post post, @NotNull Member writer, String content, Comment parentComment) {
-        this.post = post;
-        this.writer = writer;
-        this.content = content;
-        this.parentComment = parentComment;
-        this.isDeleted = false;
-    }
-
     public void updateContent(String content) {
         this.content = content;
     }

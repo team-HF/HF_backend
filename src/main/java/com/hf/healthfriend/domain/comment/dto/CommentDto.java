@@ -15,22 +15,26 @@ public class CommentDto {
     private Long commentId;
     private Long postId;
     private Long writerId;
+    private String writerName;
+    private String writerProfileUrl;
     private String content;
     private LocalDateTime creationTime;
-    private LocalDateTime lastModified;
+    private Long parentId;
+    private String parentWriterName;
     private List<CommentDto> replies;
-    private String writerProfileUrl;
 
-    public static CommentDto of(Comment entity, String writerProfileUrl, List<CommentDto> replies) {
+    public static CommentDto of(Comment comment, String writerProfileUrl, String parentWriterName, Long parentId, List<CommentDto> replies) {
         return CommentDto.builder()
-                .commentId(entity.getCommentId())
-                .postId(entity.getPost().getPostId())
-                .writerId(entity.getWriter().getId())
-                .content(entity.getContent())
-                .creationTime(entity.getCreationTime())
-                .lastModified(entity.getLastModified())
-                .replies(replies)
+                .commentId(comment.getCommentId())
+                .postId(comment.getPost().getPostId())
+                .writerId(comment.getWriter().getId())
+                .writerName(comment.getWriter().getName())
                 .writerProfileUrl(writerProfileUrl)
+                .content(comment.getContent())
+                .creationTime(comment.getCreationTime())
+                .parentId(parentId)
+                .parentWriterName(parentWriterName)
+                .replies(replies)
                 .build();
     }
 }

@@ -23,13 +23,12 @@ public class CommentCustomRepositoryImpl implements CommentCustomRepository {
     private final QLike like = QLike.like;
 
     @Override
-    public List<Comment> findParentCommentsByPostIdWithSorting(Long postId, CommentSortType sortType) {
+    public List<Comment> findAllCommentsByPostIdWithSorting(Long postId, CommentSortType sortType) {
         return queryFactory
                 .selectFrom(comment)
                 .leftJoin(like).on(like.comment.eq(comment))
                 .where(comment.post.postId.eq(postId)
-                        .and(comment.isDeleted.isFalse())
-                        .and(comment.parentComment.isNull()))
+                        .and(comment.isDeleted.isFalse()))
                 .groupBy(comment.commentId)
                 .orderBy(getSortTypeByPostId(sortType))
                 .fetch(); //리스트로 결과 반환하는 메소드
