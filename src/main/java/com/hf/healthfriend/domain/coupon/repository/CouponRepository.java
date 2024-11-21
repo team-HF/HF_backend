@@ -1,0 +1,8 @@
+package com.hf.healthfriend.domain.coupon.repository;
+
+import com.hf.healthfriend.domain.coupon.entity.Coupon;
+import com.hf.healthfriend.domain.coupon.repository.querydsl.CouponCustomRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface CouponRepository extends JpaRepository<Coupon, Long>, CouponCustomRepository {
+}
