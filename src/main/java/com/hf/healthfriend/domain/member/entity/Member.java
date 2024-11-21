@@ -27,6 +27,9 @@ import java.util.List;
 @Setter // TODO: Setter를 없애고 엔티티 수정 코드는 udpate~ 메소드로 대체해야 함
 @Getter
 @ToString
+@Table(indexes = {
+        @Index(name = "member_fitness_level_idx", columnList = "fitnessLevel")
+})
 public class Member implements UserDetails {
 
     @Id
@@ -126,12 +129,6 @@ public class Member implements UserDetails {
 
     @OneToMany(mappedBy = "reviewee", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviewsReceived = new ArrayList<>();
-
-    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Follow> following = new ArrayList<>();
-
-    @OneToMany(mappedBy = "followee", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Follow> followers = new ArrayList<>();
 
     @Column(name = "review_score")
     private Double reviewScore = 0.0;

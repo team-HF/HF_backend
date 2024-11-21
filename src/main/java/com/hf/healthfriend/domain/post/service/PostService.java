@@ -16,11 +16,18 @@ import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.global.exception.CustomException;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
 import com.hf.healthfriend.global.exception.ErrorCode;
+import com.hf.healthfriend.global.util.file.FileUrlResolver;
+import com.hf.healthfriend.global.util.file.MultipartFileUploader;
 import jakarta.transaction.Transactional;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RScoredSortedSet;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -28,6 +35,7 @@ import org.springframework.data.domain.PageRequest;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -41,7 +49,9 @@ public class PostService {
     private final LikeRepository likeRepository;
     private final RedissonClient redissonClient;
 
-    public Long save(PostWriteRequest postWriteRequest) {
+    private final FileUrlResolver fileUrlResolver;
+
+    public Long save(PostWriteRequest postWriteRequest){
         Long memberId = postWriteRequest.getWriterId();
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
@@ -63,7 +73,8 @@ public class PostService {
             post.updateViewCount(post.getViewCount());
         }
         List<CommentDto> commentList = commentService.getCommentsOfPost(postId,sortType);
-        return PostGetResponse.of(post, commentList);
+        String imagePath = fileUrlResolver.resolveFileUrl(post.getImagePath());
+        return PostGetResponse.of(post, commentList,imagePath);
     }
 
     public void delete(Long postId) {
