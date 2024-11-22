@@ -4,7 +4,7 @@ import com.hf.healthfriend.domain.member.constant.FitnessLevel;
 import com.hf.healthfriend.domain.post.constant.PostCategory;
 import com.hf.healthfriend.domain.post.dto.response.PostListObject;
 import com.hf.healthfriend.domain.post.entity.QPost;
-import com.hf.healthfriend.global.util.file.FileUrlResolver;
+import com.hf.healthfriend.global.file.FileUrlResolver;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;

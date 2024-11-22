@@ -25,11 +25,10 @@ public class CommentRepository {
      * @throws CommentNotFoundException commentId에 해당하는 Comment entity가 존재하지 않을 경우
      */
     public void deleteById(Long commentId) throws CommentNotFoundException {
-        Optional<Comment> commentOp = this.commentJpaRepository.findById(commentId);
-        if (commentOp.isEmpty()) {
+        Comment comment = this.commentJpaRepository.findById(commentId).orElse(null);
+        if (comment == null || comment.isDeleted()) {
             throw new CommentNotFoundException("Comment entity of commentId not exists", commentId);
         }
-        Comment comment = commentOp.get();
         comment.delete();
     }
 
@@ -67,5 +66,9 @@ public class CommentRepository {
         }
         comment.updateLastModified(LocalDateTime.now()); // TODO: Update DTO의 모든 null일 경우 어떻게 할까?
         return comment;
+    }
+
+    public boolean existsByCommentIdAndIsDeletedFalse(Long id) {
+        return this.commentJpaRepository.existsByCommentIdAndIsDeletedFalse(id);
     }
 }
