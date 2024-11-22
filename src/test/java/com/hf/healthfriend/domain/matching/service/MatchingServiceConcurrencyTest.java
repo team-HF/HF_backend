@@ -65,12 +65,15 @@ class MatchingServiceConcurrencyTest {
     void requestMatching_concurrency() throws InterruptedException {
         for (int i = 0; i < 10; i++) {
             log.info("TEST COUNT: {}", i + 1);
-            runSingleTest_requestMatching_concurrency();
-            TransactionStatus status = this.txManager.getTransaction(new DefaultTransactionAttribute());
-            this.em.createNativeQuery("DELETE FROM matching").executeUpdate();
-            this.em.createNativeQuery("DELETE FROM members").executeUpdate();
-            this.txManager.commit(status);
-            System.out.println("-------------------");
+            try {
+                runSingleTest_requestMatching_concurrency();
+            } finally {
+                TransactionStatus status = this.txManager.getTransaction(new DefaultTransactionAttribute());
+                this.em.createNativeQuery("DELETE FROM matching").executeUpdate();
+                this.em.createNativeQuery("DELETE FROM members").executeUpdate();
+                this.txManager.commit(status);
+                System.out.println("-------------------");
+            }
         }
     }
 
