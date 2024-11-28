@@ -1,5 +1,6 @@
 package com.hf.healthfriend.global.exception;
 
+import com.hf.healthfriend.domain.member.exception.MemberExceptionHandlerControllerAdvice;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -11,7 +12,7 @@ import lombok.Getter;
  * Error Code를 따로 정의한 enum 클래스를 만들 예정이다.
  *
  * @author PGD
- * @see com.hf.healthfriend.domain.member.exceptionhandler.MemberExceptionHandlerControllerAdvice
+ * @see MemberExceptionHandlerControllerAdvice
  */
 
 @AllArgsConstructor
