@@ -50,7 +50,7 @@ public class MemberExceptionHandlerControllerAdvice {
                 e);
         return ResponseEntity.badRequest()
                 .body(
-                        BasicErrorResponse.of(MEMBER_NOT_FOUND)
+                        BasicErrorResponse.of(MEMBER_ALREADY_EXISTS)
                 );
     }
 

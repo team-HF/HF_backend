@@ -247,8 +247,8 @@ class MemberControllerMockMvcTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json("""
                         {
-                            "statusCode": 400,
-                            "errorCode": 201,
+                            "statusCode": 40003,
+                            "errorCode": "MB004",
                             "errorName": "MEMBER_ALREADY_EXISTS"
                         }
                         """));
@@ -312,10 +312,10 @@ class MemberControllerMockMvcTest {
                 .andExpect(status().isNotFound())
                 .andExpect(content().json("""
                         {
-                            "statusCode": 404,
+                            "statusCode": 40401,
                             "statusCodeSeries": 4,
-                            "errorCode": 200,
-                            "errorName": "MEMBER_OF_THE_MEMBER_ID_NOT_FOUND"
+                            "errorCode": "MB001",
+                            "errorName": "MEMBER_NOT_FOUND"
                         }
                         """));
     }
@@ -350,10 +350,10 @@ class MemberControllerMockMvcTest {
                 .andExpect(status().isNotFound())
                 .andExpect(content().json("""
                         {
-                            "statusCode": 404,
+                            "statusCode": 40401,
                             "statusCodeSeries": 4,
-                            "errorCode": 200,
-                            "errorName": "MEMBER_OF_THE_MEMBER_ID_NOT_FOUND"
+                            "errorCode": "MB001",
+                            "errorName": "MEMBER_NOT_FOUND"
                         }
                         """));
     }
