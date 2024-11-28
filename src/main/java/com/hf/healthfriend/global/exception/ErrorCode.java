@@ -23,6 +23,10 @@ public enum ErrorCode {
     INVALID_CODE(102, "유효하지 않은 인가코드입니다"),
     INVALID_REFRESH_TOKEN(103, "유효하지 않은 Refresh Token입니다"),
 
+    //MEMBER
+    // TODO: 기존 코드와 호환성을 위해 남겨둠. 추후 리팩토링
+    MEMBER_OF_THE_MEMBER_ID_NOT_FOUND(200, "memberId에 해당하는 회원이 없습니다"),
+
     //POST
     INVALID_REQUEST_FORMAT(40003,"요청 형식이 잘못되었습니다."),
     NON_EXIST_POST(40400,"존재하지 않는 글입니다."),
