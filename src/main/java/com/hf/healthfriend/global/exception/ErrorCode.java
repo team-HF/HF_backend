@@ -1,6 +1,6 @@
 package com.hf.healthfriend.global.exception;
 
-import com.hf.healthfriend.domain.member.exception.MemberExceptionHandlerControllerAdvice;
+import com.hf.healthfriend.domain.member.exception.handler.MemberExceptionHandlerControllerAdvice;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -22,10 +22,6 @@ public enum ErrorCode {
     UNAUTHORIZED(101, "허용되지 않은 접근입니다"),
     INVALID_CODE(102, "유효하지 않은 인가코드입니다"),
     INVALID_REFRESH_TOKEN(103, "유효하지 않은 Refresh Token입니다"),
-
-    //MEMBER
-    MEMBER_OF_THE_MEMBER_ID_NOT_FOUND(200, "memberId에 해당하는 회원이 없습니다"),
-    MEMBER_ALREADY_EXISTS(201, "이미 존재하는 회원입니다"),
 
     //POST
     INVALID_REQUEST_FORMAT(40003,"요청 형식이 잘못되었습니다."),
