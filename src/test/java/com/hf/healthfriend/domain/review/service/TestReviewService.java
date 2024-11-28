@@ -7,7 +7,6 @@ import com.hf.healthfriend.domain.matching.repository.MatchingRepository;
 import com.hf.healthfriend.domain.member.constant.FitnessLevel;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
-import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.review.constants.EvaluationType;
 import com.hf.healthfriend.domain.review.dto.request.ReviewCreationRequestDto;
@@ -16,7 +15,7 @@ import com.hf.healthfriend.domain.review.dto.response.RevieweeResponseDto;
 import com.hf.healthfriend.domain.review.entity.Review;
 import com.hf.healthfriend.domain.review.entity.ReviewEvaluation;
 import com.hf.healthfriend.domain.review.repository.ReviewRepository;
-import com.hf.healthfriend.domain.review.repository.dto.RevieweeStatisticsMapping;
+import com.hf.healthfriend.domain.review.repository.dto.RevieweeStatisticsQueryResultDto;
 import com.hf.healthfriend.testutil.SampleEntityGenerator;
 import jakarta.persistence.Id;
 import lombok.extern.slf4j.Slf4j;
@@ -56,9 +55,6 @@ class TestReviewService {
 
     @Mock
     MemberRepository memberRepository;
-
-    @Mock
-    MemberJpaRepository memberJpaRepository;
 
     Map<Long, Member> dummyMembers;
     Map<Long, Matching> dummyMatchings;
@@ -188,21 +184,19 @@ class TestReviewService {
         when(this.memberRepository.existsById(reviewee.getId())).thenReturn(true);
         when(this.reviewRepository.getRevieweeStatistics(reviewee.getId()))
                 .thenReturn(List.of(
-                        new RevieweeStatisticsMapping(
+                        new RevieweeStatisticsQueryResultDto(
                                 EvaluationType.GOOD, 1, 2L
                         ),
-                        new RevieweeStatisticsMapping(
+                        new RevieweeStatisticsQueryResultDto(
                                 EvaluationType.GOOD, 2, 1L
                         ),
-                        new RevieweeStatisticsMapping(
+                        new RevieweeStatisticsQueryResultDto(
                                 EvaluationType.GOOD, 1, 2L
                         ),
-                        new RevieweeStatisticsMapping(
+                        new RevieweeStatisticsQueryResultDto(
                                 EvaluationType.GOOD, 2, 1L
                         )
                 ));
-        when(this.reviewRepository.calculateAverageScoreByRevieweeId(reviewee.getId()))
-                .thenReturn(3.5);
 
         Map<EvaluationType, Map<Integer, Long>> expectedMap = Map.of(
                 EvaluationType.GOOD,
@@ -223,7 +217,6 @@ class TestReviewService {
         // Then
         log.info("result={}", result);
 
-        assertThat(result.averageScore()).isEqualTo(3.5);
         assertThat(result.memberId()).isEqualTo(reviewee.getId());
         result.reviewDetails().forEach((re) -> {
             assertThat(re.totalCountPerEvaluationType()).isEqualTo(3L);

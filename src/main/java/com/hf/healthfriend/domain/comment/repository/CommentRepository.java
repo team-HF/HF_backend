@@ -32,7 +32,6 @@ public class CommentRepository {
             throw new CommentException(CommentErrorCode.COMMENT_NOT_FOUND, HttpStatus.NOT_FOUND,
                     commentId+"번 댓글은 존재하지 않습니다.");
         }
-        Comment comment = commentOp.get();
         comment.delete();
     }
 
@@ -71,5 +70,9 @@ public class CommentRepository {
         }
         comment.updateLastModified(LocalDateTime.now()); // TODO: Update DTO의 모든 null일 경우 어떻게 할까?
         return comment;
+    }
+
+    public boolean existsByCommentIdAndIsDeletedFalse(Long id) {
+        return this.commentJpaRepository.existsByCommentIdAndIsDeletedFalse(id);
     }
 }

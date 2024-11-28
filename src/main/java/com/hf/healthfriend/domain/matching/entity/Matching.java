@@ -22,11 +22,11 @@ public class Matching {
     @Column(name = "matching_id")
     private Long matchingId;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "requester_id")
     private Member requester;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "request_target_id")
     private Member targetMember;
 
@@ -90,6 +90,8 @@ public class Matching {
         }
         this.status = MatchingStatus.FINISHED;
         this.finishTime = LocalDateTime.now();
+        this.requester.incrementMatchedCount();
+        this.targetMember.incrementMatchedCount();
     }
 
     public int sizeOfReviews() {

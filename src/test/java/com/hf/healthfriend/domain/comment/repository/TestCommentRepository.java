@@ -90,7 +90,7 @@ class TestCommentRepository {
                 new Comment(Post.builder().postId(this.postId).build(), new Member(this.commentWriterIds.get(0)), "content1");
         Long generatedId = this.commentRepository.save(comment).getCommentId();
         this.commentRepository.deleteById(generatedId);
-        assertThat(this.commentRepository.findById(generatedId)).isEmpty();
+        assertThat(this.commentRepository.existsByCommentIdAndIsDeletedFalse(generatedId)).isFalse();
     }
 
     @DisplayName("findCommentsByPostId - 다 찾아옴")

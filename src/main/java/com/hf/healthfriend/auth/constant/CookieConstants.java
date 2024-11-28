@@ -9,6 +9,7 @@ public enum CookieConstants {
     AUTH_SERVER_COOKIE_KEY("token_auth_server"), // 이건 아마 안 쓸 듯
     COOKIE_NAME_ACCESS_TOKEN("access_token"),
     COOKIE_NAME_EMAIL("email"),
+    COOKIE_NAME_NAME("name"),
     COOKIE_NAME_IS_NEW_MEMBER("is_new_member"),
     COOKIE_NAME_REFRESH_TOKEN("refresh_token");
 

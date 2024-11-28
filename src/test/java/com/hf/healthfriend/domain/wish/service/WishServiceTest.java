@@ -1,7 +1,7 @@
 package com.hf.healthfriend.domain.wish.service;
 
 import com.hf.healthfriend.domain.member.entity.Member;
-import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
+import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.wish.dto.response.WishResponse;
 import com.hf.healthfriend.domain.wish.entity.Wish;
 import com.hf.healthfriend.domain.wish.exception.WishException;
@@ -29,7 +29,7 @@ class WishServiceTest {
     private WishRepository wishRepository;
 
     @Mock
-    private MemberJpaRepository memberJpaRepository;
+    private MemberRepository memberRepository;
 
     @InjectMocks
     private WishService wishService;
@@ -46,8 +46,8 @@ class WishServiceTest {
         long wishedId = 2L;
 
         when(wishRepository.existsByWishedIdAndWisherId(wishedId, wisherId)).thenReturn(false);
-        when(memberJpaRepository.existsById(wisherId)).thenReturn(true);
-        when(memberJpaRepository.existsById(wishedId)).thenReturn(true);
+        when(memberRepository.existsById(wisherId)).thenReturn(true);
+        when(memberRepository.existsById(wishedId)).thenReturn(true);
 
         Wish savedWish = new Wish(new Member(wisherId), new Member(wishedId));
         when(wishRepository.save(any(Wish.class))).thenReturn(savedWish);
@@ -80,7 +80,7 @@ class WishServiceTest {
         long wishedId = 2L;
 
         when(wishRepository.existsByWishedIdAndWisherId(wishedId, wisherId)).thenReturn(false);
-        when(memberJpaRepository.existsById(wisherId)).thenReturn(false);
+        when(memberRepository.existsById(wisherId)).thenReturn(false);
 
         WishException exception = assertThrows(WishException.class, () -> {
             wishService.save(wisherId, wishedId);

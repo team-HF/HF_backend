@@ -6,6 +6,7 @@ import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.review.constants.EvaluationType;
 import com.hf.healthfriend.domain.review.entity.Review;
 import com.hf.healthfriend.domain.review.entity.ReviewEvaluation;
+import com.hf.healthfriend.domain.spec.entity.Spec;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -23,6 +24,7 @@ public class SampleEntityGenerator {
     @Deprecated
     public static Member generateSampleMember(String email, String nickname, String phoneNumber) {
         Member member = new Member(email);
+        member.setEmail(email);
         member.setNickname(nickname);
         member.setBirthDate(LocalDate.of(1997, 9, 16));
         member.setName("김샘플");
@@ -37,6 +39,17 @@ public class SampleEntityGenerator {
         member.setFitnessObjective(FitnessObjective.BULK_UP);
         member.setFitnessKind(FitnessKind.FUNCTIONAL);
         return member;
+    }
+
+    public static Spec generateSampleSpec(Member member) {
+        return new Spec(
+                member,
+                LocalDate.of(2005, 3, 5),
+                LocalDate.of(2006, 4, 7),
+                false,
+                "sample-spec",
+                "this is sample"
+        );
     }
 
     public static Review generateSampleReview(Matching matching, Member reviewer, Member reviewee) {

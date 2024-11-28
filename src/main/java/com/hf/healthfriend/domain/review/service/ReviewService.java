@@ -6,7 +6,6 @@ import com.hf.healthfriend.domain.matching.exception.MatchingNotFoundException;
 import com.hf.healthfriend.domain.matching.repository.MatchingRepository;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
-import com.hf.healthfriend.domain.member.repository.MemberJpaRepository;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.review.constants.EvaluationType;
 import com.hf.healthfriend.domain.review.dto.request.ReviewCreationRequestDto;
@@ -20,7 +19,7 @@ import com.hf.healthfriend.domain.review.exception.DuplicateReviewException;
 import com.hf.healthfriend.domain.review.exception.InvalidEvaluationsException;
 import com.hf.healthfriend.domain.review.exception.ReviewBeforeMeetingException;
 import com.hf.healthfriend.domain.review.repository.ReviewRepository;
-import com.hf.healthfriend.domain.review.repository.dto.RevieweeStatisticsMapping;
+import com.hf.healthfriend.domain.review.repository.dto.RevieweeStatisticsQueryResultDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -38,7 +37,6 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final MatchingRepository matchingRepository;
     private final MemberRepository memberRepository;
-    private final MemberJpaRepository memberJpaRepository;
 
     /**
      * 리뷰를 추가한다.
@@ -102,6 +100,31 @@ public class ReviewService {
         return targetMatching;
     }
 
+    private boolean isDuplicateEvaluationPresent(List<ReviewEvaluationDto> evaluations) {
+        if (evaluations == null) {
+            return true;
+        }
+
+        // TODO: iteration 때문에 성능상 약간 좀 안 좋을 수 있음 - 이걸 DB에서 검증하도록 하는 게 나을까?
+        Map<EvaluationType, Set<Integer>> evaluationIdsByEvaluationType = new HashMap<>();
+        for (ReviewEvaluationDto evaluationDto : evaluations) {
+            EvaluationType evaluationType = evaluationDto.getEvaluationType();
+            Integer evaluationId = evaluationDto.getEvaluationDetailId();
+            if (evaluationIdsByEvaluationType.containsKey(evaluationType)) {
+                Set<Integer> ids = evaluationIdsByEvaluationType.get(evaluationType);
+                if (ids.contains(evaluationId)) {
+                    return true;
+                }
+                ids.add(evaluationId);
+            } else {
+                Set<Integer> idSet = new HashSet<>();
+                idSet.add(evaluationId);
+                evaluationIdsByEvaluationType.put(evaluationType, idSet);
+            }
+        }
+        return false;
+    }
+
     /**
      * 특정 회원에게 달린 리뷰 정보를 가져온다.
      *
@@ -113,12 +136,10 @@ public class ReviewService {
             throw new MemberNotFoundException(revieweeId);
         }
 
-        // TODO: 이 두 개의 쿼리를 어떻게든 하나로 묶는 게 나을까?
-        List<RevieweeStatisticsMapping> statistics = this.reviewRepository.getRevieweeStatistics(revieweeId);
-        double averageScore = this.reviewRepository.calculateAverageScoreByRevieweeId(revieweeId);
+        List<RevieweeStatisticsQueryResultDto> statistics = this.reviewRepository.getRevieweeStatistics(revieweeId);
 
         Map<EvaluationType, Map<Integer, Long>> evaluationDetailCountsByEvaluationType = new HashMap<>();
-        for (RevieweeStatisticsMapping mapping : statistics) {
+        for (RevieweeStatisticsQueryResultDto mapping : statistics) {
             EvaluationType evaluationType = mapping.getEvaluationType();
             if (!evaluationDetailCountsByEvaluationType.containsKey(evaluationType)) {
                 evaluationDetailCountsByEvaluationType.put(evaluationType, new HashMap<>());
@@ -145,32 +166,7 @@ public class ReviewService {
                     )
             );
         }
-        return new RevieweeResponseDto(revieweeId, averageScore, reviewResponseDtos);
-    }
-
-    private boolean isDuplicateEvaluationPresent(List<ReviewEvaluationDto> evaluations) {
-        if (evaluations == null) {
-            return true;
-        }
-
-        // TODO: iteration 때문에 성능상 약간 좀 안 좋을 수 있음 - 이걸 DB에서 검증하도록 하는 게 나을까?
-        Map<EvaluationType, Set<Integer>> evaluationIdsByEvaluationType = new HashMap<>();
-        for (ReviewEvaluationDto evaluationDto : evaluations) {
-            EvaluationType evaluationType = evaluationDto.getEvaluationType();
-            Integer evaluationId = evaluationDto.getEvaluationDetailId();
-            if (evaluationIdsByEvaluationType.containsKey(evaluationType)) {
-                Set<Integer> ids = evaluationIdsByEvaluationType.get(evaluationType);
-                if (ids.contains(evaluationId)) {
-                    return true;
-                }
-                ids.add(evaluationId);
-            } else {
-                Set<Integer> idSet = new HashSet<>();
-                idSet.add(evaluationId);
-                evaluationIdsByEvaluationType.put(evaluationType, idSet);
-            }
-        }
-        return false;
+        return new RevieweeResponseDto(revieweeId, reviewResponseDtos);
     }
 
     private void updateMemberReviewScore(Long revieweeId) {
@@ -180,6 +176,6 @@ public class ReviewService {
                 .mapToInt(Integer::intValue)
                 .average()
                 .orElse(0.0)*10.0)/10.0;
-        memberJpaRepository.updateMemberReviewScore(revieweeId,averageScore);
+        memberRepository.updateMemberReviewScore(revieweeId,averageScore);
     }
 }

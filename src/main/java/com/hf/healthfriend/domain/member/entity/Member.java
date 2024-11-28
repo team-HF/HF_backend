@@ -3,6 +3,7 @@ package com.hf.healthfriend.domain.member.entity;
 import com.hf.healthfriend.domain.follow.entity.Follow;
 import com.hf.healthfriend.domain.matching.entity.Matching;
 import com.hf.healthfriend.domain.member.constant.*;
+import com.hf.healthfriend.domain.member.domain.Tier;
 import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.review.entity.Review;
 import com.hf.healthfriend.domain.spec.entity.Spec;
@@ -62,13 +63,13 @@ public class Member implements UserDetails {
     @Column(name = "profile_url")
     private String profileImageUrl;
 
-    @Column(name = "cd1")
+    @Column(name = "cd1", nullable = false)
     private String cd1;
 
-    @Column(name = "cd2")
+    @Column(name = "cd2", nullable = false)
     private String cd2;
 
-    @Column(name = "cd3")
+    @Column(name = "cd3", nullable = false)
     private String cd3;
 
     @Column(name = "birth_date", nullable = false)
@@ -82,23 +83,23 @@ public class Member implements UserDetails {
     @Column(name = "introduction", nullable = false)
     private String introduction;
 
-    @Column(name = "fitness_level", nullable = false)
+    @Column(name = "fitness_level")
     @Enumerated(EnumType.STRING)
     private FitnessLevel fitnessLevel;
 
-    @Column(name = "companion_style", nullable = false)
+    @Column(name = "companion_style")
     @Enumerated(EnumType.STRING)
     private CompanionStyle companionStyle;
 
-    @Column(name = "fitness_eagerness", nullable = false)
+    @Column(name = "fitness_eagerness")
     @Enumerated(EnumType.STRING)
     private FitnessEagerness fitnessEagerness;
 
-    @Column(name = "fitness_objective", nullable = false)
+    @Column(name = "fitness_objective")
     @Enumerated(EnumType.STRING)
     private FitnessObjective fitnessObjective;
 
-    @Column(name = "fitness_kind", nullable = false)
+    @Column(name = "fitness_kind")
     @Enumerated(EnumType.STRING)
     private FitnessKind fitnessKind;
 
@@ -130,10 +131,10 @@ public class Member implements UserDetails {
     private List<Review> reviewsReceived = new ArrayList<>();
 
     @Column(name = "review_score")
-    private Double reviewScore;
+    private Double reviewScore = 0.0;
 
     @Column(name = "matched_count")
-    private Long matchedCount;
+    private Long matchedCount = 0L;
 
     public Member(long memberId) {
         this.id = memberId;
@@ -156,6 +157,10 @@ public class Member implements UserDetails {
         this.password = password;
     }
 
+    public void addSpec(Spec spec) {
+        this.specs.add(spec);
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(this.role.name()));
@@ -172,5 +177,13 @@ public class Member implements UserDetails {
 
     public void delete() {
         this.isDeleted = true;
+    }
+
+    public void incrementMatchedCount() {
+        this.matchedCount++;
+    }
+
+    public Tier getTier() {
+        return Tier.create(this.fitnessLevel, this.matchedCount);
     }
 }

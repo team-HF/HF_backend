@@ -108,20 +108,20 @@ class SpecControllerMockMvcTest {
         List<SpecDto> given = List.of(
                 SpecDto.builder()
                         .title("경력1")
-                        .startDate(LocalDate.of(2017, 11, 23))
-                        .endDate(LocalDate.of(2018, 11, 12))
+                        .startDate(LocalDate.of(2017, 11, 1))
+                        .endDate(LocalDate.of(2018, 11, 1))
                         .isCurrent(false)
                         .description("종료된 경력")
                         .build(),
                 SpecDto.builder()
                         .title("경력2")
-                        .startDate(LocalDate.of(2024, 8, 24))
+                        .startDate(LocalDate.of(2024, 8, 1))
                         .isCurrent(true)
                         .description("현재 진행 중인 경력")
                         .build(),
                 SpecDto.builder()
                         .title("수상1")
-                        .startDate(LocalDate.of(2020, 11, 23))
+                        .startDate(LocalDate.of(2020, 11, 1))
                         .isCurrent(false)
                         .description("")
                         .build()
@@ -135,21 +135,21 @@ class SpecControllerMockMvcTest {
                         .content("""
                                 [
                                     {
-                                        "startDate": "2017-11-23",
-                                        "endDate": "2018-11-12",
+                                        "startDate": "2017-11",
+                                        "endDate": "2018-11",
                                         "isCurrent": false,
                                         "title": "경력1",
                                         "description": "종료된 경력"
                                     },
                                     {
-                                        "startDate": "2024-08-24",
+                                        "startDate": "2024-08",
                                         "endDate": null,
                                         "isCurrent": true,
                                         "title": "경력2",
                                         "description": "현재 진행 중인 경력"
                                     },
                                     {
-                                        "startDate": "2020-11-23",
+                                        "startDate": "2020-11",
                                         "endDate": null,
                                         "isCurrent": false,
                                         "title": "수상1",
@@ -182,20 +182,20 @@ class SpecControllerMockMvcTest {
         List<SpecDto> given = List.of(
                 SpecDto.builder()
                         .title("경력1")
-                        .startDate(LocalDate.of(2017, 11, 23))
-                        .endDate(LocalDate.of(2018, 11, 12))
+                        .startDate(LocalDate.of(2017, 11, 1))
+                        .endDate(LocalDate.of(2018, 11, 1))
                         .isCurrent(false)
                         .description("종료된 경력")
                         .build(),
                 SpecDto.builder()
                         .title("경력2")
-                        .startDate(LocalDate.of(2024, 8, 24))
+                        .startDate(LocalDate.of(2024, 8, 1))
                         .isCurrent(true)
                         .description("현재 진행 중인 경력")
                         .build(),
                 SpecDto.builder()
                         .title("수상1")
-                        .startDate(LocalDate.of(2020, 11, 23))
+                        .startDate(LocalDate.of(2020, 11, 1))
                         .isCurrent(false)
                         .description("")
                         .build()
@@ -209,21 +209,21 @@ class SpecControllerMockMvcTest {
                         .content("""
                                 [
                                     {
-                                        "startDate": "2017-11-23",
-                                        "endDate": "2018-11-12",
+                                        "startDate": "2017-11",
+                                        "endDate": "2018-11",
                                         "isCurrent": false,
                                         "title": "경력1",
                                         "description": "종료된 경력"
                                     },
                                     {
-                                        "startDate": "2024-08-24",
+                                        "startDate": "2024-08",
                                         "endDate": null,
                                         "isCurrent": true,
                                         "title": "경력2",
                                         "description": "현재 진행 중인 경력"
                                     },
                                     {
-                                        "startDate": "2020-11-23",
+                                        "startDate": "2020-11",
                                         "endDate": null,
                                         "isCurrent": false,
                                         "title": "수상1",
@@ -275,8 +275,8 @@ class SpecControllerMockMvcTest {
                                 {
                                     "specId": 1000,
                                     "title": "스펙1",
-                                    "startDate": "2018-03-05",
-                                    "endDate": "2019-05-07",
+                                    "startDate": "2018-03",
+                                    "endDate": "2019-05",
                                     "isCurrent": false,
                                     "description": ""
                                 }
@@ -294,8 +294,8 @@ class SpecControllerMockMvcTest {
                         .specUpdateType(SpecUpdateType.INSERT)
                         .spec(
                                 SpecDto.builder()
-                                        .startDate(LocalDate.of(2020, 10, 21))
-                                        .endDate(LocalDate.of(2022, 10, 21))
+                                        .startDate(LocalDate.of(2020, 10, 1))
+                                        .endDate(LocalDate.of(2022, 10, 1))
                                         .title("새 스펙")
                                         .description("스펙")
                                         .isCurrent(false)
@@ -307,8 +307,8 @@ class SpecControllerMockMvcTest {
                         .specId(100L)
                         .spec(
                                 SpecDto.builder()
-                                        .startDate(LocalDate.of(2020, 10, 21))
-                                        .endDate(LocalDate.of(2022, 10, 21))
+                                        .startDate(LocalDate.of(2020, 10, 1))
+                                        .endDate(LocalDate.of(2022, 10, 1))
                                         .title("스포애니 전문 트레이너")
                                         .description("원래는 에이블짐 트레이너였음")
                                         .isCurrent(false)
@@ -333,8 +333,8 @@ class SpecControllerMockMvcTest {
                                     {
                                         "specUpdateType": "INSERT",
                                         "spec": {
-                                            "startDate": "2020-10-21",
-                                            "endDate": "2022-10-21",
+                                            "startDate": "2020-10",
+                                            "endDate": "2022-10",
                                             "title": "새 스펙",
                                             "description": "스펙",
                                             "isCurrent": false
@@ -344,8 +344,8 @@ class SpecControllerMockMvcTest {
                                         "specUpdateType": "UPDATE",
                                         "specId": 100,
                                         "spec": {
-                                            "startDate": "2020-10-21",
-                                            "endDate": "2022-10-21",
+                                            "startDate": "2020-10",
+                                            "endDate": "2022-10",
                                             "title": "스포애니 전문 트레이너",
                                             "description": "원래는 에이블짐 트레이너였음",
                                             "isCurrent": false

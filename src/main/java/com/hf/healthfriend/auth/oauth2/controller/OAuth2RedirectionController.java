@@ -21,6 +21,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +86,8 @@ public class OAuth2RedirectionController {
                                             - refresh_token: Refresh Token을 담은 HTTP-only, Secure, Same-site: None 쿠키
                                             - access_token: Access Token을 담은 Secure, Same-site: None 쿠키
                                             - email: 카카오 Authorization Server로부터 가져온 email을 담은 Secure, Same-site: None 쿠키
+                                            - name: 카카오 Authorization Server로부터 가져온 회원의 이름, Secure, Same-site: None 쿠키
+                                            name은 URI 인코딩이 되어 있기 때문에 디코딩해야 함 ("%EB%B0%95%EA%B2%BD... 형식")
                                             - is_new_member: 신규 회원일 경우 true, 그렇지 않으면 false, Secure, Same-site: None 쿠키
                                             """
                             )
@@ -129,6 +133,8 @@ public class OAuth2RedirectionController {
                                             - refresh_token: Refresh Token을 담은 HTTP-only, Secure, Same-site: None 쿠키
                                             - access_token: Access Token을 담은 Secure, Same-site: None 쿠키
                                             - email: 구글 Authorization Server로부터 가져온 email을 담은 Secure, Same-site: None 쿠키
+                                            - name: 구글 Authorization Server로부터 가져온 회원의 이름, Secure, Same-site: None 쿠키
+                                            name은 URI 인코딩이 되어 있기 때문에 디코딩해야 함 ("%EB%B0%95%EA%B2%BD... 형식")
                                             - is_new_member: 신규 회원일 경우 true, 그렇지 않으면 false, Secure, Same-site: None 쿠키
                                             """
                             )
@@ -173,6 +179,9 @@ public class OAuth2RedirectionController {
         ResponseCookie emailCookie =
                 this.cookieUtils.buildJavaScriptAccessibleResponseCookie(CookieConstants.COOKIE_NAME_EMAIL.getString(),
                         grantedTokenInfo.getEmail());
+        ResponseCookie nameCookie =
+                this.cookieUtils.buildJavaScriptAccessibleResponseCookie(CookieConstants.COOKIE_NAME_NAME.getString(),
+                        URLEncoder.encode(grantedTokenInfo.getName(), StandardCharsets.UTF_8));
         ResponseCookie newMemberCookie =
                 this.cookieUtils.buildJavaScriptAccessibleResponseCookie(CookieConstants.COOKIE_NAME_IS_NEW_MEMBER.getString(),
                         String.valueOf(!memberExists));
@@ -181,6 +190,7 @@ public class OAuth2RedirectionController {
         headers.add(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
         headers.add(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
         headers.add(HttpHeaders.SET_COOKIE, emailCookie.toString());
+        headers.add(HttpHeaders.SET_COOKIE, nameCookie.toString());
         headers.add(HttpHeaders.SET_COOKIE, newMemberCookie.toString());
         headers.add(HttpHeaders.LOCATION, this.clientOrigin + REDIRECTION_PATH);
 
