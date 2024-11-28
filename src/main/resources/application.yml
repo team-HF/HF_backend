@@ -75,6 +75,10 @@ spring:
         show_sql: true
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
+    logging:
+      level:
+        org.hibernate.SQL: DEBUG
+        org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
   datasource:
     driver-class-name: com.mysql.jdbc.Driver

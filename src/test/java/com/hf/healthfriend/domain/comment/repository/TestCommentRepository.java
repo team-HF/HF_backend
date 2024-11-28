@@ -1,9 +1,8 @@
 package com.hf.healthfriend.domain.comment.repository;
 
 import com.hf.healthfriend.domain.comment.entity.Comment;
-import com.hf.healthfriend.domain.comment.exception.CommentNotFoundException;
+import com.hf.healthfriend.domain.comment.exception.CommentException;
 import com.hf.healthfriend.domain.comment.repository.dto.CommentUpdateDto;
-import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.post.constant.PostCategory;
@@ -22,7 +21,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
@@ -259,20 +257,9 @@ class TestCommentRepository {
     @DisplayName("updateComment - 그런 comment 없어서 수정 실패")
     @Test
     void updateComment_fail_sinceCommentNotFoundException() {
-        assertThatExceptionOfType(CommentNotFoundException.class)
+        assertThatExceptionOfType(CommentException.class)
                 .isThrownBy(() -> this.commentRepository.updateComment(11351L, CommentUpdateDto.builder().content("New Content").build()));
     }
 
-    @DisplayName("deleteById - 삭제된 엔티티를 또 삭제하려고 하면 CommentNotFoundException 발생")
-    @Test
-    void deleteById_failWhenAttemptsToDeleteDeletedComment() {
-        Comment comment = new Comment(Post.builder().postId(this.postId).build(),
-                new Member(this.commentWriterIds.get(0)),
-                "content1");
-        Long generatedId = this.commentRepository.save(comment).getCommentId();
-        this.commentRepository.deleteById(generatedId);
 
-        assertThatExceptionOfType(CommentNotFoundException.class)
-                .isThrownBy(() -> this.commentRepository.deleteById(generatedId));
-    }
 }

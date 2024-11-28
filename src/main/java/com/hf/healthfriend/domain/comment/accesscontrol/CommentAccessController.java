@@ -3,6 +3,7 @@ package com.hf.healthfriend.domain.comment.accesscontrol;
 import com.hf.healthfriend.auth.accesscontrol.AccessControlTrigger;
 import com.hf.healthfriend.auth.accesscontrol.AccessController;
 import com.hf.healthfriend.domain.comment.entity.Comment;
+import com.hf.healthfriend.domain.comment.exception.CommentErrorCode;
 import com.hf.healthfriend.domain.comment.repository.CommentRepository;
 import com.hf.healthfriend.domain.member.constant.Role;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,17 +20,19 @@ import java.util.Optional;
 public class CommentAccessController {
     private final CommentRepository commentRepository;
 
-    @AccessControlTrigger(path = "/hr/comments/{commentId}", method = "DELETE")
+    @AccessControlTrigger(path = "/hf/comments/{commentId}", method = "DELETE")
     public boolean accessControlForCreatingComment(BearerTokenAuthentication authentication, HttpServletRequest request) {
-        return controlAccessToCommentResourceByCommentId(authentication, request);
+        CommentErrorCode errorCode = CommentErrorCode.FORBIDDEN_COMMENT_DELETE;
+        return controlAccessToCommentResourceByCommentId(authentication, request,errorCode);
     }
 
-    @AccessControlTrigger(path = "/hr/comments/{commentId}", method = "PATCH")
+    @AccessControlTrigger(path = "/hf/comments/{commentId}", method = "PATCH")
     public boolean accessControlForUpdatingComment(BearerTokenAuthentication authentication, HttpServletRequest request) {
-        return controlAccessToCommentResourceByCommentId(authentication, request);
+        CommentErrorCode errorCode = CommentErrorCode.FORBIDDEN_COMMENT_UPDATE;
+        return controlAccessToCommentResourceByCommentId(authentication, request,errorCode);
     }
 
-    private boolean controlAccessToCommentResourceByCommentId(BearerTokenAuthentication authentication, HttpServletRequest request) {
+    private boolean controlAccessToCommentResourceByCommentId(BearerTokenAuthentication authentication, HttpServletRequest request, CommentErrorCode errorCode) {
         // TODO: AccessControlFilter에서 글로벌하게 처리해야 한다 (혹은 AOP)
         if (authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).anyMatch((g) -> Role.ROLE_ADMIN.name().equals(g))) {
             return true;

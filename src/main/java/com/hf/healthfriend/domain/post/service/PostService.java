@@ -13,21 +13,15 @@ import com.hf.healthfriend.domain.post.dto.request.PostWriteRequest;
 import com.hf.healthfriend.domain.post.dto.response.PostGetResponse;
 import com.hf.healthfriend.domain.post.dto.response.PostListObject;
 import com.hf.healthfriend.domain.post.entity.Post;
-import com.hf.healthfriend.global.exception.CustomException;
+import com.hf.healthfriend.domain.post.exception.PostErrorCode;
+import com.hf.healthfriend.domain.post.exception.PostException;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
-import com.hf.healthfriend.global.exception.ErrorCode;
 import com.hf.healthfriend.global.util.file.FileUrlResolver;
-import com.hf.healthfriend.global.util.file.MultipartFileUploader;
 import jakarta.transaction.Transactional;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RScoredSortedSet;
 import org.redisson.api.RedissonClient;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -35,7 +29,6 @@ import org.springframework.data.domain.PageRequest;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -61,14 +54,14 @@ public class PostService {
 
     public Long update(PostWriteRequest postWriteRequest, Long postId){
         Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND, HttpStatus.NOT_FOUND,postId + "번 post가 존재하지 않습니다."));
         post.update(postWriteRequest.getTitle(), postWriteRequest.getContent(), PostCategory.valueOf(postWriteRequest.getCategory()));
         return post.getPostId();
     }
 
     public PostGetResponse get(Long postId, boolean canUpdateViewCount, CommentSortType sortType) {
         Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND, HttpStatus.NOT_FOUND,postId + "번 post가 존재하지 않습니다."));
         if(canUpdateViewCount) {
             post.updateViewCount(post.getViewCount());
         }
@@ -79,7 +72,7 @@ public class PostService {
 
     public void delete(Long postId) {
         Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND, HttpStatus.NOT_FOUND,postId + "번 post가 존재하지 않습니다."));
         post.delete();
         likeRepository.deleteLikeByPostId(postId);
     }

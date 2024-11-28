@@ -5,8 +5,8 @@ import com.hf.healthfriend.domain.comment.dto.CommentDto;
 import com.hf.healthfriend.domain.comment.dto.request.CommentCreationRequestDto;
 import com.hf.healthfriend.domain.comment.dto.response.CommentCreationResponseDto;
 import com.hf.healthfriend.domain.comment.entity.Comment;
-import com.hf.healthfriend.domain.comment.exception.CommentNotFoundException;
-import com.hf.healthfriend.domain.comment.exception.PostNotFoundException;
+import com.hf.healthfriend.domain.comment.exception.CommentErrorCode;
+import com.hf.healthfriend.domain.comment.exception.CommentException;
 import com.hf.healthfriend.domain.comment.repository.CommentJpaRepository;
 import com.hf.healthfriend.domain.comment.repository.CommentRepository;
 import com.hf.healthfriend.domain.comment.repository.dto.CommentUpdateDto;
@@ -14,9 +14,10 @@ import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.post.entity.Post;
+import com.hf.healthfriend.domain.post.exception.PostErrorCode;
+import com.hf.healthfriend.domain.post.exception.PostException;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
 import com.hf.healthfriend.global.exception.CustomException;
-import com.hf.healthfriend.global.exception.ErrorCode;
 import com.hf.healthfriend.global.util.file.FileUrlResolver;
 import java.util.ArrayList;
 import java.util.Map;
@@ -49,7 +50,8 @@ public class CommentService {
         Comment parentComment = null;
         if (requestDto.getParentCommentId()!=null){
             if(!commentJpaRepository.existsByCommentIdAndIsDeletedFalse(requestDto.getParentCommentId())){
-                throw new CustomException(ErrorCode.NON_EXIST_PARENT_COMMENT,HttpStatus.NOT_FOUND);
+                throw new CommentException(CommentErrorCode.PARENT_COMMENT_NOT_FOUND,HttpStatus.NOT_FOUND,
+                        requestDto.getParentCommentId()+"번 댓글은 존재하지 않는 댓글입니다.");
             }
             parentComment = Optional.of(requestDto.getParentCommentId())
                     .map(parentId -> Comment.builder().commentId(parentId).build())
@@ -77,9 +79,10 @@ public class CommentService {
     }
 
     // TODO : 재귀 삭제
-    public void deleteComment(Long commentId) throws CommentNotFoundException {
+    public void deleteComment(Long commentId) throws CommentException {
         if(!commentJpaRepository.existsByCommentIdAndIsDeletedFalse(commentId)) {
-            throw new CustomException(ErrorCode.NON_EXIST_COMMENT, HttpStatus.NOT_FOUND);
+            throw new CommentException(CommentErrorCode.COMMENT_NOT_FOUND, HttpStatus.NOT_FOUND,
+                    commentId+"번 댓글은 존재하지 않습니다.");
         }
         // CTE 쿼리로 하위 댓글 모두 soft delete
         commentJpaRepository.deleteAllReplies(commentId);
@@ -89,7 +92,8 @@ public class CommentService {
 
     public List<CommentDto> getCommentsOfPost(Long postId, CommentSortType sortType) {
         if (!postRepository.existsById(postId)) {
-            throw new PostNotFoundException(postId, "postId에 해당하는 Post가 없음");
+            throw new PostException(PostErrorCode.POST_NOT_FOUND,HttpStatus.NOT_FOUND,
+                    postId+"번 포스트는 존재하지 않습니다.");
         }
 
         List<Comment> allComments = commentJpaRepository.findAllCommentsByPostIdWithSorting(postId,sortType);
@@ -126,7 +130,7 @@ public class CommentService {
                 .toList();
     }
 
-    public CommentDto updateComment(Long commentId, CommentUpdateDto updateDto) throws CommentNotFoundException {
+    public CommentDto updateComment(Long commentId, CommentUpdateDto updateDto) throws CommentException {
         Comment updatedComment = this.commentRepository.updateComment(commentId, updateDto);
         return toCommentDto(updatedComment);
     }
