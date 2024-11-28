@@ -184,11 +184,10 @@ class MatchingControllerMockMvcTest {
                 .andExpect(status().isNotFound())
                 .andExpect(content().json("""
                         {
-                            "statusCode": 40003,
+                            "statusCode": 40401,
                             "statusCodeSeries": 4,
-                            "errorCode": "MB004",
-                            "errorName": "MEMBER_ALREADY_EXISTS",
-                            "message": "이미 존재하는 회원입니다"
+                            "errorCode": "MB001",
+                            "errorName": "MEMBER_NOT_FOUND"
                         }
                         """));
     }

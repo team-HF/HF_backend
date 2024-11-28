@@ -142,9 +142,9 @@ public class MemberController {
                             schema = @Schema(implementation = ApiErrorResponse.class),
                             examples = @ExampleObject("""
                                     {
-                                        "statusCode": 400,
+                                        "statusCode": 40003,
                                         "statusCodeSeries": 4,
-                                        "errorCode": 201,
+                                        "errorCode": "MB004",
                                         "errorName": "MEMBER_ALREADY_EXISTS",
                                         "message": "이미 존재하는 회원입니다"
                                     }
@@ -193,11 +193,10 @@ public class MemberController {
                             schema = @Schema(implementation = ApiErrorResponse.class),
                             examples = @ExampleObject("""
                                     {
-                                        "statusCode": 404,
+                                        "statusCode": 40401,
                                         "statusCodeSeries": 4,
-                                        "errorCode": 200,
-                                        "errorName": "MEMBER_OF_THE_MEMBER_ID_NOT_FOUND",
-                                        "message": "memberId에 해당하는 회원이 없습니다"
+                                        "errorCode": "MB001",
+                                        "errorName": "MEMBER_NOT_FOUND"
                                     }
                                     """)
                     )
@@ -271,11 +270,10 @@ public class MemberController {
                             schema = @Schema(implementation = ApiErrorResponse.class),
                             examples = @ExampleObject("""
                                     {
-                                        "statusCode": 404,
+                                        "statusCode": 40401,
                                         "statusCodeSeries": 4,
-                                        "errorCode": 200,
-                                        "errorName": "MEMBER_OF_THE_MEMBER_ID_NOT_FOUND",
-                                        "message": "memberId에 해당하는 회원이 없습니다"
+                                        "errorCode": "MB001",
+                                        "errorName": "MEMBER_NOT_FOUND"
                                     }
                                     """)
                     )
@@ -386,11 +384,10 @@ public class MemberController {
                                     schema = @Schema(implementation = ApiErrorResponse.class),
                                     examples = @ExampleObject("""
                                             {
-                                                "statusCode": 404,
+                                                "statusCode": 40401,
                                                 "statusCodeSeries": 4,
-                                                "errorCode": 200,
-                                                "errorName": "MEMBER_OF_THE_MEMBER_ID_NOT_FOUND",
-                                                "message": "memberId에 해당하는 회원이 없습니다"
+                                                "errorCode": "MB001",
+                                                "errorName": "MEMBER_NOT_FOUND"
                                             }
                                             """)
                             )

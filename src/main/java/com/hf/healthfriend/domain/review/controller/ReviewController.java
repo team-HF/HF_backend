@@ -63,7 +63,7 @@ public class ReviewController {
                     ),
                     @ApiResponse(
                             description = "없는 회원 혹은 없는 매칭에 대해 리뷰를 남길 경우 실패",
-                            responseCode = "400",
+                            responseCode = "404",
                             content = @Content(
                                     schema = @Schema(implementation = BasicErrorResponse.class),
                                     examples = {
@@ -71,11 +71,13 @@ public class ReviewController {
                                                     name = "매칭이 존재하지 않음",
                                                     value = """
                                                             {
-                                                                "statusCode": 40000,
+                                                                "statusCode": 40401,
                                                                 "statusCodeSeries": 4,
-                                                                "errorCode": "R001",
-                                                                "errorName": "MATCHING_NOT_FOUND",
-                                                                "message": "리뷰를 남기려는 매칭이 존재하지 않음 - matchingId=10000"
+                                                                "errorCode": "MAT002",
+                                                                "errorName": "MATCHING_NOT_FOUND".
+                                                                "detail": {
+                                                                    "matchingId": 10000
+                                                                }
                                                             }
                                                             """
                                             ),
@@ -83,11 +85,13 @@ public class ReviewController {
                                                     name = "회원이 존재하지 않음",
                                                     value = """
                                                             {
-                                                                "statusCode": 40001,
+                                                                "statusCode": 40401,
                                                                 "statusCodeSeries": 4,
-                                                                "errorCode": "R002",
+                                                                "errorCode": "MB001",
                                                                 "errorName": "MEMBER_NOT_FOUND",
-                                                                "message": "리뷰를 남기려는 회원이 존재하지 않음 - reviewerId=10000"
+                                                                "detail": {
+                                                                    "reviewerId": 10000
+                                                                }
                                                             }
                                                             """
                                             )
@@ -167,7 +171,7 @@ public class ReviewController {
                     ),
                     @ApiResponse(
                             description = "없는 회원에 대한 리뷰를 조회할 경우",
-                            responseCode = "400",
+                            responseCode = "404",
                             content = @Content(
                                     schema = @Schema(implementation = BasicErrorResponse.class),
                                     examples = {
@@ -175,11 +179,13 @@ public class ReviewController {
                                                     name = "회원이 존재하지 않음",
                                                     value = """
                                                             {
-                                                                "statusCode": 40001,
+                                                                "statusCode": 40401,
                                                                 "statusCodeSeries": 4,
-                                                                "errorCode": "R002",
+                                                                "errorCode": "MB001",
                                                                 "errorName": "MEMBER_NOT_FOUND",
-                                                                "message": "리뷰를 남기려는 회원이 존재하지 않음 - reviewerId=10000"
+                                                                "detail": {
+                                                                    "reviewerId": 10000
+                                                                }
                                                             }
                                                             """
                                             )
