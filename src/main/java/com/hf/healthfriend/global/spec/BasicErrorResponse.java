@@ -8,6 +8,7 @@ public record BasicErrorResponse(
         int statusCodeSeries,
         String errorCode,
         String errorName,
-        String message
+        String message,
+        Object detail
 ) {
 }
