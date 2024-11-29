@@ -177,4 +177,8 @@ public class MemberService {
                 .averageReviewScore(profileResult.averageReviewScore())
                 .build();
     }
+
+    public boolean checkDuplicateOfNickname(String nickname) {
+        return this.memberRepository.existsByNickname(nickname);
+    }
 }
