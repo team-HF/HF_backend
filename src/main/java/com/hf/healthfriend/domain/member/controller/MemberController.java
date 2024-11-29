@@ -13,6 +13,7 @@ import com.hf.healthfriend.domain.member.dto.response.ProfileResponseDto;
 import com.hf.healthfriend.domain.member.service.MemberService;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
 import com.hf.healthfriend.global.spec.ApiErrorResponse;
+import com.hf.healthfriend.global.spec.schema.BooleanTypeSchema;
 import com.hf.healthfriend.global.spec.schema.MemberCreationResponseSchema;
 import com.hf.healthfriend.global.spec.schema.MemberResponseSchema;
 import io.swagger.v3.oas.annotations.Operation;
@@ -419,8 +420,40 @@ public class MemberController {
         return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.searchMembers(keyword,page,size), HttpStatus.OK));
     }
 
-    @GetMapping("/check-nickname-duplicate")
-    @Operation(summary = "닉네임 중복 체크")
+    @GetMapping("/is-duplicate-nickname")
+    @Operation(
+            summary = "닉네임 중복 체크",
+            description = "회원 닉네임 중복 확인. 중복된 닉네임일 경우 true, 중복되지 않은 닉네임일 경우 false가 \"content\"에 " +
+                    "담겨서 반환됨",
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    content = @Content(
+                            schema = @Schema(implementation = BooleanTypeSchema.class),
+                            examples = {
+                                    @ExampleObject(
+                                            summary = "닉네임 중복일 경우 true 반환",
+                                            value = """
+                                                    {
+                                                        "statusCode": 200,
+                                                        "statusCodeSeries": 2,
+                                                        "content": true
+                                                    }
+                                                    """
+                                    ),
+                                    @ExampleObject(
+                                            summary = "닉네임이 중복되지 않을 경우 false 반환",
+                                            value = """
+                                                    {
+                                                        "statusCode": 200,
+                                                        "statusCodeSeries": 2,
+                                                        "content": false
+                                                    }
+                                                    """
+                                    )
+                            }
+                    )
+            )
+    )
     public ResponseEntity<ApiBasicResponse<Boolean>> checkNicknameDuplicate(@RequestParam("nickname") String nickname) {
         return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.checkDuplicateOfNickname(nickname), HttpStatus.OK));
     }
