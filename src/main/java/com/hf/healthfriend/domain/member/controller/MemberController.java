@@ -418,4 +418,10 @@ public class MemberController {
                                                                                            @RequestParam(defaultValue = "3") int size) {
         return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.searchMembers(keyword,page,size), HttpStatus.OK));
     }
+
+    @GetMapping("/check-nickname-duplicate")
+    @Operation(summary = "닉네임 중복 체크")
+    public ResponseEntity<ApiBasicResponse<Boolean>> checkNicknameDuplicate(@RequestParam("nickname") String nickname) {
+        return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.checkDuplicateOfNickname(nickname), HttpStatus.OK));
+    }
 }
