@@ -1,7 +1,7 @@
 package com.hf.healthfriend.domain.comment.exception.handler;
 
-import com.hf.healthfriend.domain.comment.exception.CommentNotFoundException;
-import com.hf.healthfriend.domain.comment.exception.PostNotFoundException;
+import com.hf.healthfriend.domain.comment.exception.CommentErrorCode;
+import com.hf.healthfriend.domain.comment.exception.CommentException;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.global.spec.BasicErrorResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -22,13 +22,19 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @RestControllerAdvice(basePackages = "com.hf.healthfriend.domain.comment")
 public class CommentExceptionHandlerControllerAdvice {
 
-    @ExceptionHandler(CommentNotFoundException.class)
-    public ResponseEntity<BasicErrorResponse> dataIntegrityViolationException(CommentNotFoundException e) {
-        log.error("CommentNotFoundException occurred", e);
-
-        return new ResponseEntity<>(
-                BasicErrorResponse.of(COMMENT_NOT_FOUND, Map.of("commentId", e.getCommentId())),
-                NOT_FOUND
+    @ExceptionHandler(CommentException.class)
+    public ResponseEntity<BasicErrorResponse> commentException(CommentException e) {
+        log.info("commentException", e);
+        CommentErrorCode errorCode = e.getErrorCode();
+        return new ResponseEntity(
+                BasicErrorResponse.builder()
+                        .statusCode(errorCode.statusCode())
+                        .statusCodeSeries(errorCode.statusCode() / 10000)
+                        .errorCode(errorCode.errorCode())
+                        .message(errorCode.message())
+                        .errorName(errorCode.name())
+                        .build(),
+                e.getHttpStatus()
         );
     }
 
@@ -54,21 +60,6 @@ public class CommentExceptionHandlerControllerAdvice {
         return new ResponseEntity<>(
                 BasicErrorResponse.of(MEMBER_NOT_FOUND),
                 NOT_FOUND
-        );
-    }
-
-    @ExceptionHandler(PostNotFoundException.class)
-    public ResponseEntity<BasicErrorResponse> postNotFoundException(PostNotFoundException e) {
-        log.error("Post not found exception", e);
-        return new ResponseEntity<>(
-                BasicErrorResponse.builder()
-                        .statusCodeSeries(4)
-                        .statusCode(POST_NOT_EXISTS.status())
-                        .errorCode(POST_NOT_EXISTS.code())
-                        .message(POST_NOT_EXISTS.message() + " - postId=" + e.getPostId())
-                        .errorName(POST_NOT_EXISTS.name())
-                        .build(),
-                HttpStatus.BAD_REQUEST
         );
     }
 
