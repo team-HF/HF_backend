@@ -166,8 +166,8 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     @Override
     public Optional<Member> findByMemberId(Long memberId) {
         Member findMember = this.queryFactory.selectFrom(this.member)
-                .fetchJoin().on(this.spec.member.id.eq(this.member.id))
-                .where(this.spec.isDeleted.isFalse(), this.member.id.eq(memberId), this.member.isDeleted.isFalse())
+                .leftJoin(this.spec).on(this.spec.member.id.eq(this.member.id))
+                .where(this.spec.isDeleted.isNull().or(this.spec.isDeleted.isFalse()), this.member.id.eq(memberId), this.member.isDeleted.isFalse())
                 .fetchOne();
         return Optional.ofNullable(findMember);
     }
