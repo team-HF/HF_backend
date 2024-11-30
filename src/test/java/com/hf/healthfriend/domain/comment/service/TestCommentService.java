@@ -72,7 +72,7 @@ class TestCommentService {
         Post post = Post.builder()
                 .title("sample-post")
                 .content("sample-content")
-                .category(PostCategory.WORKOUT_CERTIFICATION)
+                .category(PostCategory.COUNSELING)
                 .member(postWriter)
                 .build();
 
@@ -125,7 +125,7 @@ class TestCommentService {
         Post post = Post.builder()
                 .title("sample-post")
                 .content("sample-content")
-                .category(PostCategory.WORKOUT_CERTIFICATION)
+                .category(PostCategory.COUNSELING)
                 .member(postWriter)
                 .build();
 
@@ -169,7 +169,7 @@ class TestCommentService {
         Post post = Post.builder()
                 .title("sample-post")
                 .content("sample-content")
-                .category(PostCategory.WORKOUT_CERTIFICATION)
+                .category(PostCategory.FREE_COMMUNITY)
                 .member(postWriter)
                 .build();
 
@@ -224,7 +224,7 @@ class TestCommentService {
         Post post = Post.builder()
                 .title("sample-post")
                 .content("sample-content")
-                .category(PostCategory.WORKOUT_CERTIFICATION)
+                .category(PostCategory.COUNSELING)
                 .member(parentCommentWriter)
                 .build();
 
@@ -276,7 +276,7 @@ class TestCommentService {
         Post post = Post.builder()
                 .title("sample-post")
                 .content("sample-content")
-                .category(PostCategory.WORKOUT_CERTIFICATION)
+                .category(PostCategory.COUNSELING)
                 .member(parentCommentWriter)
                 .build();
         this.postRepository.save(post);
