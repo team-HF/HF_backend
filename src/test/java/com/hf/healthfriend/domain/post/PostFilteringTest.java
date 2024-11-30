@@ -68,7 +68,7 @@ class PostFilteringTest {
             Post post = Post.builder()
                     .postId((long) i)
                     .title("Post " + i)
-                    .category(i % 2 == 0 ? PostCategory.COUNSELING : PostCategory.GYM_RECOMMENDATION)
+                    .category(i % 2 == 0 ? PostCategory.COUNSELING : PostCategory.FREE_COMMUNITY)
                     .viewCount((long) (i * 10))
                     .content("Content " + i)
                     .member(member)
