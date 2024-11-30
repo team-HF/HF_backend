@@ -238,8 +238,8 @@ class SpecControllerMockMvcTest {
                 .andExpect(content()
                         .json("""
                                 {
-                                    "errorCode": "SP001",
-                                    "statusCode": 40400,
+                                    "errorCode": "MB001",
+                                    "statusCode": 40401,
                                     "errorName": "MEMBER_NOT_FOUND",
                                     "statusCodeSeries": 4
                                 }

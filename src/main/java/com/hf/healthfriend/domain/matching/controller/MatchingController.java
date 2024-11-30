@@ -174,9 +174,8 @@ public class MatchingController {
                                             {
                                                 "statusCode": 40401,
                                                 "statusCodeSeries": 4,
-                                                "errorCode": "MAT001",
-                                                "errorName": "MEMBER_NOT_FOUND",
-                                                "message": "해당 회원이 존재하지 않습니다"
+                                                "errorCode": "MB001",
+                                                "errorName": "MEMBER_NOT_FOUND"
                                             }
                                             """)
                             )

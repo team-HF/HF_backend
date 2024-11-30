@@ -1,5 +1,6 @@
 package com.hf.healthfriend.global.exception;
 
+import com.hf.healthfriend.domain.member.exception.handler.MemberExceptionHandlerControllerAdvice;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -11,7 +12,7 @@ import lombok.Getter;
  * Error Code를 따로 정의한 enum 클래스를 만들 예정이다.
  *
  * @author PGD
- * @see com.hf.healthfriend.domain.member.exceptionhandler.MemberExceptionHandlerControllerAdvice
+ * @see MemberExceptionHandlerControllerAdvice
  */
 
 @AllArgsConstructor
@@ -23,8 +24,8 @@ public enum ErrorCode {
     INVALID_REFRESH_TOKEN(103, "유효하지 않은 Refresh Token입니다"),
 
     //MEMBER
+    // TODO: 기존 코드와 호환성을 위해 남겨둠. 추후 리팩토링
     MEMBER_OF_THE_MEMBER_ID_NOT_FOUND(200, "memberId에 해당하는 회원이 없습니다"),
-    MEMBER_ALREADY_EXISTS(201, "이미 존재하는 회원입니다"),
 
     //WISH
     FORBIDDEN_WISH_DELETE(40302,"찜을 삭제할 권한이 없습니다."),
