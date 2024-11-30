@@ -92,7 +92,7 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                                 JPAExpressions.select(count(wish.wishId))
                                         .from(wish)
                                         .where(wish.wished.eq(member)),
-                                "wishCount")))
+                                "followerCount")))
                 .from(member)
                 .where(builder)
                 .groupBy(member)

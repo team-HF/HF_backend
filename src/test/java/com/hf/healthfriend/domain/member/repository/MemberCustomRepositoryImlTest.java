@@ -63,7 +63,7 @@ public class MemberCustomRepositoryImlTest {
                     .name("Virtual User"+ i)
                     .email("virtual@user.com"+i)
                     .password("password")
-                    .nickname("VirtualNickname"+(char) ('A'+i))
+                    .nickname("VirtualNickname"+(char) ('A'+i-1))
                     .cd1("01")
                     .cd2("001")
                     .cd3("003")
@@ -121,7 +121,7 @@ public class MemberCustomRepositoryImlTest {
 
         //Then
         assertEquals(1, searchedProfileList.size());
-        assertEquals("This is a virtual member1",searchedProfileList.get(0).getIntroduction());
+        assertEquals("This is a virtual member2",searchedProfileList.get(0).getIntroduction());
         assertEquals(1,searchedProfileList.get(0).getFollowerCount());
 
     }
