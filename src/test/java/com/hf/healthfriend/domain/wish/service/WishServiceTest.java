@@ -4,8 +4,8 @@ import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.wish.dto.response.WishResponse;
 import com.hf.healthfriend.domain.wish.entity.Wish;
+import com.hf.healthfriend.domain.wish.exception.WishException;
 import com.hf.healthfriend.domain.wish.repository.WishRepository;
-import com.hf.healthfriend.global.exception.CustomException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,7 +65,7 @@ class WishServiceTest {
 
         when(wishRepository.existsByWishedIdAndWisherId(wishedId, wisherId)).thenReturn(true);
 
-        CustomException exception = assertThrows(CustomException.class, () -> {
+        WishException exception = assertThrows(WishException.class, () -> {
             wishService.save(wisherId, wishedId);
         });
 
@@ -83,7 +82,7 @@ class WishServiceTest {
         when(wishRepository.existsByWishedIdAndWisherId(wishedId, wisherId)).thenReturn(false);
         when(memberRepository.existsById(wisherId)).thenReturn(false);
 
-        CustomException exception = assertThrows(CustomException.class, () -> {
+        WishException exception = assertThrows(WishException.class, () -> {
             wishService.save(wisherId, wishedId);
         });
 
@@ -112,7 +111,7 @@ class WishServiceTest {
 
         when(wishRepository.findByWishIdAndIsDeletedFalse(wishId)).thenReturn(Optional.empty());
 
-        CustomException exception = assertThrows(CustomException.class, () -> {
+        WishException exception = assertThrows(WishException.class, () -> {
             wishService.delete(wishId);
         });
 
@@ -126,12 +125,12 @@ class WishServiceTest {
         long memberId = 1L;
         int page = 1;
         int size = 10;
-        Pageable pageable = PageRequest.of(page - 1, size);
+        Pageable pageable = PageRequest.of(0, size);
 
         Member wisher = new Member(1L);
         Member wished = new Member(2L);
         Wish wish = new Wish(wisher, wished);
-        List<Wish> wishes = Arrays.asList(wish);
+        List<Wish> wishes = List.of(wish);
 
         when(wishRepository.findAllByWisherIdAndIsDeletedFalse(memberId, pageable)).thenReturn(wishes);
 
@@ -147,12 +146,12 @@ class WishServiceTest {
         long memberId = 1L;
         int page = 1;
         int size = 10;
-        Pageable pageable = PageRequest.of(page - 1, size);
+        Pageable pageable = PageRequest.of(0, size);
 
         Member wisher = new Member(1L);
         Member wished = new Member(2L);
         Wish wish = new Wish(wisher,wished);
-        List<Wish> wishes = Arrays.asList(wish);
+        List<Wish> wishes = List.of(wish);
 
         when(wishRepository.findAllByWishedIdAndIsDeletedFalse(memberId, pageable)).thenReturn(wishes);
 

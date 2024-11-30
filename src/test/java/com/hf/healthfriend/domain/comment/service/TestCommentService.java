@@ -5,19 +5,17 @@ import com.hf.healthfriend.domain.comment.dto.CommentDto;
 import com.hf.healthfriend.domain.comment.dto.request.CommentCreationRequestDto;
 import com.hf.healthfriend.domain.comment.dto.response.CommentCreationResponseDto;
 import com.hf.healthfriend.domain.comment.entity.Comment;
-import com.hf.healthfriend.domain.comment.exception.CommentNotFoundException;
-import com.hf.healthfriend.domain.comment.exception.PostNotFoundException;
+import com.hf.healthfriend.domain.comment.exception.CommentException;
 import com.hf.healthfriend.domain.comment.repository.CommentJpaRepository;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.post.constant.PostCategory;
 import com.hf.healthfriend.domain.post.entity.Post;
+import com.hf.healthfriend.domain.post.exception.PostException;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
-import com.hf.healthfriend.global.exception.CustomException;
 import com.hf.healthfriend.testutil.RedisTestConfig;
 import com.hf.healthfriend.testutil.SampleEntityGenerator;
-import com.hf.healthfriend.testutil.TestConfig;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Optional;
@@ -26,13 +24,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -149,7 +145,7 @@ class TestCommentService {
     @DisplayName("getCommentsOfPost - 존재하지 않는 글의 댓글을 조회하려고 할 때 PostNotFoundException 발생")
     @Test
     void getCommentsOfPost_failure_PostNotFoundException() {
-        assertThatExceptionOfType(PostNotFoundException.class)
+        assertThatExceptionOfType(PostException.class)
                 .isThrownBy(() -> this.commentService.getCommentsOfPost(1111L, CommentSortType.LATEST));
     }
 
@@ -201,7 +197,7 @@ class TestCommentService {
     @DisplayName("deleteComment - 없는 Comment를 삭제하려고 해서 실패")
     @Test
     void deleteComment_fail_noSuchElementException() {
-        assertThatExceptionOfType(CustomException.class)
+        assertThatExceptionOfType(CommentException.class)
                 .isThrownBy(() -> this.commentService.deleteComment(1000L));
     }
 

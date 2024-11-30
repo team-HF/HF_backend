@@ -29,14 +29,19 @@ public class SearchService {
         List<String> recentSearchList = new ArrayList<>();
 
         // TODO : 메서드 분리할 것 (SRP)
-        if(searchCategory == SearchCategory.POST) {
-            postList = postService.getList(page, size, null, null, keyword);
-        }
-        else if (searchCategory == SearchCategory.PROFILE){
-            profileList = memberService.searchMembers(keyword,page,size);
-        }else{
-            postList = postService.getList(page, size, null, null, keyword);
-            profileList = memberService.searchMembers(keyword,page,size);
+        switch (searchCategory) {
+            case POST:
+                postList = postService.getList(page, size, null, null, keyword);
+                break;
+
+            case PROFILE:
+                profileList = memberService.searchMembers(keyword, page, size);
+                break;
+
+            default:
+                postList = postService.getList(page, size, null, null, keyword);
+                profileList = memberService.searchMembers(keyword, page, size);
+                break;
         }
 
         if (memberId != null) {

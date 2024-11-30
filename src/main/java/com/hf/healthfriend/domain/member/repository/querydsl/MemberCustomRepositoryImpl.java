@@ -2,7 +2,7 @@ package com.hf.healthfriend.domain.member.repository.querydsl;
 
 import static com.querydsl.core.types.ExpressionUtils.count;
 
-import com.hf.healthfriend.domain.follow.entity.QFollow;
+
 import com.hf.healthfriend.domain.member.constant.MemberSortType;
 import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
@@ -47,7 +47,6 @@ import static com.querydsl.core.types.ExpressionUtils.count;
 public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     private final QMember member = QMember.member;
     private final QSpec spec = QSpec.spec;
-    private final QFollow follow = QFollow.follow;
     private final QWish wish = QWish.wish;
     private final JPAQueryFactory queryFactory;
     private final EntityManager em;
@@ -90,9 +89,9 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                         member.introduction,
                         member.nickname,
                         ExpressionUtils.as(
-                                JPAExpressions.select(count(follow.followId))
-                                        .from(follow)
-                                        .where(follow.followee.eq(member)),
+                                JPAExpressions.select(count(wish.wishId))
+                                        .from(wish)
+                                        .where(wish.wished.eq(member)),
                                 "followerCount")))
                 .from(member)
                 .where(builder)

@@ -1,12 +1,12 @@
 package com.hf.healthfriend.domain.member.repository;
 
-import com.hf.healthfriend.domain.follow.entity.Follow;
-import com.hf.healthfriend.domain.follow.repository.FollowRepository;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.repository.querydsl.MemberCustomRepositoryImpl;
+import com.hf.healthfriend.domain.wish.entity.Wish;
+import com.hf.healthfriend.domain.wish.repository.WishRepository;
 import com.hf.healthfriend.testutil.TestConfig;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
@@ -39,7 +39,7 @@ public class MemberCustomRepositoryImlTest {
     private MemberRepository memberRepository;
 
     @Autowired
-    private FollowRepository followRepository;
+    private WishRepository wishRepository;
 
     @Autowired
     private TestEntityManager entityManager;
@@ -63,7 +63,7 @@ public class MemberCustomRepositoryImlTest {
                     .name("Virtual User"+ i)
                     .email("virtual@user.com"+i)
                     .password("password")
-                    .nickname("VirtualNickname"+(char) ('A'+i))
+                    .nickname("VirtualNickname"+(char) ('A'+i-1))
                     .cd1("01")
                     .cd2("001")
                     .cd3("003")
@@ -80,11 +80,8 @@ public class MemberCustomRepositoryImlTest {
             members.add(member);
         }
         for(int i = 0; i<=18; i++){
-            Follow follow = Follow.builder()
-                    .followee(members.get(i))
-                    .follower(members.get(i+1))
-                    .build();
-            followRepository.save(follow);
+            Wish wish = new Wish(members.get(i),members.get(i+1));
+            wishRepository.save(wish);
         }
         entityManager.flush();
         entityManager.clear();
@@ -124,7 +121,7 @@ public class MemberCustomRepositoryImlTest {
 
         //Then
         assertEquals(1, searchedProfileList.size());
-        assertEquals("This is a virtual member1",searchedProfileList.get(0).getIntroduction());
+        assertEquals("This is a virtual member2",searchedProfileList.get(0).getIntroduction());
         assertEquals(1,searchedProfileList.get(0).getFollowerCount());
 
     }

@@ -49,4 +49,7 @@ public interface CommentJpaRepository extends JpaRepository<Comment, Long>, Comm
     @Modifying
     @Query("UPDATE Comment c SET c.isDeleted = true WHERE c.commentId = :commentId")
     void softDeleteById(Long commentId);
+
+    @Query("SELECT c FROM Comment c WHERE c.isDeleted=false ")
+    Optional<Comment> findByCommentIdAndIsDeletedFalse(Long commentId);
 }

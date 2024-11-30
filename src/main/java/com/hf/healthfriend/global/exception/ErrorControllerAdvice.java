@@ -15,11 +15,4 @@ public class ErrorControllerAdvice {
         response.setDetail(e.getMessage());
         return new ResponseEntity<>(response, e.getHttpStatus());
     }
-
-    @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    protected ResponseEntity<ErrorResponse> methodArgumentNotValidException(MethodArgumentNotValidException e) {
-        ErrorResponse response = ErrorResponse.of(ErrorCode.INVALID_REQUEST_FORMAT);
-        response.setDetail(e.getBindingResult().getAllErrors().get(0).getDefaultMessage());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-    }
 }
