@@ -3,7 +3,6 @@ package com.hf.healthfriend.domain.member.repository.querydsl;
 import static com.querydsl.core.types.ExpressionUtils.count;
 
 
-import com.hf.healthfriend.domain.follow.entity.QFollow;
 import com.hf.healthfriend.domain.member.constant.MemberSortType;
 import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;

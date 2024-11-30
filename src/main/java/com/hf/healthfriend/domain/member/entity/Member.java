@@ -1,6 +1,5 @@
 package com.hf.healthfriend.domain.member.entity;
 
-import com.hf.healthfriend.domain.follow.entity.Follow;
 import com.hf.healthfriend.domain.matching.entity.Matching;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.domain.Tier;

@@ -31,8 +31,8 @@ public class WishService {
             throw new WishException(WishErrorCode.DUPLICATE_WISH,HttpStatus.BAD_REQUEST,
                     "wishedId: "+wishedId+", wisherId: "+wisherId);
 
-        boolean wisherExist = memberJpaRepository.existsById(wisherId);
-        boolean wishedExist = memberJpaRepository.existsById(wishedId);
+        boolean wisherExist = memberRepository.existsById(wisherId);
+        boolean wishedExist = memberRepository.existsById(wishedId);
         if( wisherExist && wishedExist){
             Wish wish = new Wish(
                     new Member(wisherId),

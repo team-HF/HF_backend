@@ -32,7 +32,7 @@ public class CommentRepository {
             throw new CommentException(CommentErrorCode.COMMENT_NOT_FOUND, HttpStatus.NOT_FOUND,
                     commentId+"번 댓글은 존재하지 않습니다.");
         }
-        comment.delete();
+        commentOp.get().delete();
     }
 
     public Optional<Comment> findById(Long commentId) {
