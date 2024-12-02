@@ -1,5 +1,6 @@
 package com.hf.healthfriend.global.config.websocket;
 
+import com.hf.healthfriend.global.websocket.CustomWebSocketHandshakeHandler;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
@@ -12,7 +13,9 @@ public class SimpleBrokerWebSocketConfig implements WebSocketMessageBrokerConfig
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/hf").withSockJS();
+        registry.addEndpoint("/hf")
+                .setHandshakeHandler(new CustomWebSocketHandshakeHandler())
+                .withSockJS();
     }
 
     @Override
