@@ -1,6 +1,7 @@
 package com.hf.healthfriend.domain.comment.dto;
 
 import com.hf.healthfriend.domain.comment.entity.Comment;
+import com.hf.healthfriend.domain.member.domain.Tier;
 import java.util.List;
 import lombok.*;
 
@@ -16,6 +17,7 @@ public class CommentDto {
     private Long postId;
     private Long writerId;
     private String writerName;
+    private Tier writerTier;
     private String writerProfileUrl;
     private String content;
     private LocalDateTime creationTime;
@@ -29,6 +31,7 @@ public class CommentDto {
                 .postId(comment.getPost().getPostId())
                 .writerId(comment.getWriter().getId())
                 .writerName(comment.getWriter().getName())
+                .writerTier(comment.getWriter().getTier())
                 .writerProfileUrl(writerProfileUrl)
                 .content(comment.getContent())
                 .creationTime(comment.getCreationTime())
