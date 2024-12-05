@@ -7,7 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice(basePackages = "com.hf.healthfriend.domain.post")
+@RestControllerAdvice(basePackages = "com.hf.healthfriend.domain.comment")
 public class CommentErrorControllerAdvice {
     @ExceptionHandler(value = CommentException.class)
     protected ResponseEntity<CommentErrorResponse> postException(CommentException e) {
