@@ -93,7 +93,7 @@ public class CommentService {
 
     public List<CommentDto> getCommentsOfPost(Long postId, CommentSortType sortType) {
         if (!postRepository.existsById(postId)) {
-            throw new PostException(PostErrorCode.POST_NOT_FOUND,HttpStatus.NOT_FOUND,
+            throw new CommentException(CommentErrorCode.POST_NOT_FOUND,HttpStatus.NOT_FOUND,
                     postId+"번 포스트는 존재하지 않습니다.");
         }
 

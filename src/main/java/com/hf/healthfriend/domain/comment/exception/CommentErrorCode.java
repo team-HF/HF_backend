@@ -8,7 +8,7 @@ import lombok.Getter;
 public enum CommentErrorCode {
     COMMENT_NOT_FOUND(40401, "CMT001", "존재하지 않는 댓글입니다."),
 
-    POST_NOT_EXISTS(40402, "CMT002", "존재하지 않는 포스트입니다."),
+    POST_NOT_FOUND(40402, "CMT002", "존재하지 않는 포스트입니다."),
 
     MEMBER_NOT_EXISTS(40403, "CMT003", "존재하지 않는 회원입니다"),
 
