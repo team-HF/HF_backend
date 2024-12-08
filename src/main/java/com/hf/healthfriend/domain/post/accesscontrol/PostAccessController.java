@@ -28,13 +28,13 @@ public class PostAccessController {
     }
 
     private boolean checkPostAccess(BearerTokenAuthentication authentication, HttpServletRequest request,PostErrorCode errorCode) {
-        String memberId = authentication.getName();
+        Long memberId = Long.parseLong(authentication.getName());
         String path = request.getRequestURI();
         Long postId = Long.parseLong(path.substring(path.lastIndexOf('/') + 1));
 
         return postRepository.findByPostIdAndIsDeletedFalse(postId)
                 .map(post -> {
-                    if(!post.getMember().getName().equals(memberId)){
+                    if (!post.getMember().getId().equals(memberId)) {
                         throw new PostException(errorCode);
                     }
                     return true;
