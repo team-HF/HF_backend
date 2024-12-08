@@ -91,5 +91,5 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
     void deleteLikeByPostId(@Param("postId") Long postId);
 
     @Query("SELECT l.post.postId FROM Like l WHERE l.likeId=:likeId ")
-    Long findPostIdByLikeId(@Param("likeId") Long likeId);
+    Optional<Long> findPostIdByLikeId(@Param("likeId") Long likeId);
 }
