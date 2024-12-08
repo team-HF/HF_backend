@@ -13,12 +13,10 @@ import com.hf.healthfriend.domain.comment.repository.dto.CommentUpdateDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
+import com.hf.healthfriend.domain.notification.constant.NotificationType;
+import com.hf.healthfriend.domain.notification.service.NotificationService;
 import com.hf.healthfriend.domain.post.entity.Post;
-import com.hf.healthfriend.domain.post.exception.PostErrorCode;
-import com.hf.healthfriend.domain.post.exception.PostException;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
-import com.hf.healthfriend.global.exception.CustomException;
-import com.hf.healthfriend.global.exception.ErrorCode;
 import com.hf.healthfriend.global.file.FileUrlResolver;
 import java.util.ArrayList;
 import java.util.Map;
@@ -44,6 +42,7 @@ public class CommentService {
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
     private final FileUrlResolver fileUrlResolver;
+    private final NotificationService notificationService;
 
     public CommentCreationResponseDto createComment(Long postId, CommentCreationRequestDto requestDto)
             throws DataIntegrityViolationException {
@@ -58,6 +57,11 @@ public class CommentService {
                     .map(parentId -> Comment.builder().commentId(parentId).build())
                     .orElse(null);
         }
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new CommentException(CommentErrorCode.POST_NOT_FOUND));
+
+        Member writer = memberRepository.findByMemberId(requestDto.getWriterId())
+                .orElseThrow(() -> new CommentException(CommentErrorCode.MEMBER_NOT_EXISTS));
 
         Comment toSave = Comment.builder()
                 .post(new Post(postId))
@@ -68,6 +72,8 @@ public class CommentService {
 
         Comment newComment = this.commentRepository.save(toSave);
         log.info("[Comment Creation] postId={}, commenterId={}", postId, requestDto.getWriterId());
+
+        sendCommentNotification(parentComment,post,writer);
 
         return CommentCreationResponseDto.builder()
                 .commentId(newComment.getCommentId())
@@ -142,5 +148,28 @@ public class CommentService {
         Long parentId = comment.getParentComment() != null ? comment.getParentComment().getCommentId() : null;
         List<CommentDto> replies = new ArrayList<>();
         return CommentDto.of(comment, writerProfileUrl, parentWriterName, parentId, replies);
+    }
+
+    private void sendCommentNotification(Comment parentComment, Post post, Member writer) {
+        // 글에 대한 댓글이라면
+        if (parentComment == null) {
+            notificationService.publishNotification(
+                    post.getMember().getId(),
+                    NotificationType.ADD_COMMENT_TO_POST,
+                    writer.getNickname(),
+                    post.getPostId()
+            );
+            log.info("글에 달린 댓글 알림 전송");
+        }
+        // 댓글에 대한 댓글이라면
+        else{
+            notificationService.publishNotification(
+                    parentComment.getWriter().getId(),
+                    NotificationType.ADD_COMMENT_TO_COMMENT,
+                    writer.getNickname(),
+                    post.getPostId()
+            );
+            log.info("댓글에 달린 댓글 알림 전송");
+        }
     }
 }
