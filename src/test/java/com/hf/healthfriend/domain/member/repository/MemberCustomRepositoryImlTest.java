@@ -7,6 +7,7 @@ import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.repository.querydsl.MemberCustomRepositoryImpl;
 import com.hf.healthfriend.domain.wish.entity.Wish;
 import com.hf.healthfriend.domain.wish.repository.WishRepository;
+import com.hf.healthfriend.testutil.SampleEntityGenerator;
 import com.hf.healthfriend.testutil.TestConfig;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -126,4 +128,29 @@ public class MemberCustomRepositoryImlTest {
 
     }
 
+    @DisplayName("findByMemberId - success")
+    @Test
+    void findByMemberId_success() {
+        // Given
+        Member sampleMember = SampleEntityGenerator.generateSampleMember("sample@gmail.com", "samplenickname");
+        this.memberRepository.save(sampleMember);
+        this.entityManager.flush();
+        this.entityManager.clear();
+
+        // When
+        Optional<Member> memberOp = this.memberCustomRepository.findByMemberId(sampleMember.getId());
+
+        // Then
+        assertThat(memberOp).isNotEmpty();
+
+        Member member = memberOp.get();
+
+        System.out.println("findMember ID=" + member.getId());
+        System.out.println("findMember Email=" + member.getEmail());
+        System.out.println("findMember Nickname=" + member.getNickname());
+
+        assertThat(member.getId()).isEqualTo(sampleMember.getId());
+        assertThat(member.getEmail()).isEqualTo(sampleMember.getEmail());
+        assertThat(member.getNickname()).isEqualTo(sampleMember.getNickname());
+    }
 }
