@@ -81,6 +81,5 @@ public class MemberCreationRequestDto {
     private FitnessKind fitnessKind;
 
     @Schema(description = "수상 및 경력")
-    @NotNull
     private List<SpecDto> specs;
 }
