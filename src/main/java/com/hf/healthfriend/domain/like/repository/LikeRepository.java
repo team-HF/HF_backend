@@ -24,6 +24,7 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
             FROM Like l
             WHERE l.post.postId = :postId
                 AND l.member.id = :memberId
+                AND l.canceled = FALSE
             """)
     Optional<Like> findByMemberIdAndPostId(@Param("memberId") Long memberId,
                                            @Param("postId") Long postId);
@@ -33,6 +34,7 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
             FROM Like l
             WHERE l.comment.commentId = :commentId
                 AND l.member.id = :memberId
+                AND l.canceled = FALSE
             """)
     Optional<Like> findByMemberIdAndCommentId(@Param("memberId") Long memberId,
                                            @Param("commentId") Long commentId);
@@ -42,6 +44,7 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
             FROM Like l
             WHERE l.member.id = :memberId
                 AND l.post.postId = :postId
+                AND l.canceled = FALSE
             """)
     boolean existsByMemberIdAndPostId(@Param("memberId") Long memberId,
                                       @Param("postId") Long postId);
@@ -90,6 +93,6 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
     @Query(value = "UPDATE likes SET canceled = true WHERE post_id = :postId", nativeQuery = true)
     void deleteLikeByPostId(@Param("postId") Long postId);
 
-    @Query("SELECT l.post.postId FROM Like l WHERE l.likeId=:likeId ")
+    @Query("SELECT l.post.postId FROM Like l WHERE l.likeId=:likeId AND l.canceled = FALSE")
     Long findPostIdByLikeId(@Param("likeId") Long likeId);
 }
