@@ -3,6 +3,8 @@ package com.hf.healthfriend.testutil;
 import com.hf.healthfriend.domain.matching.entity.Matching;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.entity.Member;
+import com.hf.healthfriend.domain.post.constant.PostCategory;
+import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.review.constants.EvaluationType;
 import com.hf.healthfriend.domain.review.entity.Review;
 import com.hf.healthfriend.domain.review.entity.ReviewEvaluation;
@@ -39,6 +41,18 @@ public class SampleEntityGenerator {
         member.setFitnessObjective(FitnessObjective.BULK_UP);
         member.setFitnessKind(FitnessKind.FUNCTIONAL);
         return member;
+    }
+
+    public static Post generateSamplePost(Member writer) {
+        return Post.builder()
+                .title("Sample Post")
+                .content("content")
+                .likesCount(10L)
+                .viewCount(50L)
+                .category(PostCategory.FREE_COMMUNITY)
+                .isDeleted(false)
+                .member(writer)
+                .build();
     }
 
     public static Spec generateSampleSpec(Member member) {

@@ -99,6 +99,7 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
     public BooleanBuilder filter(FitnessLevel fitnessLevel, PostCategory postCategory, String keyword) {
         // 조건을 동적으로 추가하기 위한 BooleanBuilder 생성
         BooleanBuilder builder = new BooleanBuilder();
+        builder.and(post.isDeleted.eq(false));
         if (fitnessLevel != null) {
             builder.and(post.member.fitnessLevel.eq(fitnessLevel));
         }
