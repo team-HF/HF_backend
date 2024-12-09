@@ -90,9 +90,9 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
     boolean existsByPostAndMember(Post post, Member member);
 
     @Modifying
-    @Query(value = "UPDATE likes SET canceled = true WHERE post_id = :postId", nativeQuery = true)
+    @Query(value = "UPDATE likes SET is_canceled = true WHERE post_id = :postId", nativeQuery = true)
     void deleteLikeByPostId(@Param("postId") Long postId);
 
     @Query("SELECT l.post.postId FROM Like l WHERE l.likeId=:likeId AND l.canceled = FALSE")
-    Long findPostIdByLikeId(@Param("likeId") Long likeId);
+    Optional<Long> findPostIdByLikeId(@Param("likeId") Long likeId);
 }

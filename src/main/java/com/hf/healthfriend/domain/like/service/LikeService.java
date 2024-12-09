@@ -165,7 +165,8 @@ public class LikeService {
         likeEntity.cancel();
         postRepository.decrementLikeCountByLikeId(likeIdToCancel);
 
-        long postId = likeRepository.findPostIdByLikeId(likeIdToCancel);
+        long postId = likeRepository.findPostIdByLikeId(likeIdToCancel)
+                .orElseThrow(NoSuchElementException::new);
         // TODO 동시성 처리 필요
         deletePopularPost(postId);
 
