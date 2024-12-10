@@ -45,7 +45,7 @@ public class LikeService {
      *                                *                                좋아요를 남기려고 할 경우
      */
     public Long addPostLike(Long memberId, Long postId) throws DuplicatePostLikeException {
-        Optional<Like> likeOp = this.likeRepository.findByMemberIdAndPostId(memberId, postId);
+        Optional<Like> likeOp = this.likeRepository.findByMemberIdAndPostIdIncludingCanceled(memberId, postId);
         if (likeOp.isEmpty()) {
             Like like = new Like(
                     new Member(memberId),
@@ -161,12 +161,13 @@ public class LikeService {
     }
 
     public void cancelLike(Long likeIdToCancel) throws NoSuchElementException {
-        Like likeEntity = this.likeRepository.findById(likeIdToCancel).orElseThrow(NoSuchElementException::new);// TODO: 메시지?
-        likeEntity.cancel();
-        postRepository.decrementLikeCountByLikeId(likeIdToCancel);
+        Like likeEntity = this.likeRepository.findById(likeIdToCancel).orElseThrow(NoSuchElementException::new);
 
         long postId = likeRepository.findPostIdByLikeId(likeIdToCancel)
                 .orElseThrow(NoSuchElementException::new);
+
+        likeEntity.cancel();
+        postRepository.decrementLikeCountByLikeId(likeIdToCancel);
         // TODO 동시성 처리 필요
         deletePopularPost(postId);
 
