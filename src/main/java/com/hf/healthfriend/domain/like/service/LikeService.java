@@ -176,6 +176,13 @@ public class LikeService {
     public void cancelLike(Long likeIdToCancel) throws NoSuchElementException {
         Like likeEntity = this.likeRepository.findById(likeIdToCancel).orElseThrow(NoSuchElementException::new);
 
+        // TODO: 나중에 좋아요 타입이 늘어날 경우, 각 경우에 맞게 로직 처리
+        if (likeEntity.getLikeType() == LikeType.COMMENT) {
+            // 해당 댓글에 대해서만 좋아요 취소
+            likeEntity.cancel();
+            return;
+        }
+
         long postId = likeRepository.findPostIdByLikeId(likeIdToCancel)
                 .orElseThrow(NoSuchElementException::new);
 

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -124,5 +125,21 @@ public class CommentLikeServiceTest {
         assertThat(likes.get(0).getCommentId()).isEqualTo(testComment.getCommentId());
         assertThat(likes.get(0).getMemberId()).isEqualTo(testMember.getId());
         verify(likeRepository, times(1)).findByCommentId(testComment.getCommentId());
+    }
+
+    @DisplayName("댓글 좋아요 취소 테스트")
+    @Test
+    void cancelCommentLike() {
+        // Given
+        Long commentLikeId = 1000L;
+
+        when(this.likeRepository.findById(commentLikeId))
+                .thenReturn(Optional.of(new Like(this.testMember,
+                        Comment.builder().commentId(testComment.getCommentId()).build(),
+                        LikeType.COMMENT)));
+
+        // When / Then
+        assertThatNoException()
+                .isThrownBy(() -> this.likeService.cancelLike(commentLikeId));
     }
 }
