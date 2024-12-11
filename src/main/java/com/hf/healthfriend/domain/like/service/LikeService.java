@@ -126,14 +126,15 @@ public class LikeService {
     }
 
     /**
-     * 특정 회원이 특정 글에 좋아요를 남겼는지 확인
+     * 특정 회원이 특정 글에 남긴 좋아요 ID를 반환
      *
      * @param memberId 좋아요를 남겼는지 체크할 회원의 ID
      * @param postId 회원이 좋아요를 남겼는지 체크할 Post의 ID
-     * @return 해당 회원이 해당 글에 좋아요를 남겼으면 true, 그렇지 않으면 false
+     * @return member가 post에 남긴 좋아요의 ID를 반환. 만약 주어진 member가 주어진 post에 좋아요를 남기지 않았을 경우, null 반환
      */
-    public boolean doesMemberLikePost(Long memberId, Long postId) {
-        return this.likeRepository.existsByMemberIdAndPostId(memberId, postId);
+    public Long getLikeIdOfMemberToPost(Long memberId, Long postId) {
+        return this.likeRepository.findByMemberIdAndPostId(memberId, postId)
+                .orElse(new Like(null)).getLikeId();
     }
 
     public List<PostLikeDto> getLikeOfPost(Long postId) {
