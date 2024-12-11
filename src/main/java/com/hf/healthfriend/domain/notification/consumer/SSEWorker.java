@@ -1,7 +1,5 @@
 package com.hf.healthfriend.domain.notification.consumer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hf.healthfriend.domain.notification.dto.Alarm;
 import com.hf.healthfriend.domain.notification.dto.NotificationEvent;
 import com.hf.healthfriend.domain.notification.service.NotificationSSEService;
@@ -15,15 +13,16 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class SSEWorker {
+public class SseWorker {
 
     private final NotificationSSEService notificationSseService;
     private final NotificationMessageGenerator messageGenerator;
+    private final JsonUtils jsonUtils;
 
     @SqsListener("${aws.sqs.alarmQueueUrl}")
     public void consumeAlarmMessage(String message) {
         try {
-            NotificationEvent event = JsonUtils.deserializeMessage(message);
+            NotificationEvent event = jsonUtils.deserializeMessage(message);
             String alarmMessage = messageGenerator.generateMessage(event);
             Long memberId = event.memberId();
             Alarm alarm = Alarm.builder()

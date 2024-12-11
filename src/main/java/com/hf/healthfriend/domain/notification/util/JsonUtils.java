@@ -4,11 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hf.healthfriend.domain.notification.dto.NotificationEvent;
 import org.json.JSONObject;
+import org.springframework.stereotype.Component;
 
+@Component
 public class JsonUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public static String serialize(Object object) {
+    public String serialize(Object object) {
         try {
             return objectMapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
@@ -16,7 +18,7 @@ public class JsonUtils {
         }
     }
 
-    public static NotificationEvent deserializeMessage(String message) {
+    public NotificationEvent deserializeMessage(String message) {
         try {
             JSONObject snsMessage = new JSONObject(message);
             String messageContent = snsMessage.getString("Message");

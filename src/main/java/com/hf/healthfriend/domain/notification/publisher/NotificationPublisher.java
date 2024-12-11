@@ -16,6 +16,7 @@ import software.amazon.awssdk.services.sns.SnsClient;
 @Slf4j
 public class NotificationPublisher {
     private final SnsClient snsClient;
+    private final JsonUtils jsonUtils;
 
     @Value("${aws.sns.topicArn}")
     private String topicArn;
@@ -23,7 +24,7 @@ public class NotificationPublisher {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void publishNotification(Long memberId, NotificationType type, String actor, Long targetId) {
         NotificationEvent event = new NotificationEvent(memberId, type, actor, targetId);
-        String message = JsonUtils.serialize(event);
+        String message = jsonUtils.serialize(event);
         snsClient.publish(builder -> builder
                 .topicArn(topicArn)
                 .message(message)

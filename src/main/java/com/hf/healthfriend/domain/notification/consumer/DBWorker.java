@@ -16,11 +16,12 @@ import org.springframework.stereotype.Component;
 public class DBWorker {
     private final NotificationRepository notificationRepository;
     private final NotificationMessageGenerator messageGenerator;
+    private final JsonUtils jsonUtils;
 
     @SqsListener("${aws.sqs.dbQueueUrl}")
     public void consumeDbQueue(String message) {
         try {
-            NotificationEvent event = JsonUtils.deserializeMessage(message);
+            NotificationEvent event = jsonUtils.deserializeMessage(message);
             String noMessage = messageGenerator.generateMessage(event);
 
             Notification notification = Notification.builder()
