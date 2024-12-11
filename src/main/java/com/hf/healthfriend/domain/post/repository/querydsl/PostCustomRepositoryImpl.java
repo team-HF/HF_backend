@@ -131,6 +131,7 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
         Long totalPageSize = queryFactory
                 .select(post.count())
                 .from(post)
+                .where(post.isDeleted.eq(false))
                 .fetchOne();
         if (totalPageSize == null) return 0;
         return (long) Math.ceil((double) totalPageSize / 5);
