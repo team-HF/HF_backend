@@ -1,5 +1,7 @@
 package com.hf.healthfriend.domain.like.service;
 
+import com.hf.healthfriend.domain.comment.entity.Comment;
+import com.hf.healthfriend.domain.comment.repository.CommentRepository;
 import com.hf.healthfriend.domain.like.dto.PostLikeDto;
 import com.hf.healthfriend.domain.like.exception.DuplicatePostLikeException;
 import com.hf.healthfriend.domain.like.exception.PostOrMemberNotExistsException;
@@ -55,6 +57,9 @@ class PostLikeServiceTest {
 
     @Autowired
     PostRepository postRepository;
+
+    @Autowired
+    CommentRepository commentRepository;
 
     Map<String, Member> sampleMembers;
 
@@ -205,7 +210,7 @@ class PostLikeServiceTest {
     @Autowired
     DataSource dataSource;
 
-    @DisplayName("cancelLike - 취소된 좋아요는 가져올 수 없음")
+    @DisplayName("cancelLike - Post 좋아요 취소 - 취소된 좋아요는 가져올 수 없음")
     @Test
     void cancelLike_success() throws SQLException {
         Long generatedId = this.likeService.addPostLike(
