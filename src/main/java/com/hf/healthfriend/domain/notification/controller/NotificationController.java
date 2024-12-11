@@ -1,25 +1,44 @@
 package com.hf.healthfriend.domain.notification.controller;
 
-import com.hf.healthfriend.domain.notification.service.NotificationSSEService;
+import com.hf.healthfriend.domain.member.constant.FitnessLevel;
+import com.hf.healthfriend.domain.notification.constant.NotificationGetType;
+import com.hf.healthfriend.domain.notification.constant.NotificationType;
+import com.hf.healthfriend.domain.notification.dto.NotificationResponse;
+import com.hf.healthfriend.domain.notification.service.NotificationService;
+import com.hf.healthfriend.domain.post.constant.PostCategory;
+import com.hf.healthfriend.domain.post.dto.response.PostListObject;
+import com.hf.healthfriend.global.spec.ApiBasicResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Nullable;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Tag(name = "Notification API", description = "알람 API")
 @RequiredArgsConstructor
+@RequestMapping("/hf")
 public class NotificationController {
 
-    private final NotificationSSEService notificationSseService;
+    private final NotificationService notificationService;
 
-    @GetMapping(value = "/connect/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public ResponseEntity<SseEmitter> connect(
-            @RequestParam Long memberId,
-            @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "") String lastEventId) {
-        return ResponseEntity.ok( notificationSseService.connectClient(memberId,lastEventId));
+    @Operation(summary = "알람 목록 조회", responses = {
+            @ApiResponse(responseCode = "200", description = "알람 목록 조회 성공"),
+            @ApiResponse(responseCode = "400", description = "알람 목록 조회 실패")
+    })
+    @GetMapping("/notification/list")
+    public ResponseEntity<ApiBasicResponse<List<NotificationResponse>>> getList(
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam int size,
+            @RequestParam @Nullable NotificationGetType notificationGetType) {
+        return ResponseEntity.ok(ApiBasicResponse.of(notificationService.getList(page,size,notificationGetType),
+                HttpStatus.OK));
     }
 }
