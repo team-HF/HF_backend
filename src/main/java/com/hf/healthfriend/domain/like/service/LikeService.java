@@ -137,6 +137,18 @@ public class LikeService {
                 .orElse(new Like(null)).getLikeId();
     }
 
+    /**
+     * 특정 회원이 특정 댓글에 남긴 좋아요 ID 반환
+     *
+     * @param memberId 좋아요를 남겼는지 체크할 회원의 ID
+     * @param commentId 회원이 좋아요를 남겼는지 체크할 Comment의 ID
+     * @return member가 comment에 남긴 좋아요의 ID를 반환. 만약 주어진 member가 주어진 comment에 좋아요를 남기지 않았을 경우, null 반환
+     */
+    public Long getLikeIdOfMemberToComment(Long memberId, Long commentId) {
+        return this.likeRepository.findByMemberIdAndCommentId(memberId, commentId)
+                .orElse(new Like(null)).getLikeId();
+    }
+
     public List<PostLikeDto> getLikeOfPost(Long postId) {
         return postEntityListToDtoList(this.likeRepository.findByPostId(postId));
     }
