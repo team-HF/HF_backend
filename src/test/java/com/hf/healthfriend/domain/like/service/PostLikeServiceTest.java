@@ -1,5 +1,7 @@
 package com.hf.healthfriend.domain.like.service;
 
+import com.hf.healthfriend.domain.comment.entity.Comment;
+import com.hf.healthfriend.domain.comment.repository.CommentRepository;
 import com.hf.healthfriend.domain.like.dto.PostLikeDto;
 import com.hf.healthfriend.domain.like.exception.DuplicatePostLikeException;
 import com.hf.healthfriend.domain.like.exception.PostOrMemberNotExistsException;
@@ -55,6 +57,9 @@ class PostLikeServiceTest {
 
     @Autowired
     PostRepository postRepository;
+
+    @Autowired
+    CommentRepository commentRepository;
 
     Map<String, Member> sampleMembers;
 
@@ -205,13 +210,73 @@ class PostLikeServiceTest {
     @Autowired
     DataSource dataSource;
 
-    @DisplayName("cancelLike - 취소된 좋아요는 가져올 수 없음")
+    @DisplayName("cancelLike - Post 좋아요 취소 - 취소된 좋아요는 가져올 수 없음")
     @Test
     void cancelLike_success() throws SQLException {
         Long generatedId = this.likeService.addPostLike(
                 this.sampleMembers.get("member1").getId(),
                 this.samplePosts.get("post1").getPostId()
         );
+
+        PostLikeDto like = this.likeService.getLike(generatedId);
+        assertThat(like).isNotNull();
+
+        this.likeService.cancelLike(generatedId);
+
+        assertThatExceptionOfType(NoSuchElementException.class)
+                .isThrownBy(() -> this.likeService.getLike(generatedId));
+
+        this.likeRepository.flush();
+
+        // 실제 DB에서 레코드가 삭제된 게 아니라 is_canceled가 true로 세팅된 것 확인
+
+        Connection connection = DataSourceUtils.getConnection(this.dataSource);
+        PreparedStatement stmt = connection.prepareStatement("""
+                SELECT is_canceled
+                FROM likes
+                WHERE like_id = ?
+                """);
+        stmt.setLong(1, generatedId);
+        ResultSet rs = stmt.executeQuery();
+        assertThat(rs.next()).isTrue();
+        boolean canceled = rs.getBoolean("is_canceled");
+        assertThat(canceled).isTrue();
+
+        try {
+            rs.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            stmt.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            DataSourceUtils.releaseConnection(connection, this.dataSource);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @DisplayName("cancelLike - Comment 좋아요 취소 - 취소된 좋아요는 가져올 수 없음")
+    @Test
+    void cancelLike_comment_success() throws SQLException {
+        Member sampleMember1 = this.sampleMembers.get("member1");
+        Member sampleMember2 = this.sampleMembers.get("member2");
+        Post samplePost = this.samplePosts.get("post1");
+
+        Comment comment = Comment.builder()
+                .post(samplePost)
+                .writer(sampleMember1)
+                .content("Content")
+                .build();
+
+        Long generatedId = this.likeService.addCommentLike(
+                sampleMember2.getId(),
+                comment.getCommentId()
+        );
+
 
         PostLikeDto like = this.likeService.getLike(generatedId);
         assertThat(like).isNotNull();
