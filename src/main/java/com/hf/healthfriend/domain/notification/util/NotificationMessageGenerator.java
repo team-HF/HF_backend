@@ -11,7 +11,7 @@ public class NotificationMessageGenerator {
             case ADD_COMMENT_TO_POST -> event.actor() + "님이 회원님의 글에 댓글을 작성했습니다.";
             case ADD_LIKE_TO_COMMENT -> event.actor() + "님이 회원님의 댓글을 좋아합니다.";
             case ADD_LIKE_TO_POST -> event.actor() + "님이 회원님의 글을 좋아합니다.";
-            case SELECT_POPULAR -> "회원님의 글이 인기글이 되었습니다!";
+            case POPULAR_POST -> "회원님의 글이 인기글이 되었습니다!";
             case MATCH_REQUEST -> "1:1 매칭 신청이 들어왔습니다.";
             case MATCH_ACCEPT -> event.actor() + "님이 매칭 신청을 수락했습니다.";
             case MATCH_REJECT -> event.actor() + "님이 매칭 신청을 거절했습니다.";

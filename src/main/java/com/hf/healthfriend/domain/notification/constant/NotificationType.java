@@ -8,7 +8,7 @@ public enum NotificationType {
     ADD_COMMENT_TO_POST,
     ADD_LIKE_TO_COMMENT,
     ADD_LIKE_TO_POST,
-    SELECT_POPULAR,
+    POPULAR_POST,
     MATCH_REQUEST,
     MATCH_ACCEPT,
     MATCH_REJECT,
