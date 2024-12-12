@@ -1,6 +1,7 @@
 
 package com.hf.healthfriend.domain.notification.entity;
 
+import com.hf.healthfriend.domain.BaseTimeEntity;
 import com.hf.healthfriend.domain.notification.constant.NotificationType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,7 +20,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Notification {
+public class Notification extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long notificationId;

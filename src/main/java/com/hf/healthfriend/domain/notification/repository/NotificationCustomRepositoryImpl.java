@@ -29,6 +29,7 @@ public class NotificationCustomRepositoryImpl implements NotificationCustomRepos
                 .stream().map(notification-> NotificationResponse.builder()
                         .message(notification.getMessage())
                         .type(notificationGetType)
+                        .time(notification.getCreationTime())
                         .targetId(notification.getTargetId())
                         .build()).toList();
     }
