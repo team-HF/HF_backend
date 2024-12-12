@@ -2,6 +2,8 @@ package com.hf.healthfriend.domain.chat.entity.chatmessage;
 
 import com.hf.healthfriend.domain.chat.constant.MatchingResponseType;
 import com.hf.healthfriend.domain.chat.entity.ChatParticipation;
+import com.hf.healthfriend.domain.chat.entity.Chatroom;
+import com.hf.healthfriend.domain.member.entity.Member;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;
@@ -20,26 +22,30 @@ public class MatchingResponseChatMessage extends ChatMessage {
         super(chatMessageId);
     }
 
-    public MatchingResponseChatMessage(ChatParticipation chatParticipation,
+    public MatchingResponseChatMessage(Chatroom chatroom,
+                                       Member sender,
                                        MatchingResponseType matchingResponseType) {
-        super(chatParticipation);
+        super(chatroom, sender);
         this.matchingResponseType = matchingResponseType;
     }
 
-    public MatchingResponseChatMessage(ChatParticipation chatParticipation,
+    public MatchingResponseChatMessage(Chatroom chatroom,
+                                       Member sender,
                                        MatchingResponseType matchingResponseType,
                                        String cancelMessage) {
-        this(chatParticipation, matchingResponseType);
+        this(chatroom, sender, matchingResponseType);
         this.cancelMessage = cancelMessage;
     }
 
-    public static MatchingResponseChatMessage createAcceptanceMessage(ChatParticipation chatParticipation) {
-        return new MatchingResponseChatMessage(chatParticipation, MatchingResponseType.ACCEPTED);
+    public static MatchingResponseChatMessage createAcceptanceMessage(Chatroom chatroom, Member sender) {
+        return new MatchingResponseChatMessage(chatroom, sender, MatchingResponseType.ACCEPTED);
     }
 
-    public static MatchingResponseChatMessage createRejectMessage(ChatParticipation chatParticipation,
+    public static MatchingResponseChatMessage createRejectMessage(Chatroom chatroom,
+                                                                  Member sender,
                                                                   String cancelMessage) {
-        return new MatchingResponseChatMessage(chatParticipation,
+        return new MatchingResponseChatMessage(chatroom,
+                sender,
                 MatchingResponseType.REJECTED,
                 cancelMessage);
     }

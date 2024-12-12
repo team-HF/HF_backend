@@ -35,9 +35,6 @@ public class ChatParticipation extends BaseTimeEntity {
     @Column(name = "is_discononected")
     private boolean disconnected = false;
 
-    @OneToMany(mappedBy = "chatroom", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<ChatMessage> messages = new ArrayList<>();
-
     public ChatParticipation(ChatParticipationId id) {
         this.chatParticipationId = id;
     }

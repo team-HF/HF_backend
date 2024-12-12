@@ -1,6 +1,8 @@
 package com.hf.healthfriend.domain.chat.entity.chatmessage;
 
 import com.hf.healthfriend.domain.chat.entity.ChatParticipation;
+import com.hf.healthfriend.domain.chat.entity.Chatroom;
+import com.hf.healthfriend.domain.member.entity.Member;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;
@@ -18,8 +20,8 @@ public class ImageChatMessage extends ChatMessage {
         super(chatMessageId);
     }
 
-    public ImageChatMessage(ChatParticipation chatParticipation, String imageUrl) {
-        super(chatParticipation);
+    public ImageChatMessage(Chatroom chatroom, Member sender, String imageUrl) {
+        super(chatroom, sender);
         this.imageUrl = imageUrl;
     }
 }

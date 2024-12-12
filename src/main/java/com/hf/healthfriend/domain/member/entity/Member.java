@@ -1,6 +1,7 @@
 package com.hf.healthfriend.domain.member.entity;
 
 import com.hf.healthfriend.domain.chat.entity.ChatParticipation;
+import com.hf.healthfriend.domain.chat.entity.chatmessage.ChatMessage;
 import com.hf.healthfriend.domain.matching.entity.Matching;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.domain.Tier;
@@ -132,6 +133,9 @@ public class Member implements UserDetails {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatParticipation> chatParticipations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatMessage> chatMessages = new ArrayList<>();
 
     @Column(name = "review_score")
     private Double reviewScore = 0.0;
