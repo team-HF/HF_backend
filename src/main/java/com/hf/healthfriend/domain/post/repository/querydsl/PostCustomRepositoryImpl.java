@@ -51,6 +51,7 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
                             .content(content)
                             .fitnessLevel(post.getMember().getFitnessLevel().name())
                             .likeCount(post.getLikesCount())
+                            .commentCount(post.getCommentsCount())
                             .totalPageSize(getTotalPageSize())
                             .memberProfileUrl(fileUrlResolver.resolveFileUrl(post.getMember().getProfileImageUrl()))
                             .build();
@@ -90,6 +91,7 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
                             .content(content)
                             .fitnessLevel(post.getMember().getFitnessLevel().name())
                             .likeCount(post.getLikesCount())
+                            .commentCount(post.getCommentsCount())
                             .totalPageSize(totalPageSize)
                             .memberProfileUrl(fileUrlResolver.resolveFileUrl(post.getMember().getProfileImageUrl()))
                             .build();

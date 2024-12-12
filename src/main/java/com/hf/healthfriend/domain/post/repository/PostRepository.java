@@ -16,13 +16,21 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostCustomRep
 
     Page<Post> findAll(Pageable pageable);
 
-    // 불필요한 필드 로드를 줄이려면 네이티브 쿼리를 적절히 사용할줄 알아야 함
     @Modifying
-    @Query(value = "UPDATE post SET likes_count = likes_count + 1 WHERE post_id = :postId", nativeQuery = true)
+    @Query("UPDATE Post p SET p.likesCount = p.likesCount + 1 WHERE p.postId = :postId")
     void incrementLikeCount(@Param("postId") Long postId);
 
     @Modifying
-    @Query(value = "UPDATE post p SET p.likes_count = p.likes_count - 1 " +
-            "WHERE p.post_id = (SELECT l.post_id FROM likes l WHERE l.like_id = :likeId)", nativeQuery = true)
+    @Query("UPDATE Post p SET p.likesCount = p.likesCount - 1 WHERE p.postId = " +
+            "(SELECT l.post.postId FROM Like l WHERE l.likeId = :likeId)")
     void decrementLikeCountByLikeId(@Param("likeId") Long likeId);
+
+    @Modifying
+    @Query("UPDATE Post p SET p.commentsCount = p.commentsCount + 1 WHERE p.postId = :postId")
+    void incrementCommentsCount(@Param("postId") Long postId);
+
+    @Modifying
+    @Query("UPDATE Post p SET p.commentsCount = p.commentsCount - 1 WHERE p.postId = " +
+            "(SELECT c.post.postId FROM Comment c WHERE c.commentId = :commentId)")
+    void decrementCommentsCountByCommentId(@Param("commentId") Long commentId);
 }

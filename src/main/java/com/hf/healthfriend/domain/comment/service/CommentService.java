@@ -14,11 +14,7 @@ import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.post.entity.Post;
-import com.hf.healthfriend.domain.post.exception.PostErrorCode;
-import com.hf.healthfriend.domain.post.exception.PostException;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
-import com.hf.healthfriend.global.exception.CustomException;
-import com.hf.healthfriend.global.exception.ErrorCode;
 import com.hf.healthfriend.global.file.FileUrlResolver;
 import java.util.ArrayList;
 import java.util.Map;
@@ -67,6 +63,7 @@ public class CommentService {
                 .build();
 
         Comment newComment = this.commentRepository.save(toSave);
+        postRepository.incrementCommentsCount(postId);
         log.info("[Comment Creation] postId={}, commenterId={}", postId, requestDto.getWriterId());
 
         return CommentCreationResponseDto.builder()
@@ -79,7 +76,6 @@ public class CommentService {
                 .build();
     }
 
-    // TODO : 재귀 삭제
     public void deleteComment(Long commentId) throws CommentException {
         if(!commentJpaRepository.existsByCommentIdAndIsDeletedFalse(commentId)) {
             throw new CommentException(CommentErrorCode.COMMENT_NOT_FOUND, HttpStatus.NOT_FOUND,
@@ -89,6 +85,7 @@ public class CommentService {
         commentJpaRepository.deleteAllReplies(commentId);
         // 부모 댓글 soft delete
         commentJpaRepository.softDeleteById(commentId);
+        postRepository.decrementCommentsCountByCommentId(commentId);
     }
 
     public List<CommentDto> getCommentsOfPost(Long postId, CommentSortType sortType) {

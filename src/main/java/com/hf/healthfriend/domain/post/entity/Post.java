@@ -58,6 +58,9 @@ public class Post extends BaseTimeEntity {
     @Builder.Default
     private Long likesCount = 0L;
 
+    @Builder.Default
+    private Long commentsCount = 0L;
+
     private String imagePath;
 
     public Post(Long postId){

@@ -21,7 +21,7 @@ public record PostGetResponse(
         Long viewCount,
         Long likeCount,
         List<CommentDto> comments,
-        Integer commentCount
+        Long commentCount
 ) {
     public static PostGetResponse of(Post post, List<CommentDto> comments, String imagePath) {
         return PostGetResponse.builder()
@@ -37,7 +37,7 @@ public record PostGetResponse(
                 .viewCount(post.getViewCount())
                 .likeCount(post.getLikesCount())
                 .comments(comments)
-                .commentCount(comments.size())
+                .commentCount(post.getCommentsCount())
                 .build();
     }
 }
