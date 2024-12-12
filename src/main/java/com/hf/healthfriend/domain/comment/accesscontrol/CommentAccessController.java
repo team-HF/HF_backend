@@ -4,8 +4,12 @@ import com.hf.healthfriend.auth.accesscontrol.AccessControlTrigger;
 import com.hf.healthfriend.auth.accesscontrol.AccessController;
 import com.hf.healthfriend.domain.comment.entity.Comment;
 import com.hf.healthfriend.domain.comment.exception.CommentErrorCode;
+import com.hf.healthfriend.domain.comment.exception.CommentException;
+import com.hf.healthfriend.domain.comment.repository.CommentJpaRepository;
 import com.hf.healthfriend.domain.comment.repository.CommentRepository;
 import com.hf.healthfriend.domain.member.constant.Role;
+import com.hf.healthfriend.domain.post.exception.PostErrorCode;
+import com.hf.healthfriend.domain.post.exception.PostException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +22,7 @@ import java.util.Optional;
 @AccessController
 @RequiredArgsConstructor
 public class CommentAccessController {
-    private final CommentRepository commentRepository;
+    private final CommentJpaRepository commentJpaRepository;
 
     @AccessControlTrigger(path = "/hf/comments/{commentId}", method = "DELETE")
     public boolean accessControlForCreatingComment(BearerTokenAuthentication authentication, HttpServletRequest request) {
@@ -33,26 +37,17 @@ public class CommentAccessController {
     }
 
     private boolean controlAccessToCommentResourceByCommentId(BearerTokenAuthentication authentication, HttpServletRequest request, CommentErrorCode errorCode) {
-        // TODO: AccessControlFilter에서 글로벌하게 처리해야 한다 (혹은 AOP)
-        if (authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).anyMatch((g) -> Role.ROLE_ADMIN.name().equals(g))) {
-            return true;
-        }
-
+        Long memberId = Long.parseLong(authentication.getName());
         String path = request.getRequestURI();
-        long commentIdBeingAccessed = Long.parseLong(path.substring(path.lastIndexOf('/') + 1));
+        Long commentId = Long.parseLong(path.substring(path.lastIndexOf('/') + 1));
 
-        Optional<Comment> commentOp = this.commentRepository.findById(commentIdBeingAccessed);
-        if (commentOp.isEmpty()) {
-            return true; // 그대로 진행시켜서 404 Not Found가 나도록
-        }
-
-        if (log.isTraceEnabled()) {
-            log.trace("authentication={}", authentication);
-            log.trace("authentication.principal={}", authentication.getPrincipal());
-            log.trace("authentication.name={}", authentication.getName());
-        }
-
-        Comment comment = commentOp.get();
-        return comment.getWriter().getId().equals(Long.parseLong(authentication.getName()));
+        return commentJpaRepository.findByCommentIdAndIsDeletedFalse(commentId)
+                .map(comment -> {
+                    if (!comment.getWriter().getId().equals(memberId)) {
+                        throw new CommentException(errorCode);
+                    }
+                    return true;
+                })
+                .orElseThrow(() -> new CommentException(CommentErrorCode.COMMENT_NOT_FOUND));
     }
 }
