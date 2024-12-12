@@ -62,6 +62,7 @@ public class LikeService {
                 Like savedLike = this.likeRepository.save(like);
                 // TODO 동시성 처리 필요
                 postRepository.incrementLikeCount(postId);
+                notificationPublishService.publishPostLikeNot(memberId, postId);
                 savePopularPost(postId);
                 return savedLike.getLikeId();
             } catch (DataIntegrityViolationException e) {
