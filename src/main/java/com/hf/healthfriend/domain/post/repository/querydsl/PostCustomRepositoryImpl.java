@@ -42,19 +42,7 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
                         String sentence = getSentenceContainKeyword(keyword,post.getContent());
                         content = (sentence!=null)?sentence:content;
                     }
-                    return PostListObject.builder()
-                            .postId(post.getPostId())
-                            .title(post.getTitle())
-                            .category(post.getCategory().name())
-                            .viewCount(post.getViewCount())
-                            .creationTime(post.getCreationTime())
-                            .content(content)
-                            .fitnessLevel(post.getMember().getFitnessLevel().name())
-                            .likeCount(post.getLikesCount())
-                            .commentCount(post.getCommentsCount())
-                            .totalPageSize(getTotalPageSize())
-                            .memberProfileUrl(fileUrlResolver.resolveFileUrl(post.getMember().getProfileImageUrl()))
-                            .build();
+                    return PostListObject.of(post,content,getTotalPageSize(),fileUrlResolver);
                 }).toList();
     }
 
@@ -77,24 +65,11 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
                 .fetch()
                 .stream().map(post-> {
                     String content = post.getContent();
-                    long totalPageSize = (long) Math.ceil((double) postIdList.size() / 5);
                     if (keyword!=null){
                         String sentence = getSentenceContainKeyword(keyword,post.getContent());
                         content = (sentence!=null)?sentence:content;
                     }
-                    return PostListObject.builder()
-                            .postId(post.getPostId())
-                            .title(post.getTitle())
-                            .category(post.getCategory().name())
-                            .viewCount(post.getViewCount())
-                            .creationTime(post.getCreationTime())
-                            .content(content)
-                            .fitnessLevel(post.getMember().getFitnessLevel().name())
-                            .likeCount(post.getLikesCount())
-                            .commentCount(post.getCommentsCount())
-                            .totalPageSize(totalPageSize)
-                            .memberProfileUrl(fileUrlResolver.resolveFileUrl(post.getMember().getProfileImageUrl()))
-                            .build();
+                    return PostListObject.of(post,content,getTotalPageSize(),fileUrlResolver);
                 }).toList();
     }
 

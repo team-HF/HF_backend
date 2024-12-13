@@ -20,8 +20,8 @@ public record PostGetResponse(
         LocalDateTime createDate,
         Long viewCount,
         Long likeCount,
-        List<CommentDto> comments,
-        Long commentCount
+        Long commentCount,
+        List<CommentDto> comments
 ) {
     public static PostGetResponse of(Post post, List<CommentDto> comments, String imagePath) {
         return PostGetResponse.builder()
@@ -36,8 +36,8 @@ public record PostGetResponse(
                 .createDate(post.getCreationTime())
                 .viewCount(post.getViewCount())
                 .likeCount(post.getLikesCount())
-                .comments(comments)
                 .commentCount(post.getCommentsCount())
+                .comments(comments)
                 .build();
     }
 }
