@@ -63,6 +63,14 @@ server:
 
 file:
   upload-dir: C:/hf/upload/
+
+aws:
+  region: ap-northeast-2
+  sns:
+    topicArn: arn:aws:sns:ap-northeast-2:676206915972:hf-notification
+  sqs:
+    alarmQueueUrl: ${AWS_SQS_ALARM_QUEUE_URL}
+    dbQueueUrl: ${AWS_SQS_DB_QUEUE_URL}
 ---
 spring:
   config:
@@ -90,10 +98,3 @@ spring:
     username: root
     password: 1111
 
-aws:
-  region: ap-northeast-2
-  sns:
-    topicArn: arn:aws:sns:ap-northeast-2:676206915972:hf-notification
-  sqs:
-    alarmQueueUrl: ${AWS_SQS_ALARM_QUEUE_URL}
-    dbQueueUrl: ${AWS_SQS_DB_QUEUE_URL}
