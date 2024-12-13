@@ -1,15 +1,11 @@
 package com.hf.healthfriend.domain.chat.entity;
 
 import com.hf.healthfriend.domain.BaseTimeEntity;
-import com.hf.healthfriend.domain.chat.entity.chatmessage.ChatMessage;
 import com.hf.healthfriend.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -40,6 +36,7 @@ public class ChatParticipation extends BaseTimeEntity {
     }
 
     public ChatParticipation(Chatroom chatroom, Member member) {
+        this(new ChatParticipationId(chatroom.getChatroomId(), member.getId()));
         this.chatroom = chatroom;
         this.member = member;
         this.chatroom.addChatParticipation(this);
