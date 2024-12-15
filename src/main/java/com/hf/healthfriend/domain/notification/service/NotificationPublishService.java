@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(propagation = Propagation.REQUIRES_NEW)
 @Slf4j
 public class NotificationPublishService {
     private final PostRepository postRepository;
