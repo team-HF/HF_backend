@@ -13,6 +13,7 @@ import com.hf.healthfriend.domain.comment.repository.dto.CommentUpdateDto;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
+import com.hf.healthfriend.domain.notification.service.NotificationPublishService;
 import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
 import com.hf.healthfriend.global.file.FileUrlResolver;
@@ -40,6 +41,7 @@ public class CommentService {
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
     private final FileUrlResolver fileUrlResolver;
+    private final NotificationPublishService notificationPublishService;
 
     public CommentCreationResponseDto createComment(Long postId, CommentCreationRequestDto requestDto)
             throws DataIntegrityViolationException {
@@ -54,6 +56,11 @@ public class CommentService {
                     .map(parentId -> Comment.builder().commentId(parentId).build())
                     .orElse(null);
         }
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new CommentException(CommentErrorCode.POST_NOT_FOUND));
+
+        Member writer = memberRepository.findByMemberId(requestDto.getWriterId())
+                .orElseThrow(() -> new CommentException(CommentErrorCode.MEMBER_NOT_EXISTS));
 
         Comment toSave = Comment.builder()
                 .post(new Post(postId))
@@ -65,6 +72,8 @@ public class CommentService {
         Comment newComment = this.commentRepository.save(toSave);
         postRepository.incrementCommentsCount(postId);
         log.info("[Comment Creation] postId={}, commenterId={}", postId, requestDto.getWriterId());
+
+        notificationPublishService.publishCommentNot(parentComment, post, writer);
 
         return CommentCreationResponseDto.builder()
                 .commentId(newComment.getCommentId())
