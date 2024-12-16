@@ -3,7 +3,6 @@ package com.hf.healthfriend.domain.member.dto;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.domain.Tier;
 import com.hf.healthfriend.domain.member.entity.Member;
-import com.hf.healthfriend.domain.spec.dto.SpecDto;
 import com.hf.healthfriend.global.util.mapping.BeanMapping;
 import com.hf.healthfriend.global.util.mapping.MappingAttribute;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -11,7 +10,6 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -47,7 +45,7 @@ public class MemberDto {
     private Long matchedCount;
     private Tier tier;
 
-    public static MemberDto of(Member member) {
+    public static MemberDto of(Member member, String profileImageUrl) {
         return MemberDto.builder()
                 .memberId(member.getId())
                 .loginId(member.getLoginId())
@@ -56,7 +54,7 @@ public class MemberDto {
                 .email(member.getEmail())
                 .creationTime(member.getCreationTime())
                 .nickname(member.getNickname())
-                .profileImageUrl(member.getProfileImageUrl())
+                .profileImageUrl(profileImageUrl)
                 .cd1(member.getCd1())
                 .cd2(member.getCd2())
                 .cd3(member.getCd3())
