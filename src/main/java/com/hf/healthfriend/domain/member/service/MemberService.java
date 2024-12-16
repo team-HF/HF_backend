@@ -63,7 +63,7 @@ public class MemberService {
 
         String profileImagePath = null;
         if (dto.getProfileImageFileExtension() != null) {
-            profileImagePath = this.fileUrlResolver.generateFilePathWithUuid(dto.getProfileImageFileExtension(), "image");
+            profileImagePath = this.fileUrlResolver.generateFilePathWithUuid(dto.getProfileImageFileExtension(), "files", "image");
             newMember.setProfileImageUrl(profileImagePath);
             log.info("id={}, profileImagePath={}", newMember.getId(), profileImagePath);
         } else {
@@ -86,7 +86,7 @@ public class MemberService {
     public MemberDto findMember(Long memberId) throws MemberNotFoundException {
         Member findMember = this.memberRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
-        return MemberDto.of(findMember);
+        return MemberDto.of(findMember, this.fileUrlResolver.resolveFileUrl(findMember.getProfileImageUrl()));
     }
 
     public MemberDto findMemberByLoginId(String loginId) throws MemberNotFoundException {
@@ -97,7 +97,7 @@ public class MemberService {
     public MemberDto findMemberByEmail(String email) throws MemberNotFoundException {
         Member findMember = this.memberRepository.findByEmail(email)
                 .orElseThrow(() -> new MemberNotFoundException(email));
-        return MemberDto.of(findMember);
+        return MemberDto.of(findMember, this.fileUrlResolver.resolveFileUrl(findMember.getProfileImageUrl()));
     }
 
     public MemberUpdateResponseDto updateMember(Long memberId, MemberUpdateRequestDto requestDto) throws MemberNotFoundException {
@@ -105,7 +105,7 @@ public class MemberService {
         MemberUpdateDto updateDto = this.beanMapper.generateBean(requestDto, MemberUpdateDto.class);
         String profileImagePath = null;
         if (requestDto.getProfileImageFileExtension() != null) {
-            profileImagePath = this.fileUrlResolver.generateFilePathWithUuid(requestDto.getProfileImageFileExtension(), "image");
+            profileImagePath = this.fileUrlResolver.generateFilePathWithUuid(requestDto.getProfileImageFileExtension(), "files", "image");
             updateDto = updateDto.toBuilder()
                     .profileImageUrl(profileImagePath)
                     .build();

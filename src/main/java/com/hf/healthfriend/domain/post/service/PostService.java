@@ -67,7 +67,8 @@ public class PostService {
         }
         List<CommentDto> commentList = commentService.getCommentsOfPost(postId,sortType);
         String imagePath = fileUrlResolver.resolveFileUrl(post.getImagePath());
-        return PostGetResponse.of(post, commentList,imagePath);
+        String writerProfileImageUrl = fileUrlResolver.resolveFileUrl(post.getMember().getProfileImageUrl());
+        return PostGetResponse.of(post, commentList,imagePath, writerProfileImageUrl);
     }
 
     public void delete(Long postId) {

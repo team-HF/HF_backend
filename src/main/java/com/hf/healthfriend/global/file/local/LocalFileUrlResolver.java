@@ -30,7 +30,7 @@ public class LocalFileUrlResolver implements FileUrlResolver {
         );
     }
 
-    private static final String FILE_UPLOAD_URL_BASE = "/hr/files";
+    private static final String FILE_UPLOAD_URL_BASE = "/hf/files";
 
     private final String serverOrigin;
 
