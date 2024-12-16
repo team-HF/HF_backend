@@ -52,7 +52,8 @@ class TestLocalFileUrlResolver {
                     "http://localhost:8080/image/filename.jpg;image/filename.jpg",
                     "http://localhost:8080/image/filename.jpg;/image/filename.jpg",
                     "http://localhost:8080/filename.jpg;filename.jpg",
-                    "http://localhost:8080/filename.jpg;/filename.jpg"
+                    "http://localhost:8080/filename.jpg;/filename.jpg",
+                    "http://localhost:8080/filename.jpg;http://localhost:8080/filename.jpg"
             },
             delimiter = ';'
     )
