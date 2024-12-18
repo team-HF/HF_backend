@@ -2,6 +2,7 @@ package com.hf.healthfriend.domain.comment.repository;
 
 import com.hf.healthfriend.domain.comment.entity.Comment;
 import com.hf.healthfriend.domain.comment.repository.querydsl.CommentCustomRepository;
+import com.hf.healthfriend.domain.post.entity.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -52,4 +53,7 @@ public interface CommentJpaRepository extends JpaRepository<Comment, Long>, Comm
 
     @Query("SELECT c FROM Comment c WHERE c.isDeleted=false ")
     Optional<Comment> findByCommentIdAndIsDeletedFalse(Long commentId);
+
+    @Query("SELECT c.post FROM Comment c WHERE c.commentId = :commentId AND c.isDeleted = false ")
+    Optional<Post> findPostByCommentIdAndIsDeletedFalse(Long commentId);
 }

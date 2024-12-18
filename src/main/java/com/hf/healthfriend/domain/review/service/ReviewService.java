@@ -7,6 +7,7 @@ import com.hf.healthfriend.domain.matching.repository.MatchingRepository;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
+import com.hf.healthfriend.domain.notification.service.NotificationPublishService;
 import com.hf.healthfriend.domain.review.constants.EvaluationType;
 import com.hf.healthfriend.domain.review.dto.request.ReviewCreationRequestDto;
 import com.hf.healthfriend.domain.review.dto.request.ReviewEvaluationDto;
@@ -37,6 +38,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final MatchingRepository matchingRepository;
     private final MemberRepository memberRepository;
+    private final NotificationPublishService notificationPublishService;
 
     /**
      * 리뷰를 추가한다.
@@ -68,6 +70,7 @@ public class ReviewService {
                 saved.getMatching().finish();
             }
             updateMemberReviewScore(dto.getRevieweeId());
+            notificationPublishService.publishReviewNot(dto.getReviewerId(), dto.getRevieweeId(), saved.getReviewId());
             return saved.getReviewId();
         } catch (DataIntegrityViolationException e) {
             throw new MemberNotFoundException(dto.getReviewerId(), e);

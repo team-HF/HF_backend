@@ -11,6 +11,8 @@ import com.hf.healthfriend.domain.like.exception.DuplicatePostLikeException;
 import com.hf.healthfriend.domain.like.exception.PostOrMemberNotExistsException;
 import com.hf.healthfriend.domain.like.repository.LikeRepository;
 import com.hf.healthfriend.domain.member.entity.Member;
+import com.hf.healthfriend.domain.member.repository.MemberRepository;
+import com.hf.healthfriend.domain.notification.service.NotificationPublishService;
 import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,8 @@ public class LikeService {
     private final LikeRepository likeRepository;
     private final PostRepository postRepository;
     private final RedissonClient redissonClient;
+    private final NotificationPublishService notificationPublishService;
+    private final MemberRepository memberRepository;
 
     /**
      * 좋아요를 추가한다.
@@ -58,25 +62,25 @@ public class LikeService {
                 Like savedLike = this.likeRepository.save(like);
                 // TODO 동시성 처리 필요
                 postRepository.incrementLikeCount(postId);
+                notificationPublishService.publishPostLikeNot(memberId, postId);
                 savePopularPost(postId);
                 return savedLike.getLikeId();
             } catch (DataIntegrityViolationException e) {
                 throw new PostOrMemberNotExistsException(e, memberId, postId);
             }
+        }else{
+
+            Like like = likeOp.get();
+            if (!like.isCanceled()) {
+                throw new DuplicatePostLikeException(postId, memberId);
+            }
+            like.uncancel();
+            // TODO 동시성 처리 필요
+            postRepository.incrementLikeCount(postId);
+            savePopularPost(postId);
+            notificationPublishService.publishPostLikeNot(memberId, postId);
+            return like.getLikeId();
         }
-
-        Like like = likeOp.get();
-
-        if (!like.isCanceled()) {
-            throw new DuplicatePostLikeException(postId, memberId);
-        }
-
-        like.uncancel();
-        // TODO 동시성 처리 필요
-        postRepository.incrementLikeCount(postId);
-        savePopularPost(postId);
-
-        return like.getLikeId();
     }
 
     /**
@@ -94,21 +98,25 @@ public class LikeService {
             );
             try {
                 Like savedLike = this.likeRepository.save(like);
+                notificationPublishService.publishCommentLikeNot(memberId, commentId);
                 return savedLike.getLikeId();
             } catch (DataIntegrityViolationException e) {
                 throw new CommentOrMemberNotExistsException(e, memberId, commentId);
             }
+        }else {
+
+            Like like = likeOp.get();
+
+            if (!like.isCanceled()) {
+                throw new DuplicateCommentLikeException(commentId, memberId);
+            }
+
+            like.uncancel();
+
+            notificationPublishService.publishCommentLikeNot(memberId, commentId);
+
+            return like.getLikeId();
         }
-
-        Like like = likeOp.get();
-
-        if (!like.isCanceled()) {
-            throw new DuplicateCommentLikeException(commentId, memberId);
-        }
-
-        like.uncancel();
-
-        return like.getLikeId();
     }
 
     /**
@@ -196,10 +204,10 @@ public class LikeService {
     public void savePopularPost(Long postId) {
         Long likeCount = this.likeRepository.countByPostId(postId);
         if(likeCount>=5) {
-            String postKey = "post:" + postId;
             RScoredSortedSet<Long> sortedSet = redissonClient.getScoredSortedSet("popular_posts");
             sortedSet.add(-(double)likeCount, postId);
-            log.info("popularPost sortedSet 좋아요 수 증가");
+            log.info("인기글 등록 완료 {}", postId);
+            notificationPublishService.publishPopularPostNot(postId);
         }
     }
 

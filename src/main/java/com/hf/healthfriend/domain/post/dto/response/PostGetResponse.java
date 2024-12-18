@@ -13,6 +13,7 @@ public record PostGetResponse(
         long writerId,
         String postCategory,
         String writerNickname,
+        String writerProfileImageUrl,
         Tier writerTier,
         String title,
         String content,
@@ -20,14 +21,15 @@ public record PostGetResponse(
         LocalDateTime createDate,
         Long viewCount,
         Long likeCount,
-        List<CommentDto> comments,
-        Integer commentCount
+        Long commentCount,
+        List<CommentDto> comments
 ) {
-    public static PostGetResponse of(Post post, List<CommentDto> comments, String imagePath) {
+    public static PostGetResponse of(Post post, List<CommentDto> comments, String imagePath, String writerProfileImageUrl) {
         return PostGetResponse.builder()
                 .postId(post.getPostId())
                 .writerId(post.getMember().getId())
                 .writerNickname(post.getMember().getNickname())
+                .writerProfileImageUrl(writerProfileImageUrl)
                 .writerTier(post.getMember().getTier())
                 .postCategory(post.getCategory().name())
                 .title(post.getTitle())
@@ -36,8 +38,8 @@ public record PostGetResponse(
                 .createDate(post.getCreationTime())
                 .viewCount(post.getViewCount())
                 .likeCount(post.getLikesCount())
+                .commentCount(post.getCommentsCount())
                 .comments(comments)
-                .commentCount(comments.size())
                 .build();
     }
 }

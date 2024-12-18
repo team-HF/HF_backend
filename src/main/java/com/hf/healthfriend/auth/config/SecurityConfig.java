@@ -44,6 +44,7 @@ public class SecurityConfig {
             "/actuator/**",
             "/favicon.ico",
             "/oauth/token/**",
+            "/hf/files/**",
             "/files/**",
             "/hf/current-state",
 

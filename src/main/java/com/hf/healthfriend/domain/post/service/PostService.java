@@ -16,9 +16,7 @@ import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.exception.PostErrorCode;
 import com.hf.healthfriend.domain.post.exception.PostException;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
-import com.hf.healthfriend.global.exception.ErrorCode;
 import com.hf.healthfriend.global.file.FileUrlResolver;
-import com.hf.healthfriend.global.file.FileUploader;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -69,7 +67,8 @@ public class PostService {
         }
         List<CommentDto> commentList = commentService.getCommentsOfPost(postId,sortType);
         String imagePath = fileUrlResolver.resolveFileUrl(post.getImagePath());
-        return PostGetResponse.of(post, commentList,imagePath);
+        String writerProfileImageUrl = fileUrlResolver.resolveFileUrl(post.getMember().getProfileImageUrl());
+        return PostGetResponse.of(post, commentList,imagePath, writerProfileImageUrl);
     }
 
     public void delete(Long postId) {
