@@ -1,6 +1,7 @@
 package com.hf.healthfriend.domain.chat.repository;
 
 import com.hf.healthfriend.domain.chat.entity.ChatParticipation;
+import com.hf.healthfriend.domain.chat.entity.ChatParticipationId;
 import com.hf.healthfriend.domain.chat.entity.Chatroom;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
@@ -15,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,22 +49,18 @@ class TestChatroomRepository {
         this.memberRepository.save(target);
 
         // When
-        Chatroom chatroom = new Chatroom();
-        ChatParticipation reqPart = new ChatParticipation(chatroom, requester);
-        ChatParticipation tarPart = new ChatParticipation(chatroom, target);
+        Chatroom chatroom = Chatroom.newChatroom(requester, target);
         this.chatroomRepository.save(chatroom);
 
         // Then
         Optional<Chatroom> chatroomOp = this.chatroomRepository.findById(chatroom.getChatroomId());
         assertThat(chatroomOp).isNotEmpty();
-        assertThat(this.chatParticipationRepository.findById(reqPart.getChatParticipationId()))
-                .isNotEmpty();
-        assertThat(this.chatParticipationRepository.findById(tarPart.getChatParticipationId()))
-                .isNotEmpty();
+        List<ChatParticipation> findParticipations = this.chatParticipationRepository.findAll();
+        assertThat(findParticipations).size().isEqualTo(2);
 
         Chatroom findChatroom = chatroomOp.get();
 
         assertThat(findChatroom.getParticipations().stream().map(ChatParticipation::getChatParticipationId))
-                .containsExactlyInAnyOrder(reqPart.getChatParticipationId(), tarPart.getChatParticipationId());
+                .containsExactlyInAnyOrder(findParticipations.stream().map(ChatParticipation::getChatParticipationId).toArray(ChatParticipationId[]::new));
     }
 }

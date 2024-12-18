@@ -9,7 +9,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-// 하나의 외래키만으로 Member, Chatroom 두 엔티티에 접근할 수 있으므로 ChatParticipation에 매핑
 @Entity
 @Inheritance
 @DiscriminatorColumn(name = "message_type")

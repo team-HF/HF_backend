@@ -29,9 +29,7 @@ public class ChatService {
      * @return 새로 생성된 채팅방과 채팅 참여 정보가 담긴 DTO
      */
     public ChatParticipationResponseDto requestChat(ChatParticipationRequestDto dto) {
-        Chatroom chatroom = new Chatroom();
-        ChatParticipation requesterParticipation = new ChatParticipation(chatroom, new Member(dto.getRequesterId()));
-        ChatParticipation targetParticipation = new ChatParticipation(chatroom, new Member(dto.getChatTargetId()));
+        Chatroom chatroom = Chatroom.newChatroom(new Member(dto.getRequesterId()), new Member(dto.getChatTargetId()));
         Chatroom newChatroom = this.chatroomRepository.save(chatroom);
         return ChatParticipationResponseDto.builder()
                 .newChatroomId(newChatroom.getChatroomId())
