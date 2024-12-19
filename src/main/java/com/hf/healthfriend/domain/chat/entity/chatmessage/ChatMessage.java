@@ -1,7 +1,6 @@
 package com.hf.healthfriend.domain.chat.entity.chatmessage;
 
 import com.hf.healthfriend.domain.BaseTimeEntity;
-import com.hf.healthfriend.domain.chat.entity.ChatParticipation;
 import com.hf.healthfriend.domain.chat.entity.Chatroom;
 import com.hf.healthfriend.domain.member.entity.Member;
 import jakarta.persistence.*;
@@ -26,7 +25,7 @@ public abstract class ChatMessage extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
-    private Member member;
+    private Member sender;
 
     // 서비스에 일대일 채팅만 있으므로 ChatMessage 엔티티에서 채팅 읽었는지 여부 체크
     // 나중에 기능이 확장될 경우, 크게 어려움 없이 기능 확장할 수 있을 듯
@@ -38,7 +37,7 @@ public abstract class ChatMessage extends BaseTimeEntity {
 
     protected ChatMessage(Chatroom chatroom, Member sender) {
         this.chatroom = chatroom;
-        this.member = sender;
+        this.sender = sender;
     }
 
     /**
@@ -49,7 +48,7 @@ public abstract class ChatMessage extends BaseTimeEntity {
      */
     public void readIfOpponent(Long readerId) {
         // ID만 조회하는 것이기 때문에 추가 쿼리는 날아가지 않음
-        if (this.member.getId().equals(readerId)) {
+        if (this.sender.getId().equals(readerId)) {
             this.readByOpponent = true;
         }
     }
