@@ -4,6 +4,7 @@ import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
 import com.hf.healthfriend.domain.member.entity.Member;
+import com.hf.healthfriend.domain.member.repository.dto.ProfileQueryResultDto;
 import com.hf.healthfriend.domain.member.repository.querydsl.MemberCustomRepositoryImpl;
 import com.hf.healthfriend.domain.wish.entity.Wish;
 import com.hf.healthfriend.domain.wish.repository.WishRepository;
@@ -152,5 +153,19 @@ public class MemberCustomRepositoryImlTest {
         assertThat(member.getId()).isEqualTo(sampleMember.getId());
         assertThat(member.getEmail()).isEqualTo(sampleMember.getEmail());
         assertThat(member.getNickname()).isEqualTo(sampleMember.getNickname());
+    }
+
+    @Test
+    @DisplayName("findProfileByMemberId() - 스펙, 리뷰가 없는 회원 조회 시 쿼리 성공해야 함")
+    void findProfileByMemberId_noReviewOrSpecs_success() {
+        // Given
+        Member sampleMember = SampleEntityGenerator.generateSampleMember("sample1@gmail.com", "sample1");
+        this.memberRepository.save(sampleMember);
+
+        // When
+        Optional<ProfileQueryResultDto> result = this.memberCustomRepository.findProfileByMemberId(sampleMember.getId());
+
+        // Then
+        assertThat(result).isNotEmpty();
     }
 }
