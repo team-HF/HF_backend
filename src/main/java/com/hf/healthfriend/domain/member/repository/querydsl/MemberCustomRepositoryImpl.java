@@ -196,7 +196,7 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                 .leftJoin(this.spec).on(this.spec.member.eq(this.member))
                 .where(this.member.id.eq(memberId),
                         this.member.isDeleted.isFalse(),
-                        this.spec.isDeleted.isFalse())
+                        this.spec.isDeleted.isFalse().or(this.spec.isNull()))
                 .orderBy(this.spec.startDate.desc(), this.spec.endDate.desc().nullsFirst())
                 .transform(GroupBy.groupBy(this.member.id).list(
                         Projections.constructor(
