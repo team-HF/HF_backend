@@ -21,11 +21,11 @@ public class ChatMessageCustomRepositoryImpl implements ChatMessageCustomReposit
     @Override
     public <D extends ChatMessage> D saveMessageWithChatroomId(Long chatroomId,
                                                                ChatMessageSendRequestDto<?> dto) {
-        Chatroom chatroomReference = this.em.getReference(Chatroom.class, chatroomId);
+        Chatroom chatroom = this.em.find(Chatroom.class, chatroomId);
         Member senderReference = this.em.getReference(Member.class, dto.getSenderId());
         ChatMessage chatMessage = switch (dto.getChatMessageType()) {
             case TEXT ->
-                new TextChatMessage(chatroomReference,
+                new TextChatMessage(chatroom,
                         senderReference,
                         ((TextChatMessageSendRequestContent)dto.getContent()).getText());
             case IMAGE -> {
@@ -35,7 +35,7 @@ public class ChatMessageCustomRepositoryImpl implements ChatMessageCustomReposit
             case MATCHING_REQUEST -> {
                 MatchingRequestChatMessageSendRequestContent content =
                         (MatchingRequestChatMessageSendRequestContent) dto.getContent();
-                yield new MatchingRequestChatMessage(chatroomReference,
+                yield new MatchingRequestChatMessage(chatroom,
                         senderReference,
                         content.getMeetingTime(),
                         content.getMeetingPlace(),
@@ -46,14 +46,15 @@ public class ChatMessageCustomRepositoryImpl implements ChatMessageCustomReposit
                         (MatchingResponseChatMessageSendRequestContent) dto.getContent();
                 yield switch (content.getMatchingResponseType()) {
                     case ACCEPTED ->
-                            MatchingResponseChatMessage.createAcceptanceMessage(chatroomReference, senderReference);
+                            MatchingResponseChatMessage.createAcceptanceMessage(chatroom, senderReference);
                     case REJECTED ->
-                        MatchingResponseChatMessage.createRejectMessage(chatroomReference,
+                        MatchingResponseChatMessage.createRejectMessage(chatroom,
                                 senderReference, content.getCancelMessage());
                 };
             }
         };
         this.em.persist(chatMessage);
+        chatroom.updateLastChatMessage(chatMessage);
         return (D) chatMessage;
     }
 }

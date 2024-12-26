@@ -29,7 +29,9 @@ public class Chatroom extends BaseTimeEntity {
     @OneToMany(mappedBy = "chatroom", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ChatMessage> chatMessages = new ArrayList<>();
 
-    private Long lastChatMessageId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "last_chat_message_id")
+    private ChatMessage lastChatMessage;
 
     public static Chatroom newChatroom(Member... participants) {
         Chatroom newChatroom = new Chatroom();
@@ -49,5 +51,9 @@ public class Chatroom extends BaseTimeEntity {
 
     public void addChatParticipation(ChatParticipation chatParticipation) {
         this.participations.add(chatParticipation);
+    }
+
+    public void updateLastChatMessage(ChatMessage chatMessage) {
+        this.lastChatMessage = chatMessage;
     }
 }

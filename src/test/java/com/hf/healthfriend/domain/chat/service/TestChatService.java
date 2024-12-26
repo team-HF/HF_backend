@@ -22,6 +22,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,11 +53,10 @@ class TestChatService {
         ReflectionTestUtils.setField(sampleReceiver, "id", receiverId);
 
         Chatroom mockReturnChatroom = new Chatroom(chatroomId);
-        ReflectionTestUtils.setField(mockReturnChatroom, "lastChatMessageId", 1000L);
         ReflectionTestUtils.setField(mockReturnChatroom, "participations", List.of(sampleRequester, sampleReceiver));
 
-        when(this.chatroomRepository.save(any()))
-                .thenReturn(mockReturnChatroom);
+        doReturn(mockReturnChatroom).when(this.chatroomRepository)
+                .saveWithParticipants(any(), any());
 
         // When
         Constructor<ChatParticipationRequestDto> constructor = ChatParticipationRequestDto.class.getDeclaredConstructor();

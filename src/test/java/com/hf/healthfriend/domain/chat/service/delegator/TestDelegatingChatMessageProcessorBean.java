@@ -78,54 +78,7 @@ class TestDelegatingChatMessageProcessorBean {
 
         @Bean
         public ChatMessageRepository chatMessageRepository() {
-            ChatMessageRepository chatMessageRepositoryMock = Mockito.mock(ChatMessageRepository.class);
-
-            LocalDateTime now = LocalDateTime.now();
-
-            TextChatMessage textChatMessage = new TextChatMessage(
-                    new Chatroom(DUMMY_CHATROOM_ID),
-                    new Member(DUMMY_SENDER_ID),
-                    DUMMY_CHAT_MESSAGE
-            );
-
-            setCommonChatMessageField(textChatMessage, now);
-
-            doReturn(textChatMessage).when(chatMessageRepositoryMock).save(isA(TextChatMessage.class));
-
-            MatchingRequestChatMessage matchingRequestChatMessage = new MatchingRequestChatMessage(
-                    new Chatroom(DUMMY_CHATROOM_ID),
-                    new Member(DUMMY_SENDER_ID),
-                    (LocalDateTime) DUMMY_MATCHING_REQUEST_DATA.get("meetingTime"),
-                    (String) DUMMY_MATCHING_REQUEST_DATA.get("meetingPlace"),
-                    (String) DUMMY_MATCHING_REQUEST_DATA.get("meetingPlaceAddress")
-            );
-
-            setCommonChatMessageField(matchingRequestChatMessage, now);
-
-            doReturn(matchingRequestChatMessage)
-                    .when(chatMessageRepositoryMock).save(isA(MatchingRequestChatMessage.class));
-
-            MatchingResponseChatMessage acceptMatchingResponseChatMessage =
-                    MatchingResponseChatMessage.createAcceptanceMessage(new Chatroom(DUMMY_CHATROOM_ID), new Member(DUMMY_SENDER_ID));
-
-            setCommonChatMessageField(acceptMatchingResponseChatMessage, now);
-
-            doReturn(acceptMatchingResponseChatMessage)
-                    .when(chatMessageRepositoryMock)
-                    .save(argThat(new MatchingResponseChatMessageArgumentMatcher(acceptMatchingResponseChatMessage)));
-
-            MatchingResponseChatMessage rejectMatchingResponseChatMessage =
-                    MatchingResponseChatMessage.createRejectMessage(new Chatroom(DUMMY_CHATROOM_ID),
-                            new Member(DUMMY_SENDER_ID),
-                            DUMMY_CHAT_MESSAGE);
-
-            setCommonChatMessageField(rejectMatchingResponseChatMessage, now);
-
-            doReturn(rejectMatchingResponseChatMessage)
-                    .when(chatMessageRepositoryMock)
-                    .save(argThat(new MatchingResponseChatMessageArgumentMatcher(rejectMatchingResponseChatMessage)));
-
-            return chatMessageRepositoryMock;
+            return Mockito.mock(ChatMessageRepository.class);
         }
 
         @RequiredArgsConstructor
@@ -136,12 +89,6 @@ class TestDelegatingChatMessageProcessorBean {
             public boolean matches(MatchingResponseChatMessage argument) {
                 return thisMessage.getMatchingResponseType() == argument.getMatchingResponseType();
             }
-        }
-
-        private void setCommonChatMessageField(Object toSet, LocalDateTime now) {
-            ReflectionTestUtils.setField(toSet, "creationTime", now);
-            ReflectionTestUtils.setField(toSet, "lastModified", now);
-            ReflectionTestUtils.setField(toSet, "chatMessageId", DUMMY_CHAT_MESSAGE_ID);
         }
 
         @Bean
@@ -157,10 +104,23 @@ class TestDelegatingChatMessageProcessorBean {
     @Autowired
     DelegatingChatMessageProcessorBean processor;
 
+    @Autowired
+    ChatMessageRepository chatMessageRepositoryMock;
+
     @Test
     @DisplayName("sendMessage() - 텍스트 메시지 처리 성공")
     void sendMessage_textMessage_success() throws Exception {
         // Given
+        TextChatMessage textChatMessage = new TextChatMessage(
+                new Chatroom(DUMMY_CHATROOM_ID),
+                new Member(DUMMY_SENDER_ID),
+                DUMMY_CHAT_MESSAGE
+        );
+
+        setCommonChatMessageField(textChatMessage, LocalDateTime.now());
+
+        doReturn(textChatMessage).when(chatMessageRepositoryMock).saveMessageWithChatroomId(any(), any());
+
         Constructor<?> dtoConstructor = ChatMessageSendRequestDto.class.getDeclaredConstructors()[0];
         dtoConstructor.setAccessible(true);
         Object dtoInstance = dtoConstructor.newInstance();
@@ -182,6 +142,19 @@ class TestDelegatingChatMessageProcessorBean {
     @DisplayName("sendMessage() - 매칭 신청 메시지 전송 성공")
     void sendMessage_matchingRequest_success() throws Exception {
         // Given
+        MatchingRequestChatMessage matchingRequestChatMessage = new MatchingRequestChatMessage(
+                new Chatroom(DUMMY_CHATROOM_ID),
+                new Member(DUMMY_SENDER_ID),
+                (LocalDateTime) DUMMY_MATCHING_REQUEST_DATA.get("meetingTime"),
+                (String) DUMMY_MATCHING_REQUEST_DATA.get("meetingPlace"),
+                (String) DUMMY_MATCHING_REQUEST_DATA.get("meetingPlaceAddress")
+        );
+
+        setCommonChatMessageField(matchingRequestChatMessage, LocalDateTime.now());
+
+        doReturn(matchingRequestChatMessage)
+                .when(chatMessageRepositoryMock).saveMessageWithChatroomId(any(), any());
+
         Constructor<?> dtoConstructor = ChatMessageSendRequestDto.class.getDeclaredConstructors()[0];
         dtoConstructor.setAccessible(true);
         Object dtoInstance = dtoConstructor.newInstance();
@@ -210,6 +183,15 @@ class TestDelegatingChatMessageProcessorBean {
     @DisplayName("sendMessage() - 매칭 수락 응답 메시지 전송 성공")
     void sendMessage_matchingResponse_accept_success() throws Exception {
         // Given
+        MatchingResponseChatMessage acceptMatchingResponseChatMessage =
+                MatchingResponseChatMessage.createAcceptanceMessage(new Chatroom(DUMMY_CHATROOM_ID), new Member(DUMMY_SENDER_ID));
+
+        setCommonChatMessageField(acceptMatchingResponseChatMessage, LocalDateTime.now());
+
+        doReturn(acceptMatchingResponseChatMessage)
+                .when(chatMessageRepositoryMock)
+                .saveMessageWithChatroomId(any(), any());
+
         Constructor<?> dtoConstructor = ChatMessageSendRequestDto.class.getDeclaredConstructors()[0];
         dtoConstructor.setAccessible(true);
         Object dtoInstance = dtoConstructor.newInstance();
@@ -239,6 +221,17 @@ class TestDelegatingChatMessageProcessorBean {
     @DisplayName("sendMessage() - 매칭 거절 응답 메시지 전송 성공")
     void sendMessage_matchingResponse_reject_success() throws Exception {
         // Given
+        MatchingResponseChatMessage rejectMatchingResponseChatMessage =
+                MatchingResponseChatMessage.createRejectMessage(new Chatroom(DUMMY_CHATROOM_ID),
+                        new Member(DUMMY_SENDER_ID),
+                        DUMMY_CHAT_MESSAGE);
+
+        setCommonChatMessageField(rejectMatchingResponseChatMessage, LocalDateTime.now());
+
+        doReturn(rejectMatchingResponseChatMessage)
+                .when(chatMessageRepositoryMock)
+                .saveMessageWithChatroomId(any(), any());
+
         Constructor<?> dtoConstructor = ChatMessageSendRequestDto.class.getDeclaredConstructors()[0];
         dtoConstructor.setAccessible(true);
         Object dtoInstance = dtoConstructor.newInstance();
@@ -263,5 +256,11 @@ class TestDelegatingChatMessageProcessorBean {
                         "cancelMessage", DUMMY_CHAT_MESSAGE
                 )
         );
+    }
+
+    private void setCommonChatMessageField(Object toSet, LocalDateTime now) {
+        ReflectionTestUtils.setField(toSet, "creationTime", now);
+        ReflectionTestUtils.setField(toSet, "lastModified", now);
+        ReflectionTestUtils.setField(toSet, "chatMessageId", DUMMY_CHAT_MESSAGE_ID);
     }
 }
