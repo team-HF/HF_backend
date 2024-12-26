@@ -35,16 +35,6 @@ public class DelegatingChatMessageProcessorBean implements ChatMessageProcessor 
             Constructor<?> constructor = constructors[0];
             log.debug("ChatMessageType={}", type);
             log.debug("constructor={}", constructor);
-            log.debug("beans={}", Arrays.stream(constructor.getParameterTypes())
-                    .map((t) ->
-                            t.isAssignableFrom(Collection.class)
-                                    ? this.applicationContext.getBeansOfType(t)
-                                    : this.applicationContext.getBean(t)).toList());
-            log.debug("constructor bean len={}", Arrays.stream(constructor.getParameterTypes())
-                    .map((t) ->
-                            t.isAssignableFrom(Collection.class)
-                                    ? this.applicationContext.getBeansOfType(t)
-                                    : this.applicationContext.getBean(t)).toList().size());
             ChatMessageProcessor processorInstance = (ChatMessageProcessor) constructor.newInstance(
                     Arrays.stream(constructor.getParameterTypes())
                             .map((t) ->

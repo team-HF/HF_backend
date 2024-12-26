@@ -5,12 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hf.healthfriend.domain.chat.dto.request.ChatMessageSendRequestDto;
 import com.hf.healthfriend.domain.chat.dto.request.content.MatchingResponseChatMessageSendRequestContent;
 import com.hf.healthfriend.domain.chat.dto.response.ChatMessageSendResponseDto;
-import com.hf.healthfriend.domain.chat.entity.Chatroom;
 import com.hf.healthfriend.domain.chat.entity.chatmessage.MatchingResponseChatMessage;
 import com.hf.healthfriend.domain.chat.repository.ChatMessageRepository;
 import com.hf.healthfriend.domain.matching.constant.MatchingStatus;
 import com.hf.healthfriend.domain.matching.service.MatchingService;
-import com.hf.healthfriend.domain.member.entity.Member;
 
 import java.util.Map;
 
@@ -38,15 +36,7 @@ public class MatchingResponseChatMessageProcessor
 
     @Override
     protected ChatMessageSendResponseDto processSendingMessage(Long chatroomId, ChatMessageSendRequestDto<MatchingResponseChatMessageSendRequestContent> dto) {
-        MatchingResponseChatMessage chatMessage =
-                switch (dto.getContent().getMatchingResponseType()) {
-                    case ACCEPTED -> MatchingResponseChatMessage.createAcceptanceMessage(new Chatroom(chatroomId),
-                            new Member(dto.getSenderId()));
-                    case REJECTED -> MatchingResponseChatMessage.createRejectMessage(new Chatroom(chatroomId),
-                            new Member(dto.getSenderId()),
-                            dto.getContent().getCancelMessage());
-                };
-        MatchingResponseChatMessage saved = this.chatMessageRepository.save(chatMessage);
+        MatchingResponseChatMessage saved = this.chatMessageRepository.saveMessageWithChatroomId(chatroomId, dto);
 
         this.matchingService.updateMatchingStatus(dto.getContent().getMatchingId(),
                 switch (dto.getContent().getMatchingResponseType()) {

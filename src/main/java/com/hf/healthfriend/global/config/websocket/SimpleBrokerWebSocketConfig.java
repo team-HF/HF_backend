@@ -13,18 +13,18 @@ public class SimpleBrokerWebSocketConfig implements WebSocketMessageBrokerConfig
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/hf")
+        registry.addEndpoint("/hf/portfolio")
                 .setHandshakeHandler(new CustomWebSocketHandshakeHandler())
                 .withSockJS();
     }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.setApplicationDestinationPrefixes("/app");
+        registry.setApplicationDestinationPrefixes("/hf/app");
 
         // 내장 메시지 브로커
-        registry.enableSimpleBroker("/topic", "/queue", "/user");
+        registry.enableSimpleBroker("/hf/topic", "/hf/queue", "/hf/user");
 
-        registry.setUserDestinationPrefix("/user");
+        registry.setUserDestinationPrefix("/hf/user");
     }
 }

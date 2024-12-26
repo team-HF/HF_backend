@@ -1,13 +1,16 @@
-package com.hf.healthfriend.domain.chat.repository;
+package com.hf.healthfriend.domain.chat.repository.custom;
 
 import com.hf.healthfriend.domain.chat.entity.ChatParticipation;
 import com.hf.healthfriend.domain.chat.entity.ChatParticipationId;
 import com.hf.healthfriend.domain.chat.entity.Chatroom;
+import com.hf.healthfriend.domain.chat.repository.ChatParticipationRepository;
+import com.hf.healthfriend.domain.chat.repository.ChatroomRepository;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.testutil.MysqlTestcontainerConfig;
 import com.hf.healthfriend.testutil.SampleEntityGenerator;
 import com.hf.healthfriend.testutil.TestConfig;
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,7 +31,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 })
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Slf4j
-class TestChatroomRepository {
+class TestChatroomCustomRepositoryImpl {
+
+    @Autowired
+    ChatroomCustomRepositoryImpl chatroomCustomRepository;
 
     @Autowired
     ChatroomRepository chatroomRepository;
@@ -39,18 +45,25 @@ class TestChatroomRepository {
     @Autowired
     ChatParticipationRepository chatParticipationRepository;
 
+    @Autowired
+    EntityManager em;
+
     @Test
-    @DisplayName("save() - 채팅방 생성 시 Cascade 설정에 따라 ChatParticipation도 생성")
-    void save_checkCascade_success() {
+    @DisplayName("saveWithParticipants() - success")
+    void saveWithParticipants_success() {
         // Given
         Member requester = SampleEntityGenerator.generateSampleMember("requester@gmail.com", "REQ");
         Member target = SampleEntityGenerator.generateSampleMember("target@gmail.com", "TAR");
         this.memberRepository.save(requester);
         this.memberRepository.save(target);
 
+        this.em.detach(requester);
+        this.em.detach(target);
+
         // When
-        Chatroom chatroom = Chatroom.newChatroom(requester, target);
-        this.chatroomRepository.save(chatroom);
+        Chatroom chatroom =
+                this.chatroomCustomRepository.saveWithParticipants(new Member(requester.getId()),
+                        new Member(target.getId()));
 
         // Then
         Optional<Chatroom> chatroomOp = this.chatroomRepository.findById(chatroom.getChatroomId());

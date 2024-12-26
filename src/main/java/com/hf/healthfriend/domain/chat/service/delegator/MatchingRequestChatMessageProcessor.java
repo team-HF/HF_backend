@@ -5,12 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hf.healthfriend.domain.chat.dto.request.ChatMessageSendRequestDto;
 import com.hf.healthfriend.domain.chat.dto.request.content.MatchingRequestChatMessageSendRequestContent;
 import com.hf.healthfriend.domain.chat.dto.response.ChatMessageSendResponseDto;
-import com.hf.healthfriend.domain.chat.entity.Chatroom;
 import com.hf.healthfriend.domain.chat.entity.chatmessage.MatchingRequestChatMessage;
 import com.hf.healthfriend.domain.chat.repository.ChatMessageRepository;
 import com.hf.healthfriend.domain.matching.dto.request.MatchingRequestDto;
 import com.hf.healthfriend.domain.matching.service.MatchingService;
-import com.hf.healthfriend.domain.member.entity.Member;
 
 import java.util.Map;
 
@@ -38,14 +36,7 @@ public class MatchingRequestChatMessageProcessor
 
     @Override
     protected ChatMessageSendResponseDto processSendingMessage(Long chatroomId, ChatMessageSendRequestDto<MatchingRequestChatMessageSendRequestContent> dto) {
-        MatchingRequestChatMessage chatMessage = new MatchingRequestChatMessage(
-                new Chatroom(chatroomId),
-                new Member(dto.getSenderId()),
-                dto.getContent().getMeetingTime(),
-                dto.getContent().getMeetingPlace(),
-                dto.getContent().getMeetingPlace()
-        );
-        MatchingRequestChatMessage saved = this.chatMessageRepository.save(chatMessage);
+        MatchingRequestChatMessage saved = this.chatMessageRepository.saveMessageWithChatroomId(chatroomId, dto);
 
         Long generatedMatchingId = this.matchingService.requestMatching(MatchingRequestDto.builder()
                 .requesterId(dto.getSenderId())

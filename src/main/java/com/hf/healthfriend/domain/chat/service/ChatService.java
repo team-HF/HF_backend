@@ -1,6 +1,5 @@
 package com.hf.healthfriend.domain.chat.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hf.healthfriend.domain.chat.dto.request.ChatMessageSendRequestDto;
 import com.hf.healthfriend.domain.chat.dto.request.ChatParticipationRequestDto;
 import com.hf.healthfriend.domain.chat.dto.response.ChatMessageSendResponseDto;
@@ -14,10 +13,12 @@ import com.hf.healthfriend.domain.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class ChatService {
@@ -33,8 +34,8 @@ public class ChatService {
      * @return 새로 생성된 채팅방과 채팅 참여 정보가 담긴 DTO
      */
     public ChatParticipationResponseDto requestChat(ChatParticipationRequestDto dto) {
-        Chatroom chatroom = Chatroom.newChatroom(new Member(dto.getRequesterId()), new Member(dto.getChatTargetId()));
-        Chatroom newChatroom = this.chatroomRepository.save(chatroom);
+        Chatroom newChatroom = this.chatroomRepository.saveWithParticipants(new Member(dto.getRequesterId()),
+                new Member(dto.getChatTargetId()));
         return ChatParticipationResponseDto.builder()
                 .newChatroomId(newChatroom.getChatroomId())
                 .participantIds(List.of(dto.getChatTargetId(), dto.getRequesterId()))
