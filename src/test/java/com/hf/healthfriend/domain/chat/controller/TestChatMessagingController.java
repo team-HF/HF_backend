@@ -126,8 +126,28 @@ class TestChatMessagingController {
         this.memberRepository.delete(this.receiver);
     }
 
+    // 채팅 신청에 대한 응답, 채팅 메시지 전송에 대한 응답이 제대로 도착했는지 확인하기 위한 카운트다운
     CountDownLatch latch = new CountDownLatch(3);
 
+    /**
+     * <p>채팅 신청 및 채팅 메시지 전송 테스트
+     * <p>흐름은 다음과 같다.
+     * <p>1. 채팅에 참여하는 회원 (sender, receiver)는 미리 데이터베이스에 레코드 추가해 둠
+     * <p>2. 채팅 신청 메시지 전송 -> 채팅 신청 시 Chatroom 엔티티와 ChatParticipation 엔티티 생성됨
+     * <p>2.1. 채팅 신청 엔드포인트: /hf/app/chat/request
+     * <p>2.2. 채팅 신청 subscription 엔드포인트: /hf/user/chat/request
+     * <p>2.3. ChatMessagingController.requestChat() 메소드에서 처리
+     * <p>2.4. sender, receiver에게 각각 메시지 전송
+     * <p>3. 채팅 신청 완료 후 채팅 전송 - 아래 messageSendTest() 메소드
+     * <p>4. sender와 receiver 각각 채팅 메시지 엔드포인트 subscription
+     * <p>4.1. 채팅 메시지 전송 엔드포인트: /hf/app/chat/messages/{chatroomId}
+     * <p>4.2. 채팅 메시지 subscription 엔드포인트: /hf/topic/chat/messages/{chatroomId}
+     * <p>채팅 신청 응답 수신 시 한 번, 채팅 메시지 응답 수신 시 두 번 (sender와 receiver 각각 한 번)
+     * 총 세 번 CountDownLatch의 count가 하나씩 줄어듦
+     * <p>웹소켓 통신이 비동기 방식으로 처리되기 때문에 콜백 메소드 안에서 통신 처리 로직을 정의해야 하기
+     * 때문에 웹소켓 응답 결과를 return할 수 없음. 그래서 결과값을 ConcurrentHashMap에 저장. 이후
+     * ConcurrentHashMap에 담긴 값 검증
+     */
     @Test
     @DisplayName("채팅 신청 후 메시지 보내기 테스트 - 성공")
     void chatRequestAndThenSendMessage() throws InterruptedException {
@@ -137,6 +157,8 @@ class TestChatMessagingController {
         // 비동기 처리 상황에서 결과값을 검증할 객체를 담기 위한 ConcurrentHashMap
         Map<String, Object> resultMap = new ConcurrentHashMap<>();
 
+        // 채팅 신청 엔드포인트에 대한 subscription
+        // 신청자와 피신청자 둘 다 메시지를 받게 되지만, 우선 신청자만 구독
         this.senderSession.subscribe("/hf/user/" + this.sender.getId() + "/chat/request", new StompFrameHandler() {
 
             @Override
@@ -151,16 +173,20 @@ class TestChatMessagingController {
 
                 ChatParticipationResponseDto dto = (ChatParticipationResponseDto) payload;
                 resultMap.put("ChatParticipationResponseDto", dto);
-                messageSendTest(dto, resultMap); // 동기화했기 때문에 이 메소드가 끝날 때까지 대기함
+
+                // 채팅 신청 완료 후, 채팅 전송 테스트를 수행하는 메소드 호출
+                messageSendTest(dto, resultMap);
                 latch.countDown();
             }
         });
 
+        // 채팅 신청 메시지 전송
         this.senderSession.send("/hf/app/chat/request", Map.of(
                 "requesterId", this.sender.getId(),
                 "chatTargetId", this.receiver.getId()
         ));
 
+        // 비동기 처리가 모두 끝날 때까지 대기
         boolean await = latch.await(8, TimeUnit.SECONDS);
         log.info("count={}", latch.getCount());
 
