@@ -33,6 +33,8 @@ public class Chatroom extends BaseTimeEntity {
     @JoinColumn(name = "last_chat_message_id")
     private ChatMessage lastChatMessage;
 
+    private Integer unreadMessageCount = 0;
+
     public static Chatroom newChatroom(Member... participants) {
         Chatroom newChatroom = new Chatroom();
         newChatroom.participations = Arrays.stream(participants)
@@ -55,5 +57,9 @@ public class Chatroom extends BaseTimeEntity {
 
     public void updateLastChatMessage(ChatMessage chatMessage) {
         this.lastChatMessage = chatMessage;
+    }
+
+    public void updateUnreadMessageCount(Integer count) {
+        this.unreadMessageCount = count;
     }
 }
