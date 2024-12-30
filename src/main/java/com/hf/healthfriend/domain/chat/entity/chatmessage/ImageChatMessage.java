@@ -24,4 +24,9 @@ public class ImageChatMessage extends ChatMessage {
         super(chatroom, sender);
         this.imageUrl = imageUrl;
     }
+
+    @Override
+    public String getMessageAsText() {
+        return "이미지";
+    }
 }
