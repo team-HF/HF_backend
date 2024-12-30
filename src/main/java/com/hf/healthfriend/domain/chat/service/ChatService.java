@@ -75,6 +75,7 @@ public class ChatService {
                                 .opponentParticipantProfileImageUrl(this.fileUrlResolver.resolveFileUrl(dto.opponentParticipantProfileImageUrl()))
                                 .matchingStatus(dto.matchingStatus())
                                 .lastChatMessage(dto.chatroom().getLastChatMessage().getMessageAsText())
+                                .chatSentTime(dto.chatroom().getCreationTime()) // lastModified를 반환하는 게 맞을까?
                                 .unreadMessageCount(dto.chatroom().getUnreadMessageCount())
                                 .build()
                 )
