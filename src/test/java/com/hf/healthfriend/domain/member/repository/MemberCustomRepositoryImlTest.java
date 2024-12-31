@@ -14,6 +14,8 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 import java.time.LocalDate;
 import java.util.ArrayList;
+
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -33,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ActiveProfiles("test")
 @Import(TestConfig.class)
 @DataJpaTest
+@Slf4j
 public class MemberCustomRepositoryImlTest {
 
     @Autowired
@@ -167,5 +170,12 @@ public class MemberCustomRepositoryImlTest {
 
         // Then
         assertThat(result).isNotEmpty();
+
+        ProfileQueryResultDto profileQueryResultDto = result.get();
+
+        log.info("result={}", profileQueryResultDto);
+
+        assertThat(profileQueryResultDto.specs()).isEmpty();
+        assertThat(profileQueryResultDto.averageReviewScore()).isZero();
     }
 }
