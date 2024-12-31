@@ -164,9 +164,12 @@ public class ReviewService {
             reviewResponseDtoByEvaluationType.put(entry1.getKey(),
                     new ReviewResponseDto(totalCountPerEvaluationType, reviewDetailsPerEvaluationType));
         }
+
+        double averageScore = this.reviewRepository.calculateAverageScoreByRevieweeId(revieweeId);
         return new RevieweeResponseDto(revieweeId,
                 reviewResponseDtoByEvaluationType.get(EvaluationType.GOOD),
-                reviewResponseDtoByEvaluationType.get(EvaluationType.NOT_GOOD));
+                reviewResponseDtoByEvaluationType.get(EvaluationType.NOT_GOOD),
+                averageScore);
     }
 
     private void updateMemberReviewScore(Long revieweeId) {
