@@ -344,34 +344,28 @@ public class MemberController {
                                                             "description": ""
                                                         }
                                                     ],
-                                                    "reviews": [
-                                                        {
-                                                            "evaluationType": "GOOD",
-                                                            "reviewDetailsPerEvaluationType": [
-                                                                {
-                                                                    "reviewDetailId": 1,
-                                                                    "reviewDetailCount": 12
-                                                                },
-                                                                {
-                                                                    "reviewDetailId": 2,
-                                                                    "reviewDetailCount": 9
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            "evaluationType": "NOT_GOOD",
-                                                            "reviewDetailsPerEvaluationType": [
-                                                                {
-                                                                    "reviewDetailId": 3,
-                                                                    "reviewDetailCount": 8
-                                                                },
-                                                                {
-                                                                    "reviewDetailId": 1,
-                                                                    "reviewDetailCount": 5
-                                                                }
-                                                            ]
-                                                        }
-                                                    ],
+                                                    "reviews": {
+                                                        "good": [
+                                                            {
+                                                                "reviewDetailId": 1,
+                                                                "reviewDetailCount": 12
+                                                            },
+                                                            {
+                                                                "reviewDetailId": 2,
+                                                                "reviewDetailCount": 9
+                                                            }
+                                                        ],
+                                                        "notGood": [
+                                                            {
+                                                                "reviewDetailId": 3,
+                                                                "reviewDetailCount": 8
+                                                            },
+                                                            {
+                                                                "reviewDetailId": 1,
+                                                                "reviewDetailCount": 5
+                                                            }
+                                                        ]
+                                                    },
                                                     "averageReviewScore": 3.5
                                                 }
                                             }

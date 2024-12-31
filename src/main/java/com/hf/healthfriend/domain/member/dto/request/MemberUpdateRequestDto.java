@@ -21,6 +21,10 @@ import java.util.List;
 @BeanMapping(MemberUpdateDto.class)
 public class MemberUpdateRequestDto {
 
+    @Schema(description = "변경할 닉네임")
+    @Length(min = 1, max = 8)
+    private String nickname;
+
     @Schema(description = "회원이 현재 위치하고 있는 시/도 id")
     @Length(min = 2, max = 2)
     private String cd1;

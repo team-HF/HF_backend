@@ -151,7 +151,7 @@ public class ReviewService {
             countByEvaluationId.put(mapping.getEvaluationDetailId(), mapping.getEvaluationDetailCount());
         }
 
-        List<ReviewResponseDto> reviewResponseDtos = new ArrayList<>();
+        Map<EvaluationType, ReviewResponseDto> reviewResponseDtoByEvaluationType = new HashMap<>();
         for (Map.Entry<EvaluationType, Map<Integer, Long>> entry1 : evaluationDetailCountsByEvaluationType.entrySet()) {
             List<ReviewDetailPerEvaluationType> reviewDetailsPerEvaluationType = new ArrayList<>();
             long totalCountPerEvaluationType = 0L;
@@ -161,15 +161,15 @@ public class ReviewService {
                 ));
                 totalCountPerEvaluationType += entry2.getValue();
             }
-            reviewResponseDtos.add(
-                    new ReviewResponseDto(
-                            entry1.getKey(),
-                            totalCountPerEvaluationType,
-                            reviewDetailsPerEvaluationType
-                    )
-            );
+            reviewResponseDtoByEvaluationType.put(entry1.getKey(),
+                    new ReviewResponseDto(totalCountPerEvaluationType, reviewDetailsPerEvaluationType));
         }
-        return new RevieweeResponseDto(revieweeId, reviewResponseDtos);
+
+        double averageScore = this.reviewRepository.calculateAverageScoreByRevieweeId(revieweeId);
+        return new RevieweeResponseDto(revieweeId,
+                reviewResponseDtoByEvaluationType.get(EvaluationType.GOOD),
+                reviewResponseDtoByEvaluationType.get(EvaluationType.NOT_GOOD),
+                averageScore);
     }
 
     private void updateMemberReviewScore(Long revieweeId) {

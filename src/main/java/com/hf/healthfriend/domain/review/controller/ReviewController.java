@@ -130,40 +130,37 @@ public class ReviewController {
                                                 "content": {
                                                     "memberId": 10000,
                                                     "averageScore": 3.5,
-                                                    "reviewDetails": [
-                                                        {
-                                                            "evaluationType": "GOOD",
-                                                            "totalCountPerEvaluationType": 71,
-                                                            "reviewDetailsPerEvaluationType": [
-                                                                {
-                                                                    "reviewDetailId": 3,
-                                                                    "reviewDetailCount": 36
-                                                                },
-                                                                {
-                                                                    "reviewDetailId": 1,
-                                                                    "reviewDetailCount": 23
-                                                                },
-                                                                {
-                                                                    "reviewDetailId": 2,
-                                                                    "reviewDetailCount": 12
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            "evaluationType": "NOT_GOOD",
-                                                            "totalCountPerEvaluationType": 15,
-                                                            "reviewDetailsPerEvaluationType": [
-                                                                {
-                                                                    "reviewDetailId": 2,
-                                                                    "reviewDetailCount": 10
-                                                                },
-                                                                {
-                                                                    "reviewDetailId": 1,
-                                                                    "reviewDetailCount": 5
-                                                                }
-                                                            ]
-                                                        }
-                                                    ]
+                                                    "good": {
+                                                        "totalCountPerEvaluationType": 71,
+                                                        "reviewDetailsPerEvaluationType": [
+                                                            {
+                                                                "reviewDetailId": 3,
+                                                                "reviewDetailCount": 36
+                                                            },
+                                                            {
+                                                                "reviewDetailId": 1,
+                                                                "reviewDetailCount": 23
+                                                            },
+                                                            {
+                                                                "reviewDetailId": 2,
+                                                                "reviewDetailCount": 12
+                                                            }
+                                                        ]
+                                                    },
+                                                    "notGood": {
+                                                        "totalCountPerEvaluationType": 15,
+                                                        "reviewDetailsPerEvaluationType": [
+                                                            {
+                                                                "reviewDetailId": 2,
+                                                                "reviewDetailCount": 10
+                                                            },
+                                                            {
+                                                                "reviewDetailId": 1,
+                                                                "reviewDetailCount": 5
+                                                            }
+                                                        ]
+                                                    },
+                                                    "reviewScore": 3.5
                                                 }
                                             }
                                             """)

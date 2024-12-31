@@ -144,7 +144,7 @@ public class MemberService {
         }
     }
 
-    public List<MemberRecommendResponse> recommendMember(MembersRecommendRequest request, int pageNumber){
+    public List<MemberRecommendResponse> recommendMember(MembersRecommendRequest request, int pageNumber) {
         Pageable pageable = PageRequest.of(pageNumber - 1, 6);
         return memberRepository.recommendMembers(request, pageable);
     }
@@ -170,10 +170,9 @@ public class MemberService {
                 .memberId(profileResult.memberId())
                 .introduction(profileResult.introduction())
                 .specs(profileResult.specs())
-                .reviews(reviewDto.reviewDetails()
-                        .stream()
-                        .map((r) -> new SimpleReviewResponseDto(r.evaluationType(), r.reviewDetailsPerEvaluationType()))
-                        .toList())
+                .reviews(new SimpleReviewResponseDto(
+                        reviewDto.good().reviewDetailsPerEvaluationType(),
+                        reviewDto.notGood().reviewDetailsPerEvaluationType()))
                 .averageReviewScore(profileResult.averageReviewScore())
                 .build();
     }

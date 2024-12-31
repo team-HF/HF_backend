@@ -221,6 +221,17 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
             log.warn("findProfileByMemberId - 쿼리 결과 리스트의 사이즈가 1을 초과합니다.");
             result.forEach((r) -> log.warn("memberId={}", r.memberId()));
         }
-        return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
+
+        return result.isEmpty() ? Optional.empty() : Optional.of(removeNull(result.get(0)));
+    }
+
+    private ProfileQueryResultDto removeNull(ProfileQueryResultDto dto) {
+        for (int i = 0; i < dto.specs().size(); i++) {
+            SpecDto specDto = dto.specs().get(i);
+            if (specDto.getSpecId() == null) {
+                dto.specs().remove(i--);
+            }
+        }
+        return dto;
     }
 }
