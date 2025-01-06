@@ -4,12 +4,13 @@ import com.hf.healthfriend.domain.chat.constant.ChatroomListSearchCondition;
 import com.hf.healthfriend.domain.chat.constant.ChatDefaultValues;
 import com.hf.healthfriend.domain.chat.dto.request.ChatMessageSendRequestDto;
 import com.hf.healthfriend.domain.chat.dto.request.ChatParticipationRequestDto;
-import com.hf.healthfriend.domain.chat.dto.response.ChatMessageSendResponseDto;
-import com.hf.healthfriend.domain.chat.dto.response.ChatParticipationResponseDto;
-import com.hf.healthfriend.domain.chat.dto.response.ChatroomListResponseDto;
+import com.hf.healthfriend.domain.chat.dto.response.*;
+import com.hf.healthfriend.domain.chat.dto.response.messagecontent.ImageChatMessageResponseContent;
+import com.hf.healthfriend.domain.chat.dto.response.messagecontent.MatchingRequestChatMessageResponseContent;
+import com.hf.healthfriend.domain.chat.dto.response.messagecontent.MatchingResponseChatMessageResponseContent;
+import com.hf.healthfriend.domain.chat.dto.response.messagecontent.TextChatMessageResponseContent;
 import com.hf.healthfriend.domain.chat.entity.Chatroom;
-import com.hf.healthfriend.domain.chat.entity.chatmessage.ChatMessage;
-import com.hf.healthfriend.domain.chat.entity.chatmessage.TextChatMessage;
+import com.hf.healthfriend.domain.chat.entity.chatmessage.*;
 import com.hf.healthfriend.domain.chat.repository.ChatMessageRepository;
 import com.hf.healthfriend.domain.chat.repository.ChatParticipationRepository;
 import com.hf.healthfriend.domain.chat.repository.ChatroomRepository;
@@ -19,6 +20,7 @@ import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.global.file.FileUrlResolver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,11 +59,11 @@ public class ChatService {
     }
 
     public List<ChatroomListResponseDto> getChatroomList(Long participantId,
-                                                   ChatroomListSearchCondition searchCondition,
-                                                   Integer page,
-                                                   Integer pageSize) {
+                                                         ChatroomListSearchCondition searchCondition,
+                                                         Integer page,
+                                                         Integer pageSize) {
         page = page == null ? ChatDefaultValues.DEFAULT_PAGE : page;
-        pageSize = pageSize == null ? ChatDefaultValues.DEFAULT_PAGE_SIZE : pageSize;
+        pageSize = pageSize == null ? ChatDefaultValues.DEFAULT_CHATROOM_PAGE_SIZE : pageSize;
 
         List<ChatroomListDto> list = this.chatroomRepository.findByParticipantIdAndSearchCondition(
                 participantId, searchCondition, PageRequest.of(page - 1, pageSize));
@@ -80,5 +82,51 @@ public class ChatService {
                                 .build()
                 )
                 .toList();
+    }
+
+    public ChatMessageListResponseDto getChatMessages(Long chatroomId, int page, int pageSize) {
+        Page<ChatMessage> messages =
+                this.chatMessageRepository.findByChatroomId(chatroomId, PageRequest.of(page - 1, pageSize));
+        List<ChatMessageResponseDto> responseList =
+                messages.stream()
+                        .map((entity) ->
+                                ChatMessageResponseDto.builder()
+                                        .chatMessageId(entity.getChatMessageId())
+                                        .chatMessageType(entity.getChatMessageType())
+                                        .content(switch (entity.getChatMessageType()) {
+                                            case TEXT ->
+                                                    new TextChatMessageResponseContent(((TextChatMessage) entity).getText());
+                                            case IMAGE ->
+                                                    new ImageChatMessageResponseContent(((ImageChatMessage) entity).getImageUrl());
+                                            case MATCHING_REQUEST -> {
+                                                MatchingRequestChatMessage matchingRequestChatMessage = (MatchingRequestChatMessage) entity;
+                                                yield new MatchingRequestChatMessageResponseContent(
+                                                        matchingRequestChatMessage.getMeetingTime(),
+                                                        matchingRequestChatMessage.getMeetingPlace(),
+                                                        matchingRequestChatMessage.getMeetingPlaceAddress()
+                                                );
+                                            }
+                                            case MATCHING_RESPONSE -> {
+                                                MatchingResponseChatMessage matchingResponseChatMessage = (MatchingResponseChatMessage) entity;
+                                                yield new MatchingResponseChatMessageResponseContent(
+                                                        matchingResponseChatMessage.getMatchingResponseType(),
+                                                        matchingResponseChatMessage.getCancelMessage()
+                                                );
+                                            }
+                                        })
+                                        .senderId(entity.getSender().getId())
+                                        .creationTime(entity.getCreationTime())
+                                        .lastModified(entity.getLastModified())
+                                        .read(entity.isReadByOpponent())
+                                        .build()
+                        )
+                        .toList();
+        return ChatMessageListResponseDto.builder()
+                .chatMessages(responseList)
+                .isFirst(messages.isFirst())
+                .isLast(messages.isLast())
+                .page(page)
+                .pageSize(pageSize)
+                .build();
     }
 }
