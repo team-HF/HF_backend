@@ -85,6 +85,8 @@ public class ChatService {
     }
 
     public ChatMessageListResponseDto getChatMessages(Long chatroomId, int page, int pageSize) {
+        this.chatMessageRepository.readMessagesInChatroomByOpponent(chatroomId);
+
         Page<ChatMessage> messages =
                 this.chatMessageRepository.findByChatroomId(chatroomId, PageRequest.of(page - 1, pageSize));
         List<ChatMessageResponseDto> responseList =
