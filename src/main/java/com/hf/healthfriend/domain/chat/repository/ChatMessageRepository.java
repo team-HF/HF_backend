@@ -5,6 +5,7 @@ import com.hf.healthfriend.domain.chat.repository.custom.ChatMessageCustomReposi
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -18,4 +19,12 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long>,
             ORDER BY cm.creationTime DESC
             """)
     Page<ChatMessage> findByChatroomId(@Param("chatroomId") Long chatroomId, Pageable page);
+
+    @Modifying(clearAutomatically = true)
+    @Query("""
+            UPDATE ChatMessage
+            SET readByOpponent = TRUE
+            WHERE chatroom.chatroomId = :chatroomId
+            """)
+    void readMessagesInChatroomByOpponent(@Param("chatroomId") Long chatroomId);
 }

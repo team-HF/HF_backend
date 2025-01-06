@@ -1,6 +1,5 @@
 package com.hf.healthfriend.domain.chat.repository;
 
-import com.hf.healthfriend.domain.chat.constant.ChatMessageType;
 import com.hf.healthfriend.domain.chat.entity.Chatroom;
 import com.hf.healthfriend.domain.chat.entity.chatmessage.ChatMessage;
 import com.hf.healthfriend.domain.chat.entity.chatmessage.ImageChatMessage;
@@ -10,8 +9,8 @@ import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.testutil.MysqlTestcontainerConfig;
 import com.hf.healthfriend.testutil.SampleEntityGenerator;
 import com.hf.healthfriend.testutil.TestConfig;
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -52,6 +51,9 @@ class TestChatMessageRepository {
     @Autowired
     ChatParticipationRepository chatParticipationRepository;
 
+    @Autowired
+    EntityManager em;
+
     @Test
     @DisplayName("save() - 이미지 메시지 저장 성공")
     void saveImageMessage_success() {
@@ -91,7 +93,7 @@ class TestChatMessageRepository {
     @DisplayName("findByChatroomId() - Pagination을 적용한 채팅 메시지 목록 불러오기 테스트")
     void findByChatroomId_success_fetchWithPagination(int page, int pageSize) {
         // Given
-        int index = page - 1;
+        int zeroBasedPage = page - 1;
         Member participant1 = SampleEntityGenerator.generateSampleMember("participant1@gmail.com", "part1");
         Member participant2 = SampleEntityGenerator.generateSampleMember("participant2@gmail.com", "part2");
         this.memberRepository.save(participant1);
@@ -108,21 +110,24 @@ class TestChatMessageRepository {
         }
 
         // When
+        PageRequest pageObj = PageRequest.of(zeroBasedPage, pageSize);
+        log.info("pageObj={}", pageObj);
         Page<ChatMessage> result = this.chatMessageRepository.findByChatroomId(chatroom.getChatroomId(),
-                PageRequest.of(index, pageSize));
+                pageObj);
 
         // Then
-        List<ChatMessage> expected = getSubList(messages, index, pageSize);
+        List<ChatMessage> expected = getSubList(messages, zeroBasedPage, pageSize);
 
-        log.info("message.size()={}", messages.size());
-        log.info("messages.size() / pageSize = {}", messages.size() / pageSize);
         assertThat(result.getTotalElements()).isEqualTo(messages.size());
         assertThat(result.getTotalPages())
                 .isEqualTo(messages.size() / pageSize + (messages.size() % pageSize > 0 ? 1 : 0));
 
+        Long[] resultIds = result.getContent().stream().map(ChatMessage::getChatMessageId).toArray(Long[]::new);
+        log.info("resultIds={}", Arrays.toString(resultIds));
+        log.info("expected={}", expected.stream().map(ChatMessage::getChatMessageId).toList());
         // 순서 보장
         assertThat(expected.stream().map(ChatMessage::getChatMessageId))
-                .containsExactly(result.getContent().stream().map(ChatMessage::getChatMessageId).toArray(Long[]::new));
+                .containsExactly(resultIds);
     }
 
     private List<ChatMessage> inputSampleChatMessages(Chatroom chatroom, Member participant1, Member participant2) {
@@ -130,13 +135,19 @@ class TestChatMessageRepository {
         List<ChatMessage> chatMessages = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
 
+        Set<Integer> usedRandomValue = new HashSet<>();
         for (int i = 0; i < DUMMY_COUNT; i++) {
             int num = i + 1;
             Random random = new Random();
-            int randomValue = random.nextInt(DUMMY_COUNT * 100);
-            log.info("DUMMY_COUNT * 100 = {}", DUMMY_COUNT * 100);
-            log.info("randomValue={}", randomValue);
-            LocalDateTime randomCreationTime = now.minus(randomValue, ChronoUnit.SECONDS);
+            int randomValue;
+            while (true) {
+                randomValue = random.nextInt();
+                if (!usedRandomValue.contains(randomValue)) {
+                    usedRandomValue.add(randomValue);
+                    break;
+                }
+            }
+            LocalDateTime randomCreationTime = now.minus(randomValue, ChronoUnit.MILLIS);
             TextChatMessage message = new TextChatMessage(chatroom, num % 2 == 0 ? participant1 : participant2, "text" + num);
             ReflectionTestUtils.setField(message, "creationTime", randomCreationTime);
             ReflectionTestUtils.setField(message, "lastModified", randomCreationTime);
@@ -158,13 +169,40 @@ class TestChatMessageRepository {
         return chatMessages;
     }
 
-    private List<ChatMessage> getSubList(List<ChatMessage> original, int index, int pageSize) {
-        int fromIndex = index * pageSize;
-        int toIndex = (index + 1) * pageSize;
-        if (fromIndex >= original.size()) {
+    private List<ChatMessage> getSubList(List<ChatMessage> original, int zeroBasedPage, int pageSize) {
+        int originalSize = original.size();
+        int fromIndex = zeroBasedPage * pageSize;
+        int toIndex = Math.min((zeroBasedPage + 1) * pageSize, originalSize);
+        if (fromIndex >= originalSize) {
             return new ArrayList<>();
         }
 
-        return original.subList(fromIndex, Math.min(toIndex, pageSize));
+        return original.subList(fromIndex, toIndex);
+    }
+
+    @Test
+    @DisplayName("readMessagesInChatroomByOpponent() - success")
+    void readByChatroomId_success() {
+        // Given
+        Member participant1 = SampleEntityGenerator.generateSampleMember("participant1@gmail.com", "part1");
+        Member participant2 = SampleEntityGenerator.generateSampleMember("participant2@gmail.com", "part2");
+        this.memberRepository.save(participant1);
+        this.memberRepository.save(participant2);
+
+        Chatroom chatroom = SampleEntityGenerator.generateSampleChatroom(participant1, participant2);
+        this.chatroomRepository.save(chatroom);
+
+        List<ChatMessage> chatMessages = inputSampleChatMessages(chatroom, participant1, participant2);
+        int chatMessageCount = chatMessages.size();
+
+        // When
+        this.chatMessageRepository.readMessagesInChatroomByOpponent(chatroom.getChatroomId());
+
+        // Then
+        List<ChatMessage> found =
+                this.chatMessageRepository.findByChatroomId(chatroom.getChatroomId(), PageRequest.of(0, chatMessageCount))
+                        .getContent();
+
+        found.forEach((f) -> assertThat(f.isReadByOpponent()).isTrue());
     }
 }
