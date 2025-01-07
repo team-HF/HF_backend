@@ -84,7 +84,9 @@ public class ChatService {
                 .toList();
     }
 
-    public ChatMessageListResponseDto getChatMessages(Long chatroomId, int page, int pageSize) {
+    public ChatMessageListResponseDto getChatMessages(Long chatroomId, Integer page, Integer pageSize) {
+        page = page == null ? ChatDefaultValues.DEFAULT_PAGE : page;
+        pageSize = pageSize == null ? ChatDefaultValues.DEFAULT_CHAT_MESSAGE_FETCH_SIZE : pageSize;
         this.chatMessageRepository.readMessagesInChatroomByOpponent(chatroomId);
 
         Page<ChatMessage> messages =
