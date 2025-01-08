@@ -1,7 +1,7 @@
 package com.hf.healthfriend.domain.chat.service;
 
-import com.hf.healthfriend.domain.chat.constant.ChatroomListSearchCondition;
 import com.hf.healthfriend.domain.chat.constant.ChatDefaultValues;
+import com.hf.healthfriend.domain.chat.constant.ChatroomListSearchCondition;
 import com.hf.healthfriend.domain.chat.dto.request.ChatMessageSendRequestDto;
 import com.hf.healthfriend.domain.chat.dto.request.ChatParticipationRequestDto;
 import com.hf.healthfriend.domain.chat.dto.response.*;
@@ -55,6 +55,7 @@ public class ChatService {
     }
 
     public ChatMessageSendResponseDto sendMessage(Long chatroomId, ChatMessageSendRequestDto<Object> dto) {
+        log.debug("sendMessage - {}", dto.getChatMessageType());
         return this.chatMessageProcessor.sendMessage(chatroomId, dto);
     }
 
