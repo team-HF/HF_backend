@@ -15,7 +15,7 @@ import java.io.InputStream;
 @ConditionalOnProperty("local-file-upload")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/hr/files")
+@RequestMapping("/hf/files")
 public class FileUploadController {
     private final FileUploader fileUploader;
 

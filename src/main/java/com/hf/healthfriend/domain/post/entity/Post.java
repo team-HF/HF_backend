@@ -17,6 +17,11 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(indexes = {
+        @Index(name = "post_creation_time_idx", columnList = "creation_time"),
+        @Index(name = "post_category_idx", columnList = "category"),
+        @Index(name = "post_member_id_idx", columnList = "writer_id")
+})
 public class Post extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,6 +31,7 @@ public class Post extends BaseTimeEntity {
     private String title;
 
     @NotNull
+    @Column(length = 1000)
     private String content;
 
     @Enumerated(EnumType.STRING)
@@ -51,6 +57,15 @@ public class Post extends BaseTimeEntity {
 
     @Builder.Default
     private Long likesCount = 0L;
+
+    @Builder.Default
+    private Long commentsCount = 0L;
+
+    private String imagePath;
+
+    public Post(Long postId){
+        this.postId = postId;
+    }
 
     public void delete(){
         this.isDeleted=true;

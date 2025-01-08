@@ -20,9 +20,11 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberCus
 
     boolean existsByLoginId(String loginId);
 
+    boolean existsByNickname(String nickname);
+
     @Transactional
     @Modifying // 조회가 아닌 변경성 작업에는 해당 어노테이션을 붙여줘야 함
-    @Query(value = "UPDATE Members m SET m.review_score=:reviewScore WHERE m.member_id=:memberId ", nativeQuery = true)
+    @Query(value = "UPDATE members m SET m.review_score=:reviewScore WHERE m.member_id=:memberId ", nativeQuery = true)
     void updateMemberReviewScore(@Param("memberId")long memberId, @Param("reviewScore")double reviewScore);
 
 

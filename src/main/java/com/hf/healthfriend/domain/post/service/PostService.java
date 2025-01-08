@@ -13,9 +13,10 @@ import com.hf.healthfriend.domain.post.dto.request.PostWriteRequest;
 import com.hf.healthfriend.domain.post.dto.response.PostGetResponse;
 import com.hf.healthfriend.domain.post.dto.response.PostListObject;
 import com.hf.healthfriend.domain.post.entity.Post;
-import com.hf.healthfriend.global.exception.CustomException;
+import com.hf.healthfriend.domain.post.exception.PostErrorCode;
+import com.hf.healthfriend.domain.post.exception.PostException;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
-import com.hf.healthfriend.global.exception.ErrorCode;
+import com.hf.healthfriend.global.file.FileUrlResolver;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +42,9 @@ public class PostService {
     private final LikeRepository likeRepository;
     private final RedissonClient redissonClient;
 
-    public Long save(PostWriteRequest postWriteRequest) {
+    private final FileUrlResolver fileUrlResolver;
+
+    public Long save(PostWriteRequest postWriteRequest){
         Long memberId = postWriteRequest.getWriterId();
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
@@ -51,24 +54,26 @@ public class PostService {
 
     public Long update(PostWriteRequest postWriteRequest, Long postId){
         Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND, HttpStatus.NOT_FOUND,postId + "번 post가 존재하지 않습니다."));
         post.update(postWriteRequest.getTitle(), postWriteRequest.getContent(), PostCategory.valueOf(postWriteRequest.getCategory()));
         return post.getPostId();
     }
 
     public PostGetResponse get(Long postId, boolean canUpdateViewCount, CommentSortType sortType) {
         Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND, HttpStatus.NOT_FOUND,postId + "번 post가 존재하지 않습니다."));
         if(canUpdateViewCount) {
             post.updateViewCount(post.getViewCount());
         }
         List<CommentDto> commentList = commentService.getCommentsOfPost(postId,sortType);
-        return PostGetResponse.of(post, commentList);
+        String imagePath = fileUrlResolver.resolveFileUrl(post.getImagePath());
+        String writerProfileImageUrl = fileUrlResolver.resolveFileUrl(post.getMember().getProfileImageUrl());
+        return PostGetResponse.of(post, commentList,imagePath, writerProfileImageUrl);
     }
 
     public void delete(Long postId) {
         Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NON_EXIST_POST, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND, HttpStatus.NOT_FOUND,postId + "번 post가 존재하지 않습니다."));
         post.delete();
         likeRepository.deleteLikeByPostId(postId);
     }

@@ -24,15 +24,26 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
             FROM Like l
             WHERE l.post.postId = :postId
                 AND l.member.id = :memberId
+                AND l.canceled = FALSE
             """)
     Optional<Like> findByMemberIdAndPostId(@Param("memberId") Long memberId,
-                                           @Param("postId") Long postId);
+                                                            @Param("postId") Long postId);
+
+    @Query("""
+            SELECT l
+            FROM Like l
+            WHERE l.post.postId = :postId
+                AND l.member.id = :memberId
+            """)
+    Optional<Like> findByMemberIdAndPostIdIncludingCanceled(@Param("memberId") Long memberId,
+                                                            @Param("postId") Long postId);
 
     @Query("""
             SELECT l
             FROM Like l
             WHERE l.comment.commentId = :commentId
                 AND l.member.id = :memberId
+                AND l.canceled = FALSE
             """)
     Optional<Like> findByMemberIdAndCommentId(@Param("memberId") Long memberId,
                                            @Param("commentId") Long commentId);
@@ -42,6 +53,7 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
             FROM Like l
             WHERE l.member.id = :memberId
                 AND l.post.postId = :postId
+                AND l.canceled = FALSE
             """)
     boolean existsByMemberIdAndPostId(@Param("memberId") Long memberId,
                                       @Param("postId") Long postId);
@@ -87,9 +99,9 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
     boolean existsByPostAndMember(Post post, Member member);
 
     @Modifying
-    @Query(value = "UPDATE likes SET canceled = true WHERE post_id = :postId", nativeQuery = true)
+    @Query(value = "UPDATE likes SET is_canceled = true WHERE post_id = :postId", nativeQuery = true)
     void deleteLikeByPostId(@Param("postId") Long postId);
 
-    @Query("SELECT l.post.postId FROM Like l WHERE l.likeId=:likeId ")
-    Long findPostIdByLikeId(@Param("likeId") Long likeId);
+    @Query("SELECT l.post.postId FROM Like l WHERE l.likeId=:likeId")
+    Optional<Long> findPostIdByLikeId(@Param("likeId") Long likeId);
 }

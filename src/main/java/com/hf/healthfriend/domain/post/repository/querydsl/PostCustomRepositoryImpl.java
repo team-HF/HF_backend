@@ -4,9 +4,11 @@ import com.hf.healthfriend.domain.member.constant.FitnessLevel;
 import com.hf.healthfriend.domain.post.constant.PostCategory;
 import com.hf.healthfriend.domain.post.dto.response.PostListObject;
 import com.hf.healthfriend.domain.post.entity.QPost;
+import com.hf.healthfriend.global.file.FileUrlResolver;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostCustomRepositoryImpl implements PostCustomRepository {
 
+    private final FileUrlResolver fileUrlResolver;
     private final JPAQueryFactory queryFactory;
     private final QPost post = QPost.post;
 
@@ -39,17 +42,7 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
                         String sentence = getSentenceContainKeyword(keyword,post.getContent());
                         content = (sentence!=null)?sentence:content;
                     }
-                    return PostListObject.builder()
-                            .postId(post.getPostId())
-                            .title(post.getTitle())
-                            .category(post.getCategory().name())
-                            .viewCount(post.getViewCount())
-                            .creationTime(post.getCreationTime())
-                            .content(content)
-                            .fitnessLevel(post.getMember().getFitnessLevel().name())
-                            .likeCount(post.getLikesCount())
-                            .totalPageSize(getTotalPageSize())
-                            .build();
+                    return PostListObject.of(post,content,getTotalPageSize(),fileUrlResolver);
                 }).toList();
     }
 
@@ -72,28 +65,18 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
                 .fetch()
                 .stream().map(post-> {
                     String content = post.getContent();
-                    long totalPageSize = (long) Math.ceil((double) postIdList.size() / 5);
                     if (keyword!=null){
                         String sentence = getSentenceContainKeyword(keyword,post.getContent());
                         content = (sentence!=null)?sentence:content;
                     }
-                    return PostListObject.builder()
-                            .postId(post.getPostId())
-                            .title(post.getTitle())
-                            .category(post.getCategory().name())
-                            .viewCount(post.getViewCount())
-                            .creationTime(post.getCreationTime())
-                            .content(content)
-                            .fitnessLevel(post.getMember().getFitnessLevel().name())
-                            .likeCount(post.getLikesCount())
-                            .totalPageSize(totalPageSize)
-                            .build();
+                    return PostListObject.of(post,content,getTotalPageSize(),fileUrlResolver);
                 }).toList();
     }
 
     public BooleanBuilder filter(FitnessLevel fitnessLevel, PostCategory postCategory, String keyword) {
         // 조건을 동적으로 추가하기 위한 BooleanBuilder 생성
         BooleanBuilder builder = new BooleanBuilder();
+        builder.and(post.isDeleted.eq(false));
         if (fitnessLevel != null) {
             builder.and(post.member.fitnessLevel.eq(fitnessLevel));
         }
@@ -101,8 +84,12 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
             builder.and(post.category.eq(postCategory));
         }
         if (keyword != null) {
-            builder.and(post.title.containsIgnoreCase(keyword)
-                    .or(post.content.containsIgnoreCase(keyword)));
+            builder.and(Expressions.booleanTemplate(
+                    "function('match_against', {0}, {1}, {2}) > 0",
+                    post.title,
+                    post.content,
+                    keyword
+            ));
         }
         return builder;
     }
@@ -121,6 +108,7 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
         Long totalPageSize = queryFactory
                 .select(post.count())
                 .from(post)
+                .where(post.isDeleted.eq(false))
                 .fetchOne();
         if (totalPageSize == null) return 0;
         return (long) Math.ceil((double) totalPageSize / 5);

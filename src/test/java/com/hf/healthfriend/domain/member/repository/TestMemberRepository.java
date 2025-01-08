@@ -120,4 +120,28 @@ class TestMemberRepository {
             assertThat(spec.getStartDate()).isIn(spec1.getStartDate(), spec2.getStartDate());
         }
     }
+
+    @DisplayName("existsByNickname - return true")
+    @Test
+    void existsByNickname_returnTrue() {
+        final String nickname = "nickname";
+        Member member = SampleEntityGenerator.generateSampleMember("sample1@gmail.com", nickname);
+        this.memberRepository.save(member);
+
+        boolean result = this.memberRepository.existsByNickname(nickname);
+
+        assertThat(result).isTrue();
+    }
+
+    @DisplayName("existsByNickname - return false")
+    @Test
+    void existsByNickname_returnFalse() {
+        final String nickname = "nickname";
+        Member member = SampleEntityGenerator.generateSampleMember("sample1@gmail.com", nickname);
+        this.memberRepository.save(member);
+
+        boolean result = this.memberRepository.existsByNickname(nickname + "2");
+
+        assertThat(result).isFalse();
+    }
 }

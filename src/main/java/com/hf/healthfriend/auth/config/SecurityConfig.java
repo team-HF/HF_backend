@@ -44,6 +44,7 @@ public class SecurityConfig {
             "/actuator/**",
             "/favicon.ico",
             "/oauth/token/**",
+            "/hf/files/**",
             "/files/**",
             "/hf/current-state",
 
@@ -122,7 +123,7 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(Collections.singletonList(this.clientOrigin));
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowCredentials(true);
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "Cookie"));
         config.setExposedHeaders(Arrays.asList("Authorization"));

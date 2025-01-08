@@ -11,7 +11,6 @@ import com.hf.healthfriend.domain.member.exception.DuplicateMemberCreationExcept
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.member.service.MemberService;
-import com.hf.healthfriend.domain.review.constants.EvaluationType;
 import com.hf.healthfriend.domain.review.dto.response.ReviewDetailPerEvaluationType;
 import com.hf.healthfriend.domain.review.dto.response.SimpleReviewResponseDto;
 import com.hf.healthfriend.domain.spec.dto.SpecDto;
@@ -213,8 +212,8 @@ class MemberControllerMockMvcTest {
     @Test
     void memberCreation_failure() throws Exception {
         this.mockMvc.perform(post("/hf/members")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                                 {
                                     "id": "duplicate@gmail.com",
                                     "name": "김샘플",
@@ -247,8 +246,8 @@ class MemberControllerMockMvcTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json("""
                         {
-                            "statusCode": 400,
-                            "errorCode": 201,
+                            "statusCode": 40003,
+                            "errorCode": "MB004",
                             "errorName": "MEMBER_ALREADY_EXISTS"
                         }
                         """));
@@ -312,10 +311,10 @@ class MemberControllerMockMvcTest {
                 .andExpect(status().isNotFound())
                 .andExpect(content().json("""
                         {
-                            "statusCode": 404,
+                            "statusCode": 40401,
                             "statusCodeSeries": 4,
-                            "errorCode": 200,
-                            "errorName": "MEMBER_OF_THE_MEMBER_ID_NOT_FOUND"
+                            "errorCode": "MB001",
+                            "errorName": "MEMBER_NOT_FOUND"
                         }
                         """));
     }
@@ -350,10 +349,10 @@ class MemberControllerMockMvcTest {
                 .andExpect(status().isNotFound())
                 .andExpect(content().json("""
                         {
-                            "statusCode": 404,
+                            "statusCode": 40401,
                             "statusCodeSeries": 4,
-                            "errorCode": 200,
-                            "errorName": "MEMBER_OF_THE_MEMBER_ID_NOT_FOUND"
+                            "errorCode": "MB001",
+                            "errorName": "MEMBER_NOT_FOUND"
                         }
                         """));
     }
@@ -396,27 +395,21 @@ class MemberControllerMockMvcTest {
                                 )
                         )
                         .reviews(
-                                List.of(
-                                        new SimpleReviewResponseDto(
-                                                EvaluationType.GOOD,
-                                                List.of(
-                                                        new ReviewDetailPerEvaluationType(
-                                                                1, 12L
-                                                        ),
-                                                        new ReviewDetailPerEvaluationType(
-                                                                2, 9L
-                                                        )
+                                new SimpleReviewResponseDto(
+                                        List.of(
+                                                new ReviewDetailPerEvaluationType(
+                                                        1, 12L
+                                                ),
+                                                new ReviewDetailPerEvaluationType(
+                                                        2, 9L
                                                 )
                                         ),
-                                        new SimpleReviewResponseDto(
-                                                EvaluationType.NOT_GOOD,
-                                                List.of(
-                                                        new ReviewDetailPerEvaluationType(
-                                                                3, 8L
-                                                        ),
-                                                        new ReviewDetailPerEvaluationType(
-                                                                1, 5L
-                                                        )
+                                        List.of(
+                                                new ReviewDetailPerEvaluationType(
+                                                        3, 8L
+                                                ),
+                                                new ReviewDetailPerEvaluationType(
+                                                        1, 5L
                                                 )
                                         )
                                 )
@@ -463,34 +456,28 @@ class MemberControllerMockMvcTest {
                                 "description": ""
                               }
                             ],
-                            "reviews": [
-                              {
-                                "evaluationType": "GOOD",
-                                "reviewDetailsPerEvaluationType": [
-                                  {
-                                    "reviewDetailId": 1,
-                                    "reviewDetailCount": 12
-                                  },
-                                  {
-                                    "reviewDetailId": 2,
-                                    "reviewDetailCount": 9
-                                  }
-                                ]
-                              },
-                              {
-                                "evaluationType": "NOT_GOOD",
-                                "reviewDetailsPerEvaluationType": [
-                                  {
-                                    "reviewDetailId": 3,
-                                    "reviewDetailCount": 8
-                                  },
-                                  {
-                                    "reviewDetailId": 1,
-                                    "reviewDetailCount": 5
-                                  }
-                                ]
-                              }
-                            ],
+                            "reviews": {
+                              "good": [
+                                {
+                                  "reviewDetailId": 1,
+                                  "reviewDetailCount": 12
+                                },
+                                {
+                                  "reviewDetailId": 2,
+                                  "reviewDetailCount": 9
+                                }
+                              ],
+                              "notGood": [
+                                {
+                                  "reviewDetailId": 3,
+                                  "reviewDetailCount": 8
+                                },
+                                {
+                                  "reviewDetailId": 1,
+                                  "reviewDetailCount": 5
+                                }
+                              ]
+                            },
                             "averageReviewScore": 3.5
                           }
                         }

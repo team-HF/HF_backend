@@ -180,4 +180,17 @@ class LikeRepositoryTest {
         boolean result = this.likeRepository.existsByPostAndMember(post, member);
         assertThat(result).isFalse();
     }
+
+    @DisplayName("existsByMemberIdAndPostId - for canceled like")
+    @Test
+    void existsByMemberIdAndPostId_forCanceledLike() {
+        // Given
+        this.likeMember1_Post1.cancel();
+
+        // When
+        boolean result = this.likeRepository.existsByMemberIdAndPostId(this.member1.getId(), this.savedPost1.getPostId());
+
+        // Then
+        assertThat(result).isFalse();
+    }
 }

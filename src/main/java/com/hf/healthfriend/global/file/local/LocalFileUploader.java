@@ -48,8 +48,9 @@ public class LocalFileUploader implements FileUploader {
         byte[] buffer = new byte[BUFFER_SIZE];
         try (BufferedInputStream bis = new BufferedInputStream(is);
              BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(path))) {
-            while (bis.read(buffer) != -1) {
-                bos.write(buffer);
+            int read;
+            while ((read = bis.read(buffer)) != -1) {
+                bos.write(buffer, 0, read);
             }
         }
     }

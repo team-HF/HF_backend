@@ -1,6 +1,6 @@
 package com.hf.healthfriend.global.exception;
 
-import lombok.AccessLevel;
+import com.hf.healthfriend.domain.member.exception.handler.MemberExceptionHandlerControllerAdvice;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -12,7 +12,7 @@ import lombok.Getter;
  * Error Code를 따로 정의한 enum 클래스를 만들 예정이다.
  *
  * @author PGD
- * @see com.hf.healthfriend.domain.member.exceptionhandler.MemberExceptionHandlerControllerAdvice
+ * @see MemberExceptionHandlerControllerAdvice
  */
 
 @AllArgsConstructor
@@ -24,19 +24,17 @@ public enum ErrorCode {
     INVALID_REFRESH_TOKEN(103, "유효하지 않은 Refresh Token입니다"),
 
     //MEMBER
+    // TODO: 기존 코드와 호환성을 위해 남겨둠. 추후 리팩토링
     MEMBER_OF_THE_MEMBER_ID_NOT_FOUND(200, "memberId에 해당하는 회원이 없습니다"),
-    MEMBER_ALREADY_EXISTS(201, "이미 존재하는 회원입니다"),
-
-    //POST
-    INVALID_REQUEST_FORMAT(40003,"요청 형식이 잘못되었습니다."),
-    NON_EXIST_POST(40400,"존재하지 않는 글입니다."),
-    FORBIDDEN_UPDATE(40300,"해당 게시글을 수정할 권한이 없습니다."),
-    FORBIDDEN_DELETE(40301,"해당 게시글을 삭제할 권한이 없습니다."),
 
     //WISH
     FORBIDDEN_WISH_DELETE(40302,"찜을 삭제할 권한이 없습니다."),
     NON_EXIST_WISH(40403,"존재하지 않는 찜입니다."),
-    BAD_WISH_REQUEST(40404,"이미 존재하는 찜입니다.");
+    BAD_WISH_REQUEST(40404,"이미 존재하는 찜입니다."),
+
+    //COMMENT
+    NON_EXIST_COMMENT(40405,"존재하지 않는 댓글입니다."),
+    NON_EXIST_PARENT_COMMENT(40406,"존재하지 않는 댓글에 대한 답글입니다.");
     private final int code;
     private final String message;
 

@@ -13,6 +13,7 @@ import com.hf.healthfriend.domain.member.dto.response.ProfileResponseDto;
 import com.hf.healthfriend.domain.member.service.MemberService;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
 import com.hf.healthfriend.global.spec.ApiErrorResponse;
+import com.hf.healthfriend.global.spec.schema.BooleanTypeSchema;
 import com.hf.healthfriend.global.spec.schema.MemberCreationResponseSchema;
 import com.hf.healthfriend.global.spec.schema.MemberResponseSchema;
 import io.swagger.v3.oas.annotations.Operation;
@@ -142,9 +143,9 @@ public class MemberController {
                             schema = @Schema(implementation = ApiErrorResponse.class),
                             examples = @ExampleObject("""
                                     {
-                                        "statusCode": 400,
+                                        "statusCode": 40003,
                                         "statusCodeSeries": 4,
-                                        "errorCode": 201,
+                                        "errorCode": "MB004",
                                         "errorName": "MEMBER_ALREADY_EXISTS",
                                         "message": "이미 존재하는 회원입니다"
                                     }
@@ -193,11 +194,10 @@ public class MemberController {
                             schema = @Schema(implementation = ApiErrorResponse.class),
                             examples = @ExampleObject("""
                                     {
-                                        "statusCode": 404,
+                                        "statusCode": 40401,
                                         "statusCodeSeries": 4,
-                                        "errorCode": 200,
-                                        "errorName": "MEMBER_OF_THE_MEMBER_ID_NOT_FOUND",
-                                        "message": "memberId에 해당하는 회원이 없습니다"
+                                        "errorCode": "MB001",
+                                        "errorName": "MEMBER_NOT_FOUND"
                                     }
                                     """)
                     )
@@ -271,11 +271,10 @@ public class MemberController {
                             schema = @Schema(implementation = ApiErrorResponse.class),
                             examples = @ExampleObject("""
                                     {
-                                        "statusCode": 404,
+                                        "statusCode": 40401,
                                         "statusCodeSeries": 4,
-                                        "errorCode": 200,
-                                        "errorName": "MEMBER_OF_THE_MEMBER_ID_NOT_FOUND",
-                                        "message": "memberId에 해당하는 회원이 없습니다"
+                                        "errorCode": "MB001",
+                                        "errorName": "MEMBER_NOT_FOUND"
                                     }
                                     """)
                     )
@@ -345,34 +344,28 @@ public class MemberController {
                                                             "description": ""
                                                         }
                                                     ],
-                                                    "reviews": [
-                                                        {
-                                                            "evaluationType": "GOOD",
-                                                            "reviewDetailsPerEvaluationType": [
-                                                                {
-                                                                    "reviewDetailId": 1,
-                                                                    "reviewDetailCount": 12
-                                                                },
-                                                                {
-                                                                    "reviewDetailId": 2,
-                                                                    "reviewDetailCount": 9
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            "evaluationType": "NOT_GOOD",
-                                                            "reviewDetailsPerEvaluationType": [
-                                                                {
-                                                                    "reviewDetailId": 3,
-                                                                    "reviewDetailCount": 8
-                                                                },
-                                                                {
-                                                                    "reviewDetailId": 1,
-                                                                    "reviewDetailCount": 5
-                                                                }
-                                                            ]
-                                                        }
-                                                    ],
+                                                    "reviews": {
+                                                        "good": [
+                                                            {
+                                                                "reviewDetailId": 1,
+                                                                "reviewDetailCount": 12
+                                                            },
+                                                            {
+                                                                "reviewDetailId": 2,
+                                                                "reviewDetailCount": 9
+                                                            }
+                                                        ],
+                                                        "notGood": [
+                                                            {
+                                                                "reviewDetailId": 3,
+                                                                "reviewDetailCount": 8
+                                                            },
+                                                            {
+                                                                "reviewDetailId": 1,
+                                                                "reviewDetailCount": 5
+                                                            }
+                                                        ]
+                                                    },
                                                     "averageReviewScore": 3.5
                                                 }
                                             }
@@ -386,11 +379,10 @@ public class MemberController {
                                     schema = @Schema(implementation = ApiErrorResponse.class),
                                     examples = @ExampleObject("""
                                             {
-                                                "statusCode": 404,
+                                                "statusCode": 40401,
                                                 "statusCodeSeries": 4,
-                                                "errorCode": 200,
-                                                "errorName": "MEMBER_OF_THE_MEMBER_ID_NOT_FOUND",
-                                                "message": "memberId에 해당하는 회원이 없습니다"
+                                                "errorCode": "MB001",
+                                                "errorName": "MEMBER_NOT_FOUND"
                                             }
                                             """)
                             )
@@ -417,5 +409,43 @@ public class MemberController {
                                                                                            @RequestParam(value = "page", defaultValue = "1") int page,
                                                                                            @RequestParam(defaultValue = "3") int size) {
         return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.searchMembers(keyword,page,size), HttpStatus.OK));
+    }
+
+    @GetMapping("/is-duplicate-nickname")
+    @Operation(
+            summary = "닉네임 중복 체크",
+            description = "회원 닉네임 중복 확인. 중복된 닉네임일 경우 true, 중복되지 않은 닉네임일 경우 false가 \"content\"에 " +
+                    "담겨서 반환됨",
+            responses = @ApiResponse(
+                    responseCode = "200",
+                    content = @Content(
+                            schema = @Schema(implementation = BooleanTypeSchema.class),
+                            examples = {
+                                    @ExampleObject(
+                                            summary = "닉네임 중복일 경우 true 반환",
+                                            value = """
+                                                    {
+                                                        "statusCode": 200,
+                                                        "statusCodeSeries": 2,
+                                                        "content": true
+                                                    }
+                                                    """
+                                    ),
+                                    @ExampleObject(
+                                            summary = "닉네임이 중복되지 않을 경우 false 반환",
+                                            value = """
+                                                    {
+                                                        "statusCode": 200,
+                                                        "statusCodeSeries": 2,
+                                                        "content": false
+                                                    }
+                                                    """
+                                    )
+                            }
+                    )
+            )
+    )
+    public ResponseEntity<ApiBasicResponse<Boolean>> checkNicknameDuplicate(@RequestParam("nickname") String nickname) {
+        return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.checkDuplicateOfNickname(nickname), HttpStatus.OK));
     }
 }

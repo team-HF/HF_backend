@@ -1,5 +1,7 @@
 package com.hf.healthfriend.domain.like.service;
 
+import com.hf.healthfriend.domain.comment.entity.Comment;
+import com.hf.healthfriend.domain.comment.repository.CommentRepository;
 import com.hf.healthfriend.domain.like.dto.PostLikeDto;
 import com.hf.healthfriend.domain.like.exception.DuplicatePostLikeException;
 import com.hf.healthfriend.domain.like.exception.PostOrMemberNotExistsException;
@@ -10,6 +12,7 @@ import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.post.constant.PostCategory;
 import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
+import com.hf.healthfriend.testutil.SampleEntityGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,6 +58,9 @@ class PostLikeServiceTest {
     @Autowired
     PostRepository postRepository;
 
+    @Autowired
+    CommentRepository commentRepository;
+
     Map<String, Member> sampleMembers;
 
     Map<String, Post> samplePosts;
@@ -62,7 +68,7 @@ class PostLikeServiceTest {
     @BeforeEach
     void beforeEach() {
         this.sampleMembers = Map.of(
-                "member1", generateSampleMember("sample1@gmail.com", "nick1")
+                "member1", SampleEntityGenerator.generateSampleMember("sample1@gmail.com", "nick1")
         );
 
         this.samplePosts = Map.of(
@@ -71,20 +77,6 @@ class PostLikeServiceTest {
 
         this.sampleMembers.values().forEach(this.memberRepository::save);
         this.postRepository.saveAll(this.samplePosts.values());
-    }
-
-    private Member generateSampleMember(String email, String nickname) {
-        Member member = new Member(email);
-        member.setNickname(nickname);
-        member.setBirthDate(LocalDate.of(1997, 9, 16));
-        member.setGender(Gender.MALE);
-        member.setIntroduction("");
-        member.setFitnessLevel(FitnessLevel.BEGINNER);
-        member.setCompanionStyle(CompanionStyle.GROUP);
-        member.setFitnessEagerness(FitnessEagerness.EAGER);
-        member.setFitnessObjective(FitnessObjective.BULK_UP);
-        member.setFitnessKind(FitnessKind.FUNCTIONAL);
-        return member;
     }
 
     private Post generateSamplePost(Member member) {
@@ -218,7 +210,7 @@ class PostLikeServiceTest {
     @Autowired
     DataSource dataSource;
 
-    @DisplayName("cancelLike - 취소된 좋아요는 가져올 수 없음")
+    @DisplayName("cancelLike - Post 좋아요 취소 - 취소된 좋아요는 가져올 수 없음")
     @Test
     void cancelLike_success() throws SQLException {
         Long generatedId = this.likeService.addPostLike(

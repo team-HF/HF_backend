@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.comment.dto.request;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -17,4 +18,7 @@ public class CommentCreationRequestDto {
 
     @NotEmpty
     private String content;
+
+    @Nullable
+    private Long parentCommentId;
 }

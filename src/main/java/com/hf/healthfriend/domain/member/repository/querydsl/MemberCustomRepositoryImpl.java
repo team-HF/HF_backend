@@ -2,7 +2,7 @@ package com.hf.healthfriend.domain.member.repository.querydsl;
 
 import static com.querydsl.core.types.ExpressionUtils.count;
 
-import com.hf.healthfriend.domain.follow.entity.QFollow;
+
 import com.hf.healthfriend.domain.member.constant.MemberSortType;
 import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
@@ -47,7 +47,6 @@ import static com.querydsl.core.types.ExpressionUtils.count;
 public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     private final QMember member = QMember.member;
     private final QSpec spec = QSpec.spec;
-    private final QFollow follow = QFollow.follow;
     private final QWish wish = QWish.wish;
     private final JPAQueryFactory queryFactory;
     private final EntityManager em;
@@ -90,9 +89,9 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                         member.introduction,
                         member.nickname,
                         ExpressionUtils.as(
-                                JPAExpressions.select(count(follow.followId))
-                                        .from(follow)
-                                        .where(follow.followee.eq(member)),
+                                JPAExpressions.select(count(wish.wishId))
+                                        .from(wish)
+                                        .where(wish.wished.eq(member)),
                                 "followerCount")))
                 .from(member)
                 .where(builder)
@@ -167,8 +166,8 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     @Override
     public Optional<Member> findByMemberId(Long memberId) {
         Member findMember = this.queryFactory.selectFrom(this.member)
-                .fetchJoin().on(this.spec.member.id.eq(this.member.id))
-                .where(this.spec.isDeleted.isFalse(), this.member.id.eq(memberId), this.member.isDeleted.isFalse())
+                .leftJoin(this.spec).on(this.spec.member.id.eq(this.member.id))
+                .where(this.spec.isDeleted.isNull().or(this.spec.isDeleted.isFalse()), this.member.id.eq(memberId), this.member.isDeleted.isFalse())
                 .fetchOne();
         return Optional.ofNullable(findMember);
     }
@@ -197,7 +196,7 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                 .leftJoin(this.spec).on(this.spec.member.eq(this.member))
                 .where(this.member.id.eq(memberId),
                         this.member.isDeleted.isFalse(),
-                        this.spec.isDeleted.isFalse())
+                        this.spec.isDeleted.isFalse().or(this.spec.isNull()))
                 .orderBy(this.spec.startDate.desc(), this.spec.endDate.desc().nullsFirst())
                 .transform(GroupBy.groupBy(this.member.id).list(
                         Projections.constructor(
@@ -222,6 +221,17 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
             log.warn("findProfileByMemberId - 쿼리 결과 리스트의 사이즈가 1을 초과합니다.");
             result.forEach((r) -> log.warn("memberId={}", r.memberId()));
         }
-        return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
+
+        return result.isEmpty() ? Optional.empty() : Optional.of(removeNull(result.get(0)));
+    }
+
+    private ProfileQueryResultDto removeNull(ProfileQueryResultDto dto) {
+        for (int i = 0; i < dto.specs().size(); i++) {
+            SpecDto specDto = dto.specs().get(i);
+            if (specDto.getSpecId() == null) {
+                dto.specs().remove(i--);
+            }
+        }
+        return dto;
     }
 }

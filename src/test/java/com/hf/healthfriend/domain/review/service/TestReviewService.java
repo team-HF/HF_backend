@@ -8,6 +8,7 @@ import com.hf.healthfriend.domain.member.constant.FitnessLevel;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
+import com.hf.healthfriend.domain.notification.service.NotificationPublishService;
 import com.hf.healthfriend.domain.review.constants.EvaluationType;
 import com.hf.healthfriend.domain.review.dto.request.ReviewCreationRequestDto;
 import com.hf.healthfriend.domain.review.dto.request.ReviewEvaluationDto;
@@ -55,6 +56,9 @@ class TestReviewService {
 
     @Mock
     MemberRepository memberRepository;
+
+    @Mock
+    NotificationPublishService notificationPublishService;
 
     Map<Long, Member> dummyMembers;
     Map<Long, Matching> dummyMatchings;
@@ -191,10 +195,10 @@ class TestReviewService {
                                 EvaluationType.GOOD, 2, 1L
                         ),
                         new RevieweeStatisticsQueryResultDto(
-                                EvaluationType.GOOD, 1, 2L
+                                EvaluationType.NOT_GOOD, 1, 2L
                         ),
                         new RevieweeStatisticsQueryResultDto(
-                                EvaluationType.GOOD, 2, 1L
+                                EvaluationType.NOT_GOOD, 2, 1L
                         )
                 ));
 
@@ -218,15 +222,31 @@ class TestReviewService {
         log.info("result={}", result);
 
         assertThat(result.memberId()).isEqualTo(reviewee.getId());
-        result.reviewDetails().forEach((re) -> {
-            assertThat(re.totalCountPerEvaluationType()).isEqualTo(3L);
-            Map<Integer, Long> counts = expectedMap.get(re.evaluationType());
-            assertThat(counts).isNotNull();
-            counts.forEach((k, v) -> {
-                Long expectedCount = counts.get(k);
-                assertThat(expectedCount).isNotNull();
-                assertThat(expectedCount).isEqualTo(v);
-            });
+        assertThat(result.good().totalCountPerEvaluationType()).isEqualTo(3L);
+        Map<Integer, Long> goodCounts = expectedMap.get(EvaluationType.GOOD);
+        assertThat(goodCounts).isNotNull();
+        goodCounts.forEach((expectedReviewDetailId, expectedCount) -> {
+            assertThat(expectedCount).isNotNull();
+            Long count = result.good().reviewDetailsPerEvaluationType()
+                    .stream()
+                    .filter((r) -> r.reviewDetailId().equals(expectedReviewDetailId))
+                    .findAny()
+                    .get()
+                    .reviewDetailCount();
+            assertThat(count).isEqualTo(expectedCount);
+        });
+        assertThat(result.notGood().totalCountPerEvaluationType()).isEqualTo(3L);
+        Map<Integer, Long> notGoodCounts = expectedMap.get(EvaluationType.NOT_GOOD);
+        assertThat(notGoodCounts).isNotNull();
+        notGoodCounts.forEach((expectedReviewDetailId, expectedCount) -> {
+            assertThat(expectedCount).isNotNull();
+            Long count = result.notGood().reviewDetailsPerEvaluationType()
+                    .stream()
+                    .filter((r) -> r.reviewDetailId().equals(expectedReviewDetailId))
+                    .findAny()
+                    .get()
+                    .reviewDetailCount();
+            assertThat(count).isEqualTo(expectedCount);
         });
     }
 }

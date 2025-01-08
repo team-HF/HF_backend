@@ -8,7 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.redisson.api.RScoredSortedSet;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -18,12 +20,12 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest
-@ActiveProfiles("test")
-@Import({TestConfig.class, RedisTestConfig.class})
+@SpringBootTest
+@Import(RedisTestConfig.class)
 class PopularPostListTest {
 
     @Autowired
+    @Qualifier("testRedissonClient")
     private RedissonClient redissonClient;
 
     @BeforeEach

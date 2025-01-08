@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Post API", description = "커뮤니티 API")
 @RequiredArgsConstructor
@@ -37,7 +38,8 @@ public class PostController {
             @ApiResponse(responseCode = "400", description = "작성 실패")
     })
     @PostMapping("/posts")
-    public ResponseEntity<ApiBasicResponse<Long>> create(@Valid @RequestBody PostWriteRequest postWriteRequest) {
+    public ResponseEntity<ApiBasicResponse<Long>> create(
+            @Valid @RequestBody PostWriteRequest postWriteRequest){
         Long postId = postService.save(postWriteRequest);
         return ResponseEntity.ok(ApiBasicResponse.of(postId, HttpStatus.OK));
     }

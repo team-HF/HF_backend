@@ -14,7 +14,10 @@ import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.global.concurrency.SynchronizedOperation;
+import com.hf.healthfriend.domain.notification.service.NotificationPublishService;
+import com.hf.healthfriend.domain.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +33,7 @@ import java.util.stream.Stream;
 
 @Service
 @Transactional
+@Slf4j
 @RequiredArgsConstructor
 public class MatchingService {
     private static final Comparator<Matching> MATCHING_LIST_SORT_COMPARATOR = (d1, d2) -> {
@@ -46,6 +50,7 @@ public class MatchingService {
 
     private final MatchingRepository matchingRepository;
     private final MemberRepository memberRepository;
+    private final NotificationPublishService notificationPublishService;
 
     @SynchronizedOperation
     public Long requestMatching(MatchingRequestDto requestDto) {
@@ -62,6 +67,7 @@ public class MatchingService {
                             requestDto.getMeetingTime()
                     )
             );
+            notificationPublishService.publishMatchRequestNot(savedMatching);
             return savedMatching.getMatchingId();
         } catch (DataIntegrityViolationException e) {
             throw new MemberNotFoundException(e);
@@ -72,8 +78,15 @@ public class MatchingService {
         Matching matching = this.matchingRepository.findById(matchingId)
                 .orElseThrow(NoSuchElementException::new);
         switch (matchingStatus) {
-            case ACCEPTED -> matching.accept();
-            case REJECTED -> matching.reject();
+            case ACCEPTED -> {
+                    matching.accept();
+                    notificationPublishService.publishMatchAcceptNot(matching);
+            }
+            case REJECTED -> {
+                matching.reject();
+                notificationPublishService.publishMatchRejectNot(matching);
+
+            }
             case FINISHED -> matching.finish();
         }
     }

@@ -10,6 +10,7 @@ import com.hf.healthfriend.global.spec.BasicErrorResponse;
 import com.hf.healthfriend.global.spec.schema.LongTypeSchema;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -54,19 +55,37 @@ public class LikeController {
 
     @GetMapping(value = "/posts/{postId}/likes", params = "memberId")
     @Operation(
-            summary = "회원이 해당 글에 좋아요를 남겼는지 여부 조회",
+            summary = "특정 post에 특정 회원이 남긴 좋아요의 ID 조회",
             responses = {
                     @ApiResponse(
-                            description = "좋아요 여부 조회 성공",
+                            description = "좋아요 여부 조회 성공. 만약 회원이 post에 좋아요를 남기지 않았다면 content는 null",
                             responseCode = "200",
-                            content = @Content(schema = @Schema(implementation = LikeDtoSchema.class))
+                            content = @Content(
+                                    schema = @Schema(implementation = LongTypeSchema.class),
+                                    examples = {
+                                            @ExampleObject("""
+                                                    {
+                                                        "statusCode": 200,
+                                                        "statusCodeSeries": 2,
+                                                        "content": 2000
+                                                    }
+                                                    """),
+                                            @ExampleObject("""
+                                                    {
+                                                        "statusCode": 200,
+                                                        "statusCodeSeries: 2,
+                                                        "content": null
+                                                    }
+                                                    """)
+                                    }
+                            )
                     )
             }
     )
-    public ResponseEntity<ApiBasicResponse<Boolean>> doesMemberLikeThePost(@PathVariable("postId") Long postId,
+    public ResponseEntity<ApiBasicResponse<Long>> doesMemberLikeThePost(@PathVariable("postId") Long postId,
                                                                    @RequestParam("memberId") Long memberId) {
         return new ResponseEntity<>(
-                ApiBasicResponse.of(this.likeService.doesMemberLikePost(memberId, postId), HttpStatus.OK),
+                ApiBasicResponse.of(this.likeService.getLikeIdOfMemberToPost(memberId, postId), HttpStatus.OK),
                 HttpStatus.OK
         );
     }

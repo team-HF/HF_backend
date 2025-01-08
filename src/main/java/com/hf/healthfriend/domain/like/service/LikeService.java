@@ -11,6 +11,8 @@ import com.hf.healthfriend.domain.like.exception.DuplicatePostLikeException;
 import com.hf.healthfriend.domain.like.exception.PostOrMemberNotExistsException;
 import com.hf.healthfriend.domain.like.repository.LikeRepository;
 import com.hf.healthfriend.domain.member.entity.Member;
+import com.hf.healthfriend.domain.member.repository.MemberRepository;
+import com.hf.healthfriend.domain.notification.service.NotificationPublishService;
 import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,8 @@ public class LikeService {
     private final LikeRepository likeRepository;
     private final PostRepository postRepository;
     private final RedissonClient redissonClient;
+    private final NotificationPublishService notificationPublishService;
+    private final MemberRepository memberRepository;
 
     /**
      * 좋아요를 추가한다.
@@ -45,7 +49,7 @@ public class LikeService {
      *                                *                                좋아요를 남기려고 할 경우
      */
     public Long addPostLike(Long memberId, Long postId) throws DuplicatePostLikeException {
-        Optional<Like> likeOp = this.likeRepository.findByMemberIdAndPostId(memberId, postId);
+        Optional<Like> likeOp = this.likeRepository.findByMemberIdAndPostIdIncludingCanceled(memberId, postId);
         if (likeOp.isEmpty()) {
             Like like = new Like(
                     new Member(memberId),
@@ -58,25 +62,25 @@ public class LikeService {
                 Like savedLike = this.likeRepository.save(like);
                 // TODO 동시성 처리 필요
                 postRepository.incrementLikeCount(postId);
+                notificationPublishService.publishPostLikeNot(memberId, postId);
                 savePopularPost(postId);
                 return savedLike.getLikeId();
             } catch (DataIntegrityViolationException e) {
                 throw new PostOrMemberNotExistsException(e, memberId, postId);
             }
+        }else{
+
+            Like like = likeOp.get();
+            if (!like.isCanceled()) {
+                throw new DuplicatePostLikeException(postId, memberId);
+            }
+            like.uncancel();
+            // TODO 동시성 처리 필요
+            postRepository.incrementLikeCount(postId);
+            savePopularPost(postId);
+            notificationPublishService.publishPostLikeNot(memberId, postId);
+            return like.getLikeId();
         }
-
-        Like like = likeOp.get();
-
-        if (!like.isCanceled()) {
-            throw new DuplicatePostLikeException(postId, memberId);
-        }
-
-        like.uncancel();
-        // TODO 동시성 처리 필요
-        postRepository.incrementLikeCount(postId);
-        savePopularPost(postId);
-
-        return like.getLikeId();
     }
 
     /**
@@ -94,21 +98,25 @@ public class LikeService {
             );
             try {
                 Like savedLike = this.likeRepository.save(like);
+                notificationPublishService.publishCommentLikeNot(memberId, commentId);
                 return savedLike.getLikeId();
             } catch (DataIntegrityViolationException e) {
                 throw new CommentOrMemberNotExistsException(e, memberId, commentId);
             }
+        }else {
+
+            Like like = likeOp.get();
+
+            if (!like.isCanceled()) {
+                throw new DuplicateCommentLikeException(commentId, memberId);
+            }
+
+            like.uncancel();
+
+            notificationPublishService.publishCommentLikeNot(memberId, commentId);
+
+            return like.getLikeId();
         }
-
-        Like like = likeOp.get();
-
-        if (!like.isCanceled()) {
-            throw new DuplicateCommentLikeException(commentId, memberId);
-        }
-
-        like.uncancel();
-
-        return like.getLikeId();
     }
 
     /**
@@ -126,14 +134,27 @@ public class LikeService {
     }
 
     /**
-     * 특정 회원이 특정 글에 좋아요를 남겼는지 확인
+     * 특정 회원이 특정 글에 남긴 좋아요 ID를 반환
      *
      * @param memberId 좋아요를 남겼는지 체크할 회원의 ID
      * @param postId 회원이 좋아요를 남겼는지 체크할 Post의 ID
-     * @return 해당 회원이 해당 글에 좋아요를 남겼으면 true, 그렇지 않으면 false
+     * @return member가 post에 남긴 좋아요의 ID를 반환. 만약 주어진 member가 주어진 post에 좋아요를 남기지 않았을 경우, null 반환
      */
-    public boolean doesMemberLikePost(Long memberId, Long postId) {
-        return this.likeRepository.existsByMemberIdAndPostId(memberId, postId);
+    public Long getLikeIdOfMemberToPost(Long memberId, Long postId) {
+        return this.likeRepository.findByMemberIdAndPostId(memberId, postId)
+                .orElse(new Like(null)).getLikeId();
+    }
+
+    /**
+     * 특정 회원이 특정 댓글에 남긴 좋아요 ID 반환
+     *
+     * @param memberId 좋아요를 남겼는지 체크할 회원의 ID
+     * @param commentId 회원이 좋아요를 남겼는지 체크할 Comment의 ID
+     * @return member가 comment에 남긴 좋아요의 ID를 반환. 만약 주어진 member가 주어진 comment에 좋아요를 남기지 않았을 경우, null 반환
+     */
+    public Long getLikeIdOfMemberToComment(Long memberId, Long commentId) {
+        return this.likeRepository.findByMemberIdAndCommentId(memberId, commentId)
+                .orElse(new Like(null)).getLikeId();
     }
 
     public List<PostLikeDto> getLikeOfPost(Long postId) {
@@ -161,11 +182,20 @@ public class LikeService {
     }
 
     public void cancelLike(Long likeIdToCancel) throws NoSuchElementException {
-        Like likeEntity = this.likeRepository.findById(likeIdToCancel).orElseThrow(NoSuchElementException::new);// TODO: 메시지?
+        Like likeEntity = this.likeRepository.findById(likeIdToCancel).orElseThrow(NoSuchElementException::new);
+
+        // TODO: 나중에 좋아요 타입이 늘어날 경우, 각 경우에 맞게 로직 처리
+        if (likeEntity.getLikeType() == LikeType.COMMENT) {
+            // 해당 댓글에 대해서만 좋아요 취소
+            likeEntity.cancel();
+            return;
+        }
+
+        long postId = likeRepository.findPostIdByLikeId(likeIdToCancel)
+                .orElseThrow(NoSuchElementException::new);
+
         likeEntity.cancel();
         postRepository.decrementLikeCountByLikeId(likeIdToCancel);
-
-        long postId = likeRepository.findPostIdByLikeId(likeIdToCancel);
         // TODO 동시성 처리 필요
         deletePopularPost(postId);
 
@@ -174,10 +204,10 @@ public class LikeService {
     public void savePopularPost(Long postId) {
         Long likeCount = this.likeRepository.countByPostId(postId);
         if(likeCount>=5) {
-            String postKey = "post:" + postId;
             RScoredSortedSet<Long> sortedSet = redissonClient.getScoredSortedSet("popular_posts");
             sortedSet.add(-(double)likeCount, postId);
-            log.info("popularPost sortedSet 좋아요 수 증가");
+            log.info("인기글 등록 완료 {}", postId);
+            notificationPublishService.publishPopularPostNot(postId);
         }
     }
 

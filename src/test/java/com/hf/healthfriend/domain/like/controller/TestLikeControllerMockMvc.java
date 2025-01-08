@@ -3,7 +3,7 @@ package com.hf.healthfriend.domain.like.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hf.healthfriend.domain.like.dto.PostLikeDto;
-import com.hf.healthfriend.domain.like.exception.LikeErrorControllerAdvice;
+import com.hf.healthfriend.domain.like.exception.handler.LikeErrorControllerAdvice;
 import com.hf.healthfriend.domain.like.service.LikeService;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.entity.Member;
