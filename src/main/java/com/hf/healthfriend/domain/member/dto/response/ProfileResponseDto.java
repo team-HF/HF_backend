@@ -13,7 +13,7 @@ public record ProfileResponseDto(
 //        Long wishedCount,
         String introduction,
         List<SpecDto> specs,
-        List<SimpleReviewResponseDto> reviews,
+        SimpleReviewResponseDto reviews,
         Double averageReviewScore
 ) {
 }

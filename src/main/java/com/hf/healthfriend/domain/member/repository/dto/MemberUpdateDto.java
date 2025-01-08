@@ -17,6 +17,9 @@ import java.time.LocalDate;
 @BeanMapping(Member.class)
 public class MemberUpdateDto {
 
+    @MappingAttribute(target = "nickname", setNull = false)
+    private String nickname;
+
     @MappingAttribute(target = "profileImageUrl", setNull = false)
     private String profileImageUrl;
 

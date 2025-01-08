@@ -196,7 +196,7 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                 .leftJoin(this.spec).on(this.spec.member.eq(this.member))
                 .where(this.member.id.eq(memberId),
                         this.member.isDeleted.isFalse(),
-                        this.spec.isDeleted.isFalse())
+                        this.spec.isDeleted.isFalse().or(this.spec.isNull()))
                 .orderBy(this.spec.startDate.desc(), this.spec.endDate.desc().nullsFirst())
                 .transform(GroupBy.groupBy(this.member.id).list(
                         Projections.constructor(
@@ -221,6 +221,17 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
             log.warn("findProfileByMemberId - 쿼리 결과 리스트의 사이즈가 1을 초과합니다.");
             result.forEach((r) -> log.warn("memberId={}", r.memberId()));
         }
-        return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
+
+        return result.isEmpty() ? Optional.empty() : Optional.of(removeNull(result.get(0)));
+    }
+
+    private ProfileQueryResultDto removeNull(ProfileQueryResultDto dto) {
+        for (int i = 0; i < dto.specs().size(); i++) {
+            SpecDto specDto = dto.specs().get(i);
+            if (specDto.getSpecId() == null) {
+                dto.specs().remove(i--);
+            }
+        }
+        return dto;
     }
 }
