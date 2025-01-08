@@ -2,11 +2,13 @@ package com.hf.healthfriend.domain.chat.entity;
 
 import com.hf.healthfriend.domain.BaseTimeEntity;
 import com.hf.healthfriend.domain.chat.entity.chatmessage.ChatMessage;
+import com.hf.healthfriend.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Entity
@@ -27,7 +29,17 @@ public class Chatroom extends BaseTimeEntity {
     @OneToMany(mappedBy = "chatroom", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ChatMessage> chatMessages = new ArrayList<>();
 
-    private Long lastChatMessageId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "last_chat_message_id")
+    private ChatMessage lastChatMessage;
+
+    public static Chatroom newChatroom(Member... participants) {
+        Chatroom newChatroom = new Chatroom();
+        newChatroom.participations = Arrays.stream(participants)
+                .map((m) -> new ChatParticipation(newChatroom, m))
+                .toList();
+        return newChatroom;
+    }
 
     public Chatroom(Long chatroomId) {
         this.chatroomId = chatroomId;
@@ -39,5 +51,9 @@ public class Chatroom extends BaseTimeEntity {
 
     public void addChatParticipation(ChatParticipation chatParticipation) {
         this.participations.add(chatParticipation);
+    }
+
+    public void updateLastChatMessage(ChatMessage chatMessage) {
+        this.lastChatMessage = chatMessage;
     }
 }

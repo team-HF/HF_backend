@@ -39,7 +39,5 @@ public class ChatParticipation extends BaseTimeEntity {
         this(new ChatParticipationId(chatroom.getChatroomId(), member.getId()));
         this.chatroom = chatroom;
         this.member = member;
-        this.chatroom.addChatParticipation(this);
-        this.member.addChatParticipation(this);
     }
 }
