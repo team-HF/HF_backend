@@ -88,11 +88,13 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                         member.profileImageUrl,
                         member.introduction,
                         member.nickname,
-                        ExpressionUtils.as(
-                                JPAExpressions.select(count(wish.wishId))
-                                        .from(wish)
-                                        .where(wish.wished.eq(member)),
-                                "followerCount")))
+                        member.wishedCount,
+                        member.matchedCount,
+                        member.companionStyle,
+                        member.fitnessEagerness,
+                        member.fitnessKind,
+                        member.fitnessObjective
+                        ))
                 .from(member)
                 .where(builder)
                 .groupBy(member)
