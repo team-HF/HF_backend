@@ -49,4 +49,9 @@ public class MatchingResponseChatMessage extends ChatMessage {
                 MatchingResponseType.REJECTED,
                 cancelMessage);
     }
+
+    @Override
+    public String getMessageAsText() {
+        return "매칭 신청에 대한 응답이 도착했습니다";
+    }
 }

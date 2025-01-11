@@ -19,4 +19,9 @@ public class TextChatMessage extends ChatMessage {
         super(chatroom, sender);
         this.text = text;
     }
+
+    @Override
+    public String getMessageAsText() {
+        return this.text;
+    }
 }

@@ -37,6 +37,7 @@ public class MatchingResponseChatMessageProcessor
     @Override
     protected ChatMessageSendResponseDto processSendingMessage(Long chatroomId, ChatMessageSendRequestDto<MatchingResponseChatMessageSendRequestContent> dto) {
         MatchingResponseChatMessage saved = this.chatMessageRepository.saveMessageWithChatroomId(chatroomId, dto);
+        saved.getChatroom().updateLastChatMessage(saved);
 
         this.matchingService.updateMatchingStatus(dto.getContent().getMatchingId(),
                 switch (dto.getContent().getMatchingResponseType()) {

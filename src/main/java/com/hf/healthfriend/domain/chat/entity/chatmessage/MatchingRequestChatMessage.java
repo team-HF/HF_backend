@@ -31,4 +31,9 @@ public class MatchingRequestChatMessage extends ChatMessage {
         this.meetingPlace = meetingPlace;
         this.meetingPlaceAddress = meetingPlaceAddress;
     }
+
+    @Override
+    public String getMessageAsText() {
+        return "매칭 신청이 도착했습니다";
+    }
 }
