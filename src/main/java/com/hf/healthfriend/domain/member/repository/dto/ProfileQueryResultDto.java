@@ -8,6 +8,7 @@ public record ProfileQueryResultDto(
         Long memberId,
         String introduction,
         List<SpecDto> specs,
-        Double averageReviewScore
+        Double averageReviewScore,
+        long matchingCount
 ) {
 }

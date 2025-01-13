@@ -174,6 +174,9 @@ public class MemberService {
                         reviewDto.good().reviewDetailsPerEvaluationType(),
                         reviewDto.notGood().reviewDetailsPerEvaluationType()))
                 .averageReviewScore(profileResult.averageReviewScore())
+                .matchingCount(profileResult.matchingCount())
+                .reviewCount(reviewDto.good().totalCountPerEvaluationType()
+                        + reviewDto.notGood().totalCountPerEvaluationType())
                 .build();
     }
 

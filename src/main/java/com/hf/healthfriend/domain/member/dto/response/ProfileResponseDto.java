@@ -14,6 +14,8 @@ public record ProfileResponseDto(
         String introduction,
         List<SpecDto> specs,
         SimpleReviewResponseDto reviews,
-        Double averageReviewScore
+        Double averageReviewScore,
+        long matchingCount,
+        long reviewCount
 ) {
 }
