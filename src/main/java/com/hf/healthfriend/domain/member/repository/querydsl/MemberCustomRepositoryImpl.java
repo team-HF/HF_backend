@@ -216,7 +216,8 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                                         )
                                 ),
                                 this.member.reviewScore,
-                                this.member.matchedCount
+                                this.member.matchedCount,
+                                this.member.wishedCount
                         )
                 ));
         if (result.size() > 1) {

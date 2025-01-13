@@ -143,6 +143,9 @@ public class Member implements UserDetails {
     @Column(name = "matched_count")
     private Long matchedCount = 0L;
 
+    @Column(name = "wished_count")
+    private Long wishedCount = 0L;
+
     public Member(long memberId) {
         this.id = memberId;
     }

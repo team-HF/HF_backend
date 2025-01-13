@@ -177,6 +177,7 @@ public class MemberService {
                 .matchingCount(profileResult.matchingCount())
                 .reviewCount(reviewDto.good().totalCountPerEvaluationType()
                         + reviewDto.notGood().totalCountPerEvaluationType())
+                .wishedCount(profileResult.wishedCount())
                 .build();
     }
 
