@@ -366,7 +366,10 @@ public class MemberController {
                                                             }
                                                         ]
                                                     },
-                                                    "averageReviewScore": 3.5
+                                                    "averageReviewScore": 3.5,
+                                                    "matchingCount": 34,
+                                                    "reviewCount": 34,
+                                                    "wishedCount": 25
                                                 }
                                             }
                                             """)

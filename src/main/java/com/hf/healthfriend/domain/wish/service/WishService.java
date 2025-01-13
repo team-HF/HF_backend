@@ -38,6 +38,7 @@ public class WishService {
                     new Member(wisherId),
                     new Member(wishedId));
             wishRepository.save(wish);
+            this.memberRepository.incrementWishedCountByMemberId(wishedId);
             return wish.getWishId();
         }else if(wisherExist){
             throw new WishException(WishErrorCode.MEMBER_NOT_FOUND, HttpStatus.BAD_REQUEST,
@@ -56,6 +57,7 @@ public class WishService {
                 .orElseThrow(() -> new WishException(WishErrorCode.WISH_NOT_FOUND, HttpStatus.BAD_REQUEST,
                         "wishId: "+wishId));
         wish.delete();
+        this.memberRepository.decrementWishedCountByMemberId(wish.getWished().getId());
     }
 
     public List<WishResponse> getWishedList(int page, int size, long memberId){

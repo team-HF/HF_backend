@@ -191,6 +191,7 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
         return member;
     }
 
+    @Override
     public Optional<ProfileQueryResultDto> findProfileByMemberId(Long memberId) {
         List<ProfileQueryResultDto> result = this.queryFactory.selectFrom(this.member)
                 .leftJoin(this.spec).on(this.spec.member.eq(this.member))
@@ -214,7 +215,9 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                                                 this.spec.description
                                         )
                                 ),
-                                this.member.reviewScore
+                                this.member.reviewScore,
+                                this.member.matchedCount,
+                                this.member.wishedCount
                         )
                 ));
         if (result.size() > 1) {
