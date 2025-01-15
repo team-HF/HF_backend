@@ -31,7 +31,7 @@ public class WishController {
             @ApiResponse(responseCode = "400", description = "찜하기 실패")
     })
     @PostMapping("/wish")
-    public ResponseEntity<ApiBasicResponse<Long>> create(long wisherId, long wishedId) {
+    public ResponseEntity<ApiBasicResponse<Long>> create(Long wisherId, Long wishedId) {
         Long wishId = wishService.save(wisherId,wishedId);
         return ResponseEntity.ok(ApiBasicResponse.of(wishId, HttpStatus.OK));
     }
@@ -54,7 +54,7 @@ public class WishController {
     public ResponseEntity<ApiBasicResponse<List<WishResponse>>> getWishedList(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam int size,
-            long memberId) {
+            Long memberId) {
         return ResponseEntity.ok(ApiBasicResponse.of(wishService.getWishedList(page,size,memberId),HttpStatus.OK));
     }
 
@@ -66,7 +66,7 @@ public class WishController {
     public ResponseEntity<ApiBasicResponse<List<WishResponse>>> getWisherList(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam int size,
-            long memberId) {
+            Long memberId) {
         return ResponseEntity.ok(ApiBasicResponse.of(wishService.getWisherList(page,size,memberId),HttpStatus.OK));
     }
 }
