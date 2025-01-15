@@ -193,6 +193,10 @@ public class Member implements UserDetails {
         this.matchedCount++;
     }
 
+    public void incrementWishedCount() { this.wishedCount++;}
+
+    public void decrementWishedCount() {this.wishedCount--;}
+
     public Tier getTier() {
         return Tier.create(this.fitnessLevel, this.matchedCount);
     }

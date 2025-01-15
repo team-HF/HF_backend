@@ -9,7 +9,9 @@ import lombok.Builder;
 @Builder
 public record SearchResponse(
         List<PostListObject> postList,
+        Long postListSize,
         List<MemberSearchResponse> profileList,
+        Long profileListSize,
         List<String> recentSearchList
 ) {
 }

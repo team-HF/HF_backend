@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.search.controller;
 
+import com.hf.healthfriend.domain.member.dto.request.MembersSearchRequest;
 import com.hf.healthfriend.domain.search.constant.SearchCategory;
 import com.hf.healthfriend.domain.search.dto.SearchResponse;
 import com.hf.healthfriend.domain.search.service.SearchService;
@@ -23,7 +24,8 @@ public class SearchController {
 
     private final SearchService searchService;
 
-    @Operation(summary = "통합 검색 목록 조회", responses = {
+    @Operation(summary = "통합 검색 목록 조회",
+            responses = {
             @ApiResponse(responseCode = "200", description = "통합 검색 목록 조회 성공"),
             @ApiResponse(responseCode = "400", description = "통합 검색 목록 조회 실패")
     })
@@ -31,10 +33,11 @@ public class SearchController {
     public ResponseEntity<ApiBasicResponse<SearchResponse>> getSearchList(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam int size,
-            @RequestParam @Nullable SearchCategory searchCategory,
-            @RequestParam String keyword,
+            @Nullable SearchCategory searchCategory,
+            @Nullable MembersSearchRequest membersSearchRequest,
+            @RequestParam @Nullable String keyword,
             @Nullable Long memberId) {
-        return ResponseEntity.ok(ApiBasicResponse.of(searchService.search(page,size,searchCategory,keyword,memberId),
+        return ResponseEntity.ok(ApiBasicResponse.of(searchService.search(page,size,searchCategory,membersSearchRequest,keyword,memberId),
                 HttpStatus.OK));
     }
 

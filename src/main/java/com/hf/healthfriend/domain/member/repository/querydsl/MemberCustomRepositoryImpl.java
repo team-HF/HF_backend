@@ -3,25 +3,26 @@ package com.hf.healthfriend.domain.member.repository.querydsl;
 import static com.querydsl.core.types.ExpressionUtils.count;
 
 
+import com.hf.healthfriend.domain.member.constant.CompanionStyle;
+import com.hf.healthfriend.domain.member.constant.FitnessEagerness;
+import com.hf.healthfriend.domain.member.constant.FitnessKind;
+import com.hf.healthfriend.domain.member.constant.FitnessLevel;
+import com.hf.healthfriend.domain.member.constant.FitnessObjective;
 import com.hf.healthfriend.domain.member.constant.MemberSortType;
-import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
+import com.hf.healthfriend.domain.member.dto.request.MembersSearchRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.entity.QMember;
 import com.hf.healthfriend.domain.spec.entity.QSpec;
 import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
-import com.hf.healthfriend.domain.member.entity.Member;
-import com.hf.healthfriend.domain.member.entity.QMember;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
 import com.hf.healthfriend.domain.member.repository.dto.ProfileQueryResultDto;
 import com.hf.healthfriend.domain.spec.dto.SpecDto;
-import com.hf.healthfriend.domain.spec.entity.QSpec;
 import com.hf.healthfriend.domain.wish.entity.QWish;
 import com.hf.healthfriend.global.util.mapping.BeanMapper;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.group.GroupBy;
-import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
@@ -39,8 +40,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static com.querydsl.core.types.ExpressionUtils.count;
-
 @Slf4j
 @Repository
 @RequiredArgsConstructor
@@ -53,16 +52,21 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     private final BeanMapper beanMapper;
 
     @Override
-    public List<MemberRecommendResponse> recommendMembers(MembersRecommendRequest request, Pageable pageable) {
-        BooleanBuilder builder = filter(request);
-        List<String> fitnessTypeList = fitnessTypesToList(request); // fitnessTypeList 업데이트는 별도의 메서드로 분리
+    public List<MemberSearchResponse> searchMembers (String keyword, MembersSearchRequest request, Pageable pageable) {
+        BooleanBuilder builder = filter(keyword, request);
         OrderSpecifier<?>[] orderSpecifier = getSortType(request);
-        List<MemberRecommendResponse> result = queryFactory
-                .select(Projections.constructor(MemberRecommendResponse.class,
+        return queryFactory
+                .select(Projections.constructor(MemberSearchResponse.class,
                         member.profileImageUrl,
+                        member.introduction,
                         member.nickname,
+                        member.wishedCount,
                         member.matchedCount,
-                        member.introduction))
+                        member.fitnessLevel.stringValue(),
+                        member.companionStyle.stringValue(),
+                        member.fitnessEagerness.stringValue(),
+                        member.fitnessKind.stringValue(),
+                        member.fitnessObjective.stringValue()))
                 .from(member)
                 .where(builder)
                 .groupBy(member)
@@ -70,38 +74,9 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
-        return result.stream()
-                .map(dto -> new MemberRecommendResponse(
-                        dto.profileImageUrl(),
-                        dto.nickName(),
-                        dto.matchingCount(),
-                        dto.introduction(),
-                        fitnessTypeList))
-                .toList();
     }
 
-    @Override
-    public List<MemberSearchResponse> searchMembers(String keyword, Pageable pageable) {
-        BooleanBuilder builder = searchFilter(keyword);
-        return queryFactory
-                .select(Projections.bean(MemberSearchResponse.class,
-                        member.profileImageUrl,
-                        member.introduction,
-                        member.nickname,
-                        ExpressionUtils.as(
-                                JPAExpressions.select(count(wish.wishId))
-                                        .from(wish)
-                                        .where(wish.wished.eq(member)),
-                                "followerCount")))
-                .from(member)
-                .where(builder)
-                .groupBy(member)
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-    }
-
-    public OrderSpecifier<?>[] getSortType(MembersRecommendRequest request) {
+    public OrderSpecifier<?>[] getSortType(MembersSearchRequest request) {
         MemberSortType sortType = request.getMemberSortType();
         if (sortType==null) return new OrderSpecifier<?>[]{member.matchedCount.desc()};
         switch(sortType){
@@ -109,14 +84,7 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                 return new OrderSpecifier<?>[]{member.reviewScore.desc()};
             }
             case WISH_COUNT -> {
-                return new OrderSpecifier<?>[]{
-                        new OrderSpecifier<>(Order.DESC,
-                                JPAExpressions
-                                        .select(count(wish.wisher))
-                                        .from(wish)
-                                        .where(wish.wished.id.eq(member.id))
-                        )
-                };
+                return new OrderSpecifier<?>[]{member.wishedCount.desc()};
             }
             // TODO : 채팅 기능이 구현되면 이어서 작업
             case RESPONSE_RATE -> {
@@ -128,39 +96,28 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
         }
     }
 
-    public BooleanBuilder filter(MembersRecommendRequest request) {
+    public BooleanBuilder filter(String keyword, MembersSearchRequest request) {
         BooleanBuilder builder = new BooleanBuilder();
-
-        addConditionsToBuilder(builder, request.getCompanionStyleList(), member.companionStyle::eq);
-        addConditionsToBuilder(builder, request.getFitnessEagernessList(), member.fitnessEagerness::eq);
-        addConditionsToBuilder(builder, request.getFitnessKindList(), member.fitnessKind::eq);
-        addConditionsToBuilder(builder, request.getFitnessObjectiveList(), member.fitnessObjective::eq);
-
+        if(request.getFitnessLevel()!=null)
+            builder.and(member.fitnessLevel.eq(FitnessLevel.valueOf(request.getFitnessLevel())));
+        if(request.getCompanionStyle()!=null)
+            builder.and(member.companionStyle.eq(CompanionStyle.valueOf(request.getCompanionStyle())));
+        if(request.getFitnessEagerness()!=null)
+            builder.and(member.fitnessEagerness.eq(FitnessEagerness.valueOf(request.getFitnessEagerness())));
+        if(request.getFitnessKind()!=null)
+            builder.and(member.fitnessKind.eq(FitnessKind.valueOf(request.getFitnessKind())));
+        if(request.getFitnessObjective()!=null)
+            builder.and(member.fitnessObjective.eq(FitnessObjective.valueOf(request.getFitnessObjective())));
+        if(request.getCd1()!=null)
+            builder.and(member.cd1.eq(request.getCd1()));
+        if(request.getCd2()!=null)
+            builder.and(member.cd2.eq(request.getCd2()));
+        if(request.getCd3()!=null)
+            builder.and(member.cd3.eq(request.getCd3()));
+        if(keyword!=null)
+                builder.and(member.introduction.containsIgnoreCase(keyword)
+                        .or(member.nickname.containsIgnoreCase(keyword)));
         return builder;
-    }
-
-    public List<String> fitnessTypesToList(MembersRecommendRequest request) {
-        List<String> fitnessTypeList = new ArrayList<>();
-
-        addTypesToList(fitnessTypeList, request.getCompanionStyleList());
-        addTypesToList(fitnessTypeList, request.getFitnessEagernessList());
-        addTypesToList(fitnessTypeList, request.getFitnessKindList());
-        addTypesToList(fitnessTypeList, request.getFitnessObjectiveList());
-
-        return fitnessTypeList;
-    }
-
-    // 제너릭 메서드
-    private <T> void addConditionsToBuilder(BooleanBuilder builder, List<T> items, Function<T, BooleanExpression> expression) {
-        if (items != null)
-            for (T item : items)
-                builder.and(expression.apply(item));
-    }
-
-    private <T extends Enum<T>> void addTypesToList(List<String> fitnessTypeList, List<T> items) {
-        if (items != null)
-            for (T item : items)
-                fitnessTypeList.add(item.name());
     }
 
     @Override
@@ -170,13 +127,6 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                 .where(this.spec.isDeleted.isNull().or(this.spec.isDeleted.isFalse()), this.member.id.eq(memberId), this.member.isDeleted.isFalse())
                 .fetchOne();
         return Optional.ofNullable(findMember);
-    }
-
-    public BooleanBuilder searchFilter(String keyword) {
-        BooleanBuilder builder = new BooleanBuilder();
-        builder.and(member.introduction.containsIgnoreCase(keyword)
-                .or(member.nickname.containsIgnoreCase(keyword)));
-        return builder;
     }
 
     @Override
