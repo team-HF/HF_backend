@@ -14,7 +14,7 @@ docker container rm hf-backend-app || true
 docker build -t hf-backend .
 
 if [ "$MODE" = "no-auth" ]; then
-  docker run --name hf-backend-app -p 8080:8080 -dit --rm -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_REGION=$AWS_REGION -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_SQS_ALARM_QUEUE_URL=$AWS_SQS_ALARM_QUEUE_URL -e AWS_SQS_DB_QUEUE_URL=$AWS_SQS_DB_QUEUE_URL --network=hf-net hf-backend
+  docker-compose -f docker-compose.yml up -d --build
 else
-  docker run --name hf-backend-app -p 8080:8080 -dit --rm -e SPRING_PROFILES_ACTIVE=local-dev,secret,constants,priv -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID -e AWS_REGION=$AWS_REGION -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -e AWS_SQS_ALARM_QUEUE_URL=$AWS_SQS_ALARM_QUEUE_URL -e AWS_SQS_DB_QUEUE_URL=$AWS_SQS_DB_QUEUE_URL --network=hf-net hf-backend
+  docker-compose -f docker-compose.yml up -d --build
 fi
