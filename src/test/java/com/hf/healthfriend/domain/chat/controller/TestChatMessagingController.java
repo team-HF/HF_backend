@@ -31,13 +31,9 @@ import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
-import org.springframework.web.socket.sockjs.client.SockJsClient;
-import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -121,9 +117,7 @@ class TestChatMessagingController {
 
     private WebSocketStompClient generateStompClient() {
         // SockJS 기반 웹 소켓 클라이언트 생성
-        WebSocketClient webSocketClient = new SockJsClient(List.of(
-                new WebSocketTransport(new StandardWebSocketClient())
-        ));
+        WebSocketClient webSocketClient = new StandardWebSocketClient();
         WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
         stompClient.setMessageConverter(new MappingJackson2MessageConverter(this.objectMapper));
         return stompClient;
