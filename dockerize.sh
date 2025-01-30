@@ -4,12 +4,15 @@ AWS_SECRET_ACCESS_KEY=$3
 AWS_SQS_ALARM_QUEUE_URL=$4
 AWS_SQS_DB_QUEUE_URL=$5
 
-MODE=$6:-auth
+BUILD_POSITION=$6
+MODE=$7:-auth
 
 docker container stop hf-backend-app || true
 docker container rm hf-backend-app || true
 
-./gradlew clean build -x test
+if [ "$BUILD_POSITION" = "container" ]; then
+  ./gradlew clean build -x test
+fi
 
 docker build -t hf-backend .
 
