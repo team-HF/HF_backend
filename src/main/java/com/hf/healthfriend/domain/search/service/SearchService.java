@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.search.service;
 
+import com.hf.healthfriend.domain.member.dto.request.MembersSearchRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
 import com.hf.healthfriend.domain.member.service.MemberService;
 import com.hf.healthfriend.domain.post.dto.response.PostListObject;
@@ -23,10 +24,14 @@ public class SearchService {
     private final PostService postService;
     private final RedissonClient redissonClient;
 
-    public SearchResponse search(int page, int size, SearchCategory searchCategory, String keyword, Long memberId) {
+    public SearchResponse search(int page, int size,SearchCategory searchCategory, MembersSearchRequest request, String keyword, Long memberId) {
         List<PostListObject> postList = new ArrayList<>();
         List<MemberSearchResponse> profileList = new ArrayList<>();
         List<String> recentSearchList = new ArrayList<>();
+
+        if (searchCategory == null) {
+            searchCategory = SearchCategory.DEFAULT;
+        }
 
         // TODO : 메서드 분리할 것 (SRP)
         switch (searchCategory) {
@@ -35,12 +40,12 @@ public class SearchService {
                 break;
 
             case PROFILE:
-                profileList = memberService.searchMembers(keyword, page, size);
+                profileList = memberService.searchMembers(keyword, request, page, size);
                 break;
 
             default:
                 postList = postService.getList(page, size, null, null, keyword);
-                profileList = memberService.searchMembers(keyword, page, size);
+                profileList = memberService.searchMembers(keyword, request, page, size);
                 break;
         }
 
@@ -51,12 +56,14 @@ public class SearchService {
 
         return SearchResponse.builder()
                 .postList(postList)
+                .postListSize((long) postList.size())
                 .profileList(profileList)
+                .profileListSize((long) profileList.size())
                 .recentSearchList(recentSearchList)
                 .build();
     }
 
-    void saveRecentSearchKeyword(Long memberId, String keyword) {
+    private void saveRecentSearchKeyword(Long memberId, String keyword) {
         RList<String> recentSearchList = redissonClient.getList("recent_search_keywords:"+memberId);
         recentSearchList.remove(keyword); //중복 저장 방지
         recentSearchList.add(0,keyword);

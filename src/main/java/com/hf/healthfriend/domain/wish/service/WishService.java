@@ -25,9 +25,9 @@ public class WishService {
     private final WishRepository wishRepository;
     private final MemberRepository memberRepository;
 
-    public Long save(long wisherId, long wishedId){
+    public Long save(Long wisherId, Long wishedId){
 
-        if (wishRepository.existsByWishedIdAndWisherId(wishedId,wisherId))
+        if (wishRepository.existsByWishedIdAndWisherIdAndIsDeletedFalse(wishedId,wisherId))
             throw new WishException(WishErrorCode.DUPLICATE_WISH,HttpStatus.BAD_REQUEST,
                     "wishedId: "+wishedId+", wisherId: "+wisherId);
 
@@ -38,6 +38,7 @@ public class WishService {
                     new Member(wisherId),
                     new Member(wishedId));
             wishRepository.save(wish);
+            memberRepository.findById(wishedId).get().incrementWishedCount();
             return wish.getWishId();
         }else if(wisherExist){
             throw new WishException(WishErrorCode.MEMBER_NOT_FOUND, HttpStatus.BAD_REQUEST,
@@ -51,20 +52,22 @@ public class WishService {
         }
     }
 
-    public void delete(long wishId){
+    public void delete(Long wishId){
         Wish wish = wishRepository.findByWishIdAndIsDeletedFalse(wishId)
                 .orElseThrow(() -> new WishException(WishErrorCode.WISH_NOT_FOUND, HttpStatus.BAD_REQUEST,
                         "wishId: "+wishId));
         wish.delete();
+        Member member = wish.getWished();
+        member.decrementWishedCount();
     }
 
-    public List<WishResponse> getWishedList(int page, int size, long memberId){
+    public List<WishResponse> getWishedList(int page, int size, Long memberId){
         Pageable pageable = PageRequest.of(page - 1, size);
         List<Wish> wishedList = wishRepository.findAllByWisherIdAndIsDeletedFalse(memberId, pageable);
         return getWishResponses(wishedList);
     }
 
-    public List<WishResponse> getWisherList(int page, int size, long memberId){
+    public List<WishResponse> getWisherList(int page, int size, Long memberId){
         Pageable pageable = PageRequest.of(page - 1, size);
         List<Wish> wisherList = wishRepository.findAllByWishedIdAndIsDeletedFalse(memberId, pageable);
         return getWishResponses(wisherList);

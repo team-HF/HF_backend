@@ -32,7 +32,7 @@ logging:
         healthfriend: trace
 
 redis:
-  host: redis://localhost:6379
+  host: ${REDIS_HOST}
 
 management:
   endpoint:

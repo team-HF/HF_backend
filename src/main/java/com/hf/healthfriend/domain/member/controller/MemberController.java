@@ -4,7 +4,7 @@ import com.hf.healthfriend.domain.member.controller.schema.ProfileResponseSchema
 import com.hf.healthfriend.domain.member.dto.MemberDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
-import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
+import com.hf.healthfriend.domain.member.dto.request.MembersSearchRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
 import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
@@ -25,13 +25,13 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -286,15 +286,6 @@ public class MemberController {
         return ResponseEntity.ok(ApiBasicResponse.of(resultDto, HttpStatus.OK));
     }
 
-    @Operation(summary = "멤버 추천 목록 조회", responses = {
-            @ApiResponse(responseCode = "200", description = "멤버 추천 목록 조회 성공"),
-            @ApiResponse(responseCode = "400", description = "멤버 추천 목록 조회 실패")
-    })
-    @GetMapping("/recommend")
-    public ResponseEntity<ApiBasicResponse<List<MemberRecommendResponse>>> getRecommendMembers(MembersRecommendRequest request, int page) {
-        return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.recommendMember(request, page), HttpStatus.OK));
-    }
-
     @GetMapping("/{memberId}/profile")
     @Operation(
             summary = "매칭을 위한 회원 프로필 조회",
@@ -366,7 +357,10 @@ public class MemberController {
                                                             }
                                                         ]
                                                     },
-                                                    "averageReviewScore": 3.5
+                                                    "averageReviewScore": 3.5,
+                                                    "matchingCount": 34,
+                                                    "reviewCount": 34,
+                                                    "wishedCount": 25
                                                 }
                                             }
                                             """)
@@ -405,10 +399,11 @@ public class MemberController {
             @ApiResponse(responseCode = "400", description = "프로필 검색 목록 조회 실패")
     })
     @GetMapping("/search")
-    public ResponseEntity<ApiBasicResponse<List<MemberSearchResponse>>> getSearchedMembers(@RequestParam String keyword,
+    public ResponseEntity<ApiBasicResponse<List<MemberSearchResponse>>> getSearchedMembers(@RequestParam @Nullable String keyword,
+                                                                                           MembersSearchRequest request,
                                                                                            @RequestParam(value = "page", defaultValue = "1") int page,
                                                                                            @RequestParam(defaultValue = "3") int size) {
-        return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.searchMembers(keyword,page,size), HttpStatus.OK));
+        return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.searchMembers(keyword, request,page,size), HttpStatus.OK));
     }
 
     @GetMapping("/is-duplicate-nickname")

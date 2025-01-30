@@ -5,7 +5,7 @@ import com.hf.healthfriend.domain.member.domain.Tier;
 import com.hf.healthfriend.domain.member.dto.MemberDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
-import com.hf.healthfriend.domain.member.dto.request.MembersRecommendRequest;
+import com.hf.healthfriend.domain.member.dto.request.MembersSearchRequest;
 import com.hf.healthfriend.domain.member.dto.response.*;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.exception.DuplicateMemberCreationException;
@@ -144,14 +144,10 @@ public class MemberService {
         }
     }
 
-    public List<MemberRecommendResponse> recommendMember(MembersRecommendRequest request, int pageNumber) {
-        Pageable pageable = PageRequest.of(pageNumber - 1, 6);
-        return memberRepository.recommendMembers(request, pageable);
-    }
 
-    public List<MemberSearchResponse> searchMembers(String keyword, int pageNumber, int size) {
+    public List<MemberSearchResponse> searchMembers(String keyword, MembersSearchRequest request, int pageNumber, int size) {
         Pageable pageable = PageRequest.of(pageNumber - 1, size);
-        return memberRepository.searchMembers(keyword, pageable);
+        return memberRepository.searchMembers(keyword, request,pageable);
     }
 
     /**
@@ -174,6 +170,10 @@ public class MemberService {
                         reviewDto.good().reviewDetailsPerEvaluationType(),
                         reviewDto.notGood().reviewDetailsPerEvaluationType()))
                 .averageReviewScore(profileResult.averageReviewScore())
+                .matchingCount(profileResult.matchingCount())
+                .reviewCount(reviewDto.good().totalCountPerEvaluationType()
+                        + reviewDto.notGood().totalCountPerEvaluationType())
+                .wishedCount(profileResult.wishedCount())
                 .build();
     }
 

@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface WishRepository extends JpaRepository<Wish, Long> {
-    boolean existsByWishedIdAndWisherId(Long wishedId, Long wisherId);
+    boolean existsByWishedIdAndWisherIdAndIsDeletedFalse(Long wishedId, Long wisherId);
     Optional<Wish> findByWishIdAndIsDeletedFalse(Long id);
     List<Wish> findAllByWisherIdAndIsDeletedFalse(Long memberId, Pageable pageable);
     List<Wish> findAllByWishedIdAndIsDeletedFalse(Long memberId, Pageable pageable);
