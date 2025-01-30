@@ -7,17 +7,19 @@ AWS_SQS_DB_QUEUE_URL=$5
 BUILD_POSITION=$6
 MODE=$7:-auth
 
-docker container stop hf-backend-app || true
-docker container rm hf-backend-app || true
+# docker container stop hf-backend-app || true
+# docker container rm hf-backend-app || true
+
+docker-compose down
 
 if [ "$BUILD_POSITION" = "container" ]; then
   ./gradlew clean build -x test
 fi
 
-docker build -t hf-backend .
+docker build -t hf/backend .
 
 if [ "$MODE" = "no-auth" ]; then
-  docker-compose -f docker-compose.yml up -d --build
+  docker-compose -f docker-compose.yml --profile blue up -d --build
 else
-  docker-compose -f docker-compose.yml up -d --build
+  docker-compose -f docker-compose.yml --profile blue up -d --build
 fi

@@ -23,7 +23,7 @@ pipeline {
         stage('Dockerize') {
             steps {
                 sh "sudo docker image build -t hf/backend:${env.BUILD_ID} ."
-                sh "sudo docker tag hf/backend:${env.BUILD_ID} rudeh1253/sample-hub:${env.BUILD_ID}"
+                sh "sudo docker tag hf/backend:${env.BUILD_ID} rudeh1253/hf-backend:${env.BUILD_ID}"
             }
         }
 
@@ -31,7 +31,7 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'docker_hub_access_token', variable: 'dockerHubAccesstoken')]) {
                     sh "echo ${dockerHubAccesstoken} | sudo docker login --username rudeh1253 --password-stdin"
-                    sh "sudo docker push rudeh1253/sample-hub:${env.BUILD_ID}"
+                    sh "sudo docker push rudeh1253/hf-backend:${env.BUILD_ID}"
                 }
             }
         }
