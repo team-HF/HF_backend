@@ -12,14 +12,14 @@ MODE=$7:-auth
 
 docker-compose down
 
-if [ "$BUILD_POSITION" = "container" ]; then
+if [ "$BUILD_POSITION" = "no-container" ]; then
   ./gradlew clean build -x test
 fi
 
 docker build -t hf/backend .
 
 if [ "$MODE" = "no-auth" ]; then
-  docker-compose -f docker-compose.yml --profile blue up -d --build
+  docker-compose -f docker-compose.yml --profile blue-noauth up -d --build
 else
   docker-compose -f docker-compose.yml --profile blue up -d --build
 fi
