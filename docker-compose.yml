@@ -35,9 +35,32 @@ services:
     image: hf/backend:latest
     container_name: spring1-container
     ports:
-      - "8081:8080"
+      - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=local-dev,secret,constants,priv
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SQS_ALARM_QUEUE_URL=${AWS_SQS_ALARM_QUEUE_URL}
+      - AWS_SQS_DB_QUEUE_URL=${AWS_SQS_DB_QUEUE_URL}
+      - REDIS_HOST=redis://redis-container:6379
+    networks:
+      - app-network
+    depends_on:
+      redis:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+
+  spring1-noauth:
+    profiles:
+      - blue-noauth
+    image: hf/backend:latest
+    container_name: spring1-container
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local-dev,secret,constants,priv,no-auth
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_REGION=${AWS_REGION}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
