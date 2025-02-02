@@ -1,11 +1,5 @@
-AWS_ACCESS_KEY_ID=$1
-AWS_REGION=$2
-AWS_SECRET_ACCESS_KEY=$3
-AWS_SQS_ALARM_QUEUE_URL=$4
-AWS_SQS_DB_QUEUE_URL=$5
-
-BUILD_POSITION=$6
-MODE=$7:-auth
+BUILD_POSITION=$1
+MODE=$2:-auth
 
 # docker container stop hf-backend-app || true
 # docker container rm hf-backend-app || true
