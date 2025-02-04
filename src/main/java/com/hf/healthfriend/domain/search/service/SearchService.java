@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RList;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SearchService {
     private final MemberService memberService;
     private final PostService postService;
@@ -49,9 +51,11 @@ public class SearchService {
                 break;
         }
 
-        if (memberId != null && keyword != null) {
+        if(memberId!=null){
             recentSearchList = getRecentSearchKeywords(memberId);
-            saveRecentSearchKeyword(memberId, keyword);
+            if (keyword != null) {
+                saveRecentSearchKeyword(memberId, keyword);
+            }
         }
 
         return SearchResponse.builder()
