@@ -49,7 +49,7 @@ public class SearchService {
                 break;
         }
 
-        if (memberId != null) {
+        if (memberId != null && keyword != null) {
             recentSearchList = getRecentSearchKeywords(memberId);
             saveRecentSearchKeyword(memberId, keyword);
         }
