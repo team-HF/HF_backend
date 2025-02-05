@@ -13,6 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MemberSearchResponse{
+    private Long memberId;
     private String profileImageUrl;
     private String introduction;
     private String nickname;

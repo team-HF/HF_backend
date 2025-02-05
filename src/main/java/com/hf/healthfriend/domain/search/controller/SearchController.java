@@ -33,11 +33,10 @@ public class SearchController {
     public ResponseEntity<ApiBasicResponse<SearchResponse>> getSearchList(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam int size,
-            @Nullable SearchCategory searchCategory,
             @Nullable MembersSearchRequest membersSearchRequest,
             @RequestParam @Nullable String keyword,
             @Nullable Long memberId) {
-        return ResponseEntity.ok(ApiBasicResponse.of(searchService.search(page,size,searchCategory,membersSearchRequest,keyword,memberId),
+        return ResponseEntity.ok(ApiBasicResponse.of(searchService.search(page,size,membersSearchRequest,keyword,memberId),
                 HttpStatus.OK));
     }
 
