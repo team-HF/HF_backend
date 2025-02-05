@@ -399,11 +399,19 @@ public class MemberController {
             @ApiResponse(responseCode = "400", description = "프로필 검색 목록 조회 실패")
     })
     @GetMapping("/search")
-    public ResponseEntity<ApiBasicResponse<List<MemberSearchResponse>>> getSearchedMembers(@RequestParam @Nullable String keyword,
-                                                                                           MembersSearchRequest request,
-                                                                                           @RequestParam(value = "page", defaultValue = "1") int page,
-                                                                                           @RequestParam(defaultValue = "3") int size) {
-        return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.searchMembers(keyword, request,page,size), HttpStatus.OK));
+    public ResponseEntity<ApiBasicResponse<List<MemberSearchResponse>>> getSearchedMembers(@RequestParam(value = "page", defaultValue = "1") int page,
+                                                                                           @RequestParam int size,
+                                                                                           @RequestParam(required = false) String cd1,
+                                                                                           @RequestParam(required = false) String cd2,
+                                                                                           @RequestParam(required = false) String cd3,
+                                                                                           @RequestParam(required = false) List<String> fitnessLevels,
+                                                                                           @RequestParam(required = false) List<String> companionStyles,
+                                                                                           @RequestParam(required = false) List<String> fitnessEagernesses,
+                                                                                           @RequestParam(required = false) List<String> fitnessKinds,
+                                                                                           @RequestParam(required = false) List<String> fitnessObjectives,
+                                                                                           @RequestParam(required = false) String memberSortType,
+                                                                                           @RequestParam @Nullable String keyword) {
+        return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.searchMembers(cd1,cd2,cd3,fitnessLevels,companionStyles,fitnessEagernesses,fitnessKinds,fitnessObjectives,memberSortType,keyword,page,size), HttpStatus.OK));
     }
 
     @GetMapping("/is-duplicate-nickname")

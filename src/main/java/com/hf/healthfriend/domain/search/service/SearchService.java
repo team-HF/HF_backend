@@ -32,22 +32,10 @@ public class SearchService {
         List<PostListObject> postList = new ArrayList<>();
         List<MemberSearchResponse> profileList;
 
-        MembersSearchRequest request = MembersSearchRequest.builder()
-                .cd1(cd1)
-                .cd2(cd2)
-                .cd3(cd3)
-                .fitnessLevels(fitnessLevels)
-                .companionStyles(companionStyles)
-                .fitnessEagernesses(fitnessEagernesses)
-                .fitnessKinds(fitnessKinds)
-                .fitnessObjectives(fitnessObjectives)
-                .memberSortType(memberSortType != null ? MemberSortType.valueOf(memberSortType) : null)
-                .build();
-
         if (keyword !=null) {
             postList = postService.getList(page, size, null, null, keyword);
         }
-        profileList = memberService.searchMembers(keyword, request, page, size);
+        profileList = memberService.searchMembers(cd1,cd2,cd3,fitnessLevels,companionStyles,fitnessEagernesses,fitnessKinds,fitnessObjectives,memberSortType,keyword,page,size);
 
         List<String> recentSearchList = getRecentSearchAndSave(memberId,keyword);
 

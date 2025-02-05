@@ -1,6 +1,7 @@
 package com.hf.healthfriend.domain.member.service;
 
 import com.hf.healthfriend.domain.member.constant.FitnessLevel;
+import com.hf.healthfriend.domain.member.constant.MemberSortType;
 import com.hf.healthfriend.domain.member.domain.Tier;
 import com.hf.healthfriend.domain.member.dto.MemberDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
@@ -145,7 +146,21 @@ public class MemberService {
     }
 
 
-    public List<MemberSearchResponse> searchMembers(String keyword, MembersSearchRequest request, int pageNumber, int size) {
+    public List<MemberSearchResponse> searchMembers(String cd1, String cd2, String cd3,
+                                                    List<String> fitnessLevels,List<String> companionStyles,List<String> fitnessEagernesses,
+                                                    List<String> fitnessKinds,List<String> fitnessObjectives,
+                                                    String memberSortType,String keyword, int pageNumber, int size) {
+        MembersSearchRequest request = MembersSearchRequest.builder()
+                .cd1(cd1)
+                .cd2(cd2)
+                .cd3(cd3)
+                .fitnessLevels(fitnessLevels)
+                .companionStyles(companionStyles)
+                .fitnessEagernesses(fitnessEagernesses)
+                .fitnessKinds(fitnessKinds)
+                .fitnessObjectives(fitnessObjectives)
+                .memberSortType(memberSortType != null ? MemberSortType.valueOf(memberSortType) : null)
+                .build();
         Pageable pageable = PageRequest.of(pageNumber - 1, size);
         return memberRepository.searchMembers(keyword, request,pageable);
     }
