@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.search.service;
 
+import com.hf.healthfriend.domain.member.constant.MemberSortType;
 import com.hf.healthfriend.domain.member.dto.request.MembersSearchRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
 import com.hf.healthfriend.domain.member.service.MemberService;
@@ -23,9 +24,25 @@ public class SearchService {
     private final PostService postService;
     private final RedissonClient redissonClient;
 
-    public SearchResponse search(int page, int size, MembersSearchRequest request, String keyword, Long memberId) {
+    public SearchResponse search(int page, int size,
+                                 String cd1, String cd2, String cd3,
+                                 List<String> fitnessLevels,List<String> companionStyles,List<String> fitnessEagernesses,
+                                 List<String> fitnessKinds,List<String> fitnessObjectives,
+                                 String memberSortType,String keyword, Long memberId) {
         List<PostListObject> postList = new ArrayList<>();
         List<MemberSearchResponse> profileList;
+
+        MembersSearchRequest request = MembersSearchRequest.builder()
+                .cd1(cd1)
+                .cd2(cd2)
+                .cd3(cd3)
+                .fitnessLevels(fitnessLevels)
+                .companionStyles(companionStyles)
+                .fitnessEagernesses(fitnessEagernesses)
+                .fitnessKinds(fitnessKinds)
+                .fitnessObjectives(fitnessObjectives)
+                .memberSortType(memberSortType != null ? MemberSortType.valueOf(memberSortType) : null)
+                .build();
 
         if (keyword !=null) {
             postList = postService.getList(page, size, null, null, keyword);
