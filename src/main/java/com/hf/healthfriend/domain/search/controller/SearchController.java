@@ -11,6 +11,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +31,7 @@ public class SearchController {
             @ApiResponse(responseCode = "400", description = "통합 검색 목록 조회 실패")
     })
     @GetMapping("/search")
+    @CrossOrigin
     public ResponseEntity<ApiBasicResponse<SearchResponse>> getSearchList(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam int size,
