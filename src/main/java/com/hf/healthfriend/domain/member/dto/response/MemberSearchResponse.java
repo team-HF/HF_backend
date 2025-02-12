@@ -1,6 +1,5 @@
 package com.hf.healthfriend.domain.member.dto.response;
 
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,6 +17,7 @@ public class MemberSearchResponse{
     private String introduction;
     private String nickname;
     private Long wishCount;
+    private Double reviewScore;
     //private Long level;
     private Long matchedCount;
     private String fitnessLevel;

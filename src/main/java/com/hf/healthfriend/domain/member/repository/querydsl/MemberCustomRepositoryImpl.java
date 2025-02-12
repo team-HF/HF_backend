@@ -52,6 +52,7 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                         member.introduction,
                         member.nickname,
                         member.wishedCount,
+                        member.reviewScore,
                         member.matchedCount,
                         member.fitnessLevel.stringValue(),
                         member.companionStyle.stringValue(),
@@ -60,7 +61,6 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                         member.fitnessObjective.stringValue()))
                 .from(member)
                 .where(builder)
-                .groupBy(member)
                 .orderBy(orderSpecifier)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -69,22 +69,15 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
 
     public OrderSpecifier<?>[] getSortType(MembersSearchRequest request) {
         MemberSortType sortType = request.getMemberSortType();
-        if (sortType==null) return new OrderSpecifier<?>[]{member.matchedCount.desc()};
-        switch(sortType){
-            case SCORE -> {
-                return new OrderSpecifier<?>[]{member.reviewScore.desc()};
-            }
-            case WISH_COUNT -> {
-                return new OrderSpecifier<?>[]{member.wishedCount.desc()};
-            }
-            // TODO : 채팅 기능이 구현되면 이어서 작업
-            case RESPONSE_RATE -> {
-                return new OrderSpecifier<?>[]{};
-            }
-            default -> {
-                return new OrderSpecifier<?>[]{member.matchedCount.desc()};
-            }
+        if (sortType == null) {
+            return new OrderSpecifier<?>[]{member.matchedCount.desc()};
         }
+        return switch(sortType) {
+            case SCORE -> new OrderSpecifier<?>[]{member.reviewScore.desc()};
+            case WISH_COUNT -> new OrderSpecifier<?>[]{member.wishedCount.desc()};
+            case RESPONSE_RATE -> new OrderSpecifier<?>[]{}; // TODO: 구현 필요
+            default -> new OrderSpecifier<?>[]{member.matchedCount.desc()};
+        };
     }
 
     public BooleanBuilder filter(String keyword, MembersSearchRequest request) {
@@ -119,6 +112,7 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                 builder.and(member.introduction.containsIgnoreCase(keyword)
                         .or(member.nickname.containsIgnoreCase(keyword)));
         }
+        log.info(builder.toString());
         return builder;
     }
 
