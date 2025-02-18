@@ -64,8 +64,8 @@ services:
     depends_on:
       redis:
         condition: service_started
-      mysql:
-        condition: service_healthy
+      # mysql:
+      #   condition: service_healthy
 
   spring1-noauth:
     profiles:
@@ -87,8 +87,8 @@ services:
     depends_on:
       redis:
         condition: service_started
-      mysql:
-        condition: service_healthy
+      # mysql:
+      #   condition: service_healthy
 
   spring2:
     profiles:
@@ -109,7 +109,7 @@ services:
       - app-network
     depends_on:
       - redis
-      - mysql
+      # - mysql
 
   redis:
     image: redis:latest
@@ -119,23 +119,23 @@ services:
     networks:
       - app-network
 
-  mysql:
-    image: mysql:8.0.40
-    container_name: mysql-container
-    ports:
-      - "3306:3306"
-      - "33060:33060"
-    environment:
-      - MYSQL_ROOT_PASSWORD=1111
-      - MYSQL_DATABASE=hf
-    networks:
-      - app-network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--password=1111"]
-      interval: 10s
-      timeout: 30s
-      retries: 5
-      start_period: 10s
+  # mysql:
+  #   image: mysql:8.0.40
+  #   container_name: mysql-container
+  #   ports:
+  #     - "3306:3306"
+  #     - "33060:33060"
+  #   environment:
+  #     - MYSQL_ROOT_PASSWORD=1111
+  #     - MYSQL_DATABASE=hf
+  #   networks:
+  #     - app-network
+  #   healthcheck:
+  #     test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--password=1111"]
+  #     interval: 10s
+  #     timeout: 30s
+  #     retries: 5
+  #     start_period: 10s
 
 networks:
   app-network:

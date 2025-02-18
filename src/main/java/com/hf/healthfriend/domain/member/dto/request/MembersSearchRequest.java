@@ -1,6 +1,7 @@
 package com.hf.healthfriend.domain.member.dto.request;
 
 import com.hf.healthfriend.domain.member.constant.*;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,15 +20,15 @@ public class MembersSearchRequest {
 
     private String cd3;
 
-    private String fitnessLevel;
+    private List<String> fitnessLevels;
 
-    private String companionStyle;
+    private List<String> companionStyles;
 
-    private String fitnessEagerness;
+    private List<String> fitnessEagernesses;
 
-    private String fitnessKind;
+    private List<String> fitnessKinds;
 
-    private String fitnessObjective;
+    private List<String> fitnessObjectives;
 
     // 정렬
     private MemberSortType memberSortType;

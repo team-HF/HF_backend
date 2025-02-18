@@ -1,7 +1,5 @@
 package com.hf.healthfriend.domain.member.repository.querydsl;
 
-import static com.querydsl.core.types.ExpressionUtils.count;
-
 
 import com.hf.healthfriend.domain.member.constant.CompanionStyle;
 import com.hf.healthfriend.domain.member.constant.FitnessEagerness;
@@ -10,7 +8,6 @@ import com.hf.healthfriend.domain.member.constant.FitnessLevel;
 import com.hf.healthfriend.domain.member.constant.FitnessObjective;
 import com.hf.healthfriend.domain.member.constant.MemberSortType;
 import com.hf.healthfriend.domain.member.dto.request.MembersSearchRequest;
-import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.entity.QMember;
 import com.hf.healthfriend.domain.spec.entity.QSpec;
@@ -19,15 +16,11 @@ import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
 import com.hf.healthfriend.domain.member.repository.dto.ProfileQueryResultDto;
 import com.hf.healthfriend.domain.spec.dto.SpecDto;
-import com.hf.healthfriend.domain.wish.entity.QWish;
 import com.hf.healthfriend.global.util.mapping.BeanMapper;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.group.GroupBy;
-import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -35,10 +28,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 @Slf4j
 @Repository
@@ -46,7 +37,6 @@ import java.util.function.Function;
 public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     private final QMember member = QMember.member;
     private final QSpec spec = QSpec.spec;
-    private final QWish wish = QWish.wish;
     private final JPAQueryFactory queryFactory;
     private final EntityManager em;
     private final BeanMapper beanMapper;
@@ -57,10 +47,12 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
         OrderSpecifier<?>[] orderSpecifier = getSortType(request);
         return queryFactory
                 .select(Projections.constructor(MemberSearchResponse.class,
+                        member.id,
                         member.profileImageUrl,
                         member.introduction,
                         member.nickname,
                         member.wishedCount,
+                        member.reviewScore,
                         member.matchedCount,
                         member.fitnessLevel.stringValue(),
                         member.companionStyle.stringValue(),
@@ -69,7 +61,6 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                         member.fitnessObjective.stringValue()))
                 .from(member)
                 .where(builder)
-                .groupBy(member)
                 .orderBy(orderSpecifier)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -78,45 +69,50 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
 
     public OrderSpecifier<?>[] getSortType(MembersSearchRequest request) {
         MemberSortType sortType = request.getMemberSortType();
-        if (sortType==null) return new OrderSpecifier<?>[]{member.matchedCount.desc()};
-        switch(sortType){
-            case SCORE -> {
-                return new OrderSpecifier<?>[]{member.reviewScore.desc()};
-            }
-            case WISH_COUNT -> {
-                return new OrderSpecifier<?>[]{member.wishedCount.desc()};
-            }
-            // TODO : 채팅 기능이 구현되면 이어서 작업
-            case RESPONSE_RATE -> {
-                return new OrderSpecifier<?>[]{};
-            }
-            default -> {
-                return new OrderSpecifier<?>[]{member.matchedCount.desc()};
-            }
+        if (sortType == null) {
+            return new OrderSpecifier<?>[]{member.matchedCount.desc()};
         }
+        return switch(sortType) {
+            case SCORE -> new OrderSpecifier<?>[]{member.reviewScore.desc()};
+            case WISH_COUNT -> new OrderSpecifier<?>[]{member.wishedCount.desc()};
+            case RESPONSE_RATE -> new OrderSpecifier<?>[]{}; // TODO: 구현 필요
+            default -> new OrderSpecifier<?>[]{member.matchedCount.desc()};
+        };
     }
 
     public BooleanBuilder filter(String keyword, MembersSearchRequest request) {
+        // TODO : 필터링 요소가 너무 많아지므로 ENUM 에 인덱스를 거는 것을 고려해야 한다.
         BooleanBuilder builder = new BooleanBuilder();
-        if(request.getFitnessLevel()!=null)
-            builder.and(member.fitnessLevel.eq(FitnessLevel.valueOf(request.getFitnessLevel())));
-        if(request.getCompanionStyle()!=null)
-            builder.and(member.companionStyle.eq(CompanionStyle.valueOf(request.getCompanionStyle())));
-        if(request.getFitnessEagerness()!=null)
-            builder.and(member.fitnessEagerness.eq(FitnessEagerness.valueOf(request.getFitnessEagerness())));
-        if(request.getFitnessKind()!=null)
-            builder.and(member.fitnessKind.eq(FitnessKind.valueOf(request.getFitnessKind())));
-        if(request.getFitnessObjective()!=null)
-            builder.and(member.fitnessObjective.eq(FitnessObjective.valueOf(request.getFitnessObjective())));
-        if(request.getCd1()!=null)
+        if (request.getFitnessLevels() != null && !request.getFitnessLevels().isEmpty()) {
+            builder.and(member.fitnessLevel.stringValue().in(request.getFitnessLevels()));
+        }
+        if (request.getCompanionStyles() != null && !request.getCompanionStyles().isEmpty()) {
+            builder.and(member.companionStyle.stringValue().in(request.getCompanionStyles()));
+        }
+        if (request.getFitnessEagernesses() != null && !request.getFitnessEagernesses().isEmpty()) {
+            builder.and(member.fitnessEagerness.stringValue().in(request.getFitnessEagernesses()));
+        }
+        if (request.getFitnessKinds() != null && !request.getFitnessKinds().isEmpty()) {
+            builder.and(member.fitnessKind.stringValue().in(request.getFitnessKinds()));
+        }
+        if (request.getFitnessObjectives() != null && !request.getFitnessObjectives().isEmpty()) {
+            builder.and(member.fitnessObjective.stringValue().in(request.getFitnessObjectives()));
+        }
+        if(request.getCd1()!=null){
             builder.and(member.cd1.eq(request.getCd1()));
-        if(request.getCd2()!=null)
+        }
+        if(request.getCd2()!=null){
             builder.and(member.cd2.eq(request.getCd2()));
-        if(request.getCd3()!=null)
+        }
+        if(request.getCd3()!=null){
             builder.and(member.cd3.eq(request.getCd3()));
-        if(keyword!=null)
+        }
+        // TODO : Full-Text-Search 로 변환
+        if(keyword!=null){
                 builder.and(member.introduction.containsIgnoreCase(keyword)
                         .or(member.nickname.containsIgnoreCase(keyword)));
+        }
+        log.info(builder.toString());
         return builder;
     }
 
