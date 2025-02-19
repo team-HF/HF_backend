@@ -61,6 +61,7 @@ services:
       - REDIS_HOST=redis://redis-container:6379
     networks:
       - app-network
+      - hf-net
     depends_on:
       redis:
         condition: service_started
@@ -84,6 +85,7 @@ services:
       - REDIS_HOST=redis://redis-container:6379
     networks:
       - app-network
+      - hf-net
     depends_on:
       redis:
         condition: service_started
@@ -140,3 +142,5 @@ services:
 networks:
   app-network:
     driver: bridge
+  hf-net:
+    external: true
