@@ -132,6 +132,7 @@ public class ChatService {
                 .isLast(messages.isLast())
                 .page(page)
                 .pageSize(pageSize)
+                .participantIds(this.chatParticipationRepository.findParticipantIdsByChatroomId(chatroomId))
                 .build();
     }
 }
