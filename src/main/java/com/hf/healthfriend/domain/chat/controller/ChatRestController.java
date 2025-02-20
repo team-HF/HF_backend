@@ -133,6 +133,9 @@ public class ChatRestController {
                                                             },
                                                             "read": true
                                                         }
+                                                    ],
+                                                    "participantIds": [
+                                                        80, 120
                                                     ]
                                                 }
                                             }
