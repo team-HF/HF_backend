@@ -43,7 +43,7 @@ public class CommentAccessController {
 
         return commentJpaRepository.findByCommentIdAndIsDeletedFalse(commentId)
                 .map(comment -> {
-                    if (!comment.getWriter().getName().equals(memberName)) {
+                    if (!comment.getWriter().getId().equals(Long.valueOf(memberName))) {
                         throw new CommentException(errorCode);
                     }
                     return true;
