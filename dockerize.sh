@@ -13,7 +13,7 @@ fi
 docker build -t hf/backend .
 
 if [ "$MODE" = "no-auth" ]; then
-  docker-compose -f docker-compose.yml --profile blue-noauth up -d --build
+  docker-compose -f docker-compose.yml --profile test-noauth up -d --build
 else
-  docker-compose -f docker-compose.yml --profile blue up -d --build
+  docker-compose -f docker-compose.yml --profile test up -d --build
 fi

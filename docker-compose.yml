@@ -1,5 +1,5 @@
 services:
-  nginx1:
+  nginx-blue:
     profiles:
       - blue
     image: nginx:latest
@@ -8,47 +8,62 @@ services:
       - "80:80"
     volumes:
       # 커스텀 설정 파일을 nginx 컨테이너 내부의 설정 파일로 마운트
-      - ./nginx/nginx1/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/nginx-blue/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - spring1
+      - spring-blue
     networks:
       - app-network
   
-  nginx2:
+  nginx-green:
     profiles:
       - green
     image: nginx:latest
     container_name: nginx-container
     ports:
-      - "80:80"
+      - "81:80"
     volumes:
       # 커스텀 설정 파일을 nginx 컨테이너 내부의 설정 파일로 마운트
-      - ./nginx/nginx2/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/nginx-green/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - spring2
+      - spring-green
     networks:
       - app-network
-  
-  nginx1-noauth:
+
+  nginx-test:
     profiles:
-      - blue-noauth
+      - test
     image: nginx:latest
     container_name: nginx-container
     ports:
       - "80:80"
     volumes:
       # 커스텀 설정 파일을 nginx 컨테이너 내부의 설정 파일로 마운트
-      - ./nginx/nginx1-noauth/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/nginx-test/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - spring-green
+    networks:
+      - app-network
+  
+  nginx-test-noauth:
+    profiles:
+      - test-noauth
+    image: nginx:latest
+    container_name: nginx-container
+    ports:
+      - "80:80"
+    volumes:
+      # 커스텀 설정 파일을 nginx 컨테이너 내부의 설정 파일로 마운트
+      - ./nginx/nginx-test-noauth/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - spring1
     networks:
       - app-network
 
-  spring1:
+  spring-test:
     profiles:
-      - blue
+      - test
     image: hf/backend:latest
-    container_name: spring1-container
+    container_name: spring-test-container
     ports:
       - "8080:8080"
     environment:
@@ -68,9 +83,55 @@ services:
       # mysql:
       #   condition: service_healthy
 
-  spring1-noauth:
+  spring-blue:
     profiles:
-      - blue-noauth
+      - blue
+    image: hf/backend:latest
+    container_name: spring-blue-container
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod,secret,constants
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SQS_ALARM_QUEUE_URL=${AWS_SQS_ALARM_QUEUE_URL}
+      - AWS_SQS_DB_QUEUE_URL=${AWS_SQS_DB_QUEUE_URL}
+      - REDIS_HOST=redis://redis-container:6379
+      - CURRENT_MODE=BLUE
+    networks:
+      - app-network
+      - hf-net
+    depends_on:
+      redis:
+        condition: service_started
+
+  spring-green:
+    profiles:
+      - green
+    image: hf/backend:latest
+    container_name: spring-green-container
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod,secret,constants
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SQS_ALARM_QUEUE_URL=${AWS_SQS_ALARM_QUEUE_URL}
+      - AWS_SQS_DB_QUEUE_URL=${AWS_SQS_DB_QUEUE_URL}
+      - REDIS_HOST=redis://redis-container:6379
+      - CURRENT_MODE=GREEN
+    networks:
+      - app-network
+      - hf-net
+    depends_on:
+      redis:
+        condition: service_started
+
+  spring-test-noauth:
+    profiles:
+      - test-noauth
     image: hf/backend:latest
     container_name: spring1-container
     ports:
@@ -91,27 +152,6 @@ services:
         condition: service_started
       # mysql:
       #   condition: service_healthy
-
-  spring2:
-    profiles:
-      - green
-    image: hf/backend:latest
-    container_name: spring2-container
-    ports:
-      - "8082:8080"
-    environment:
-      - SPRING_PROFILES_ACTIVE=local-dev,secret,constants,priv
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_REGION=${AWS_REGION}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_SQS_ALARM_QUEUE_URL=${AWS_SQS_ALARM_QUEUE_URL}
-      - AWS_SQS_DB_QUEUE_URL=${AWS_SQS_DB_QUEUE_URL}
-      - REDIS_HOST=redis://redis-container:6379
-    networks:
-      - app-network
-    depends_on:
-      - redis
-      # - mysql
 
   redis:
     image: redis:latest
