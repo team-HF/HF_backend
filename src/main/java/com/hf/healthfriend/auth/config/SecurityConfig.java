@@ -49,6 +49,7 @@ public class SecurityConfig {
             "/hf/current-state",
             "/hf/comments/**",
             "/hf/connect/sse",
+            "/hf/current-mode",
 
             // TODO: 해당 endpoint 확인 후 삭제할 수 있음
             "/login",
