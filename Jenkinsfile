@@ -38,18 +38,15 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                withCredentials([file(credentialsId: 'node_credential', variable: 'nodeInfo'),
-                        file(credentialsId: 'docker_shell_script', variable: 'deployShellFile')]) {
-                    sh "sudo chown jenkins ${deployShellFile}"
-                    sh "sudo chown jenkins ${nodeInfo}"
-                    sh "sh ${deployShellFile} \$(cat ${nodeInfo}) ${env.BUILD_ID}"
+                withCredentials([string(credentialsId: 'node_ip', variable: 'nodeIp'),
+                        string(credentialsId: 'docker_hub_access_token', variable: 'dockerHubAccessToken')]) {
+                    sh "ssh ubuntu@${nodeIp} \"docker-compose down\" | true"
+                    sh "scp docker-compose.yml ubuntu@${nodeIp}:~"
+                    sh "scp nginx ubuntu@${nodeIp}:~"
+                    sh "ssh ubuntu@${workerNodeIp} \"echo ${dockerHubAccessToken} | sudo docker login --username hansoo0614 --password-stdin\""
+                    sh "ssh ubuntu@${workerNodeIp} \"sudo docker pull hansoo0614/metamong-backend:latest\""
+                    sh "ssh ubuntu@${workerNodeIp} \"sudo docker-compose --profile blue --env-file ~/envs up -d\""
                 }
-            }
-        }
-
-        stage('Health Check') {
-            steps {
-                echo "Health Check new deployment"
             }
         }
 
@@ -60,10 +57,10 @@ pipeline {
             }
         }
 
-        stage('Clear') {
-            steps {
-                echo "Clear old images"
+            stage('Clear') {
+                steps {
+                    echo "Clear old images"
+                }
             }
         }
-    }
 }
