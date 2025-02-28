@@ -17,6 +17,7 @@ import com.hf.healthfriend.domain.post.exception.PostErrorCode;
 import com.hf.healthfriend.domain.post.exception.PostException;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
 import com.hf.healthfriend.global.file.FileUrlResolver;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,14 +62,18 @@ public class PostService {
 
     public PostGetResponse get(Long postId, boolean canUpdateViewCount, CommentSortType sortType) {
         Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
-                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND, HttpStatus.NOT_FOUND,postId + "번 post가 존재하지 않습니다."));
-        if(canUpdateViewCount) {
-            post.updateViewCount(post.getViewCount());
+                .orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND, HttpStatus.NOT_FOUND, postId + "번 post가 존재하지 않습니다."));
+
+        if (canUpdateViewCount) {
+            postRepository.increaseViewCount(postId);
         }
-        List<CommentDto> commentList = commentService.getCommentsOfPost(postId,sortType);
+
+        List<CommentDto> commentList = commentService.getCommentsOfPost(postId, sortType);
+
         String imagePath = fileUrlResolver.resolveFileUrl(post.getImagePath());
         String writerProfileImageUrl = fileUrlResolver.resolveFileUrl(post.getMember().getProfileImageUrl());
-        return PostGetResponse.of(post, commentList,imagePath, writerProfileImageUrl);
+
+        return PostGetResponse.of(post, commentList, imagePath, writerProfileImageUrl);
     }
 
     public void delete(Long postId) {

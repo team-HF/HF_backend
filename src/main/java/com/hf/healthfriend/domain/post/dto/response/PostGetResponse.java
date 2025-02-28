@@ -36,7 +36,7 @@ public record PostGetResponse(
                 .content(post.getContent())
                 .imagePath(imagePath)
                 .createDate(post.getCreationTime())
-                .viewCount(post.getViewCount())
+                .viewCount(post.getViewCount()+1)
                 .likeCount(post.getLikesCount())
                 .commentCount(post.getCommentsCount())
                 .comments(comments)
