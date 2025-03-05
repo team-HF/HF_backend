@@ -38,7 +38,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/oauth/code")
 public class OAuth2RedirectionController {
-    private static final String REDIRECTION_PATH = "/register/exercise-style";
+    private static final String REDIRECTION_PATH = "/agreement";
 
     private final Map<AuthServer, OAuth2TokenSupport> tokenSupportByName;
     private final HttpCookieUtils cookieUtils;
