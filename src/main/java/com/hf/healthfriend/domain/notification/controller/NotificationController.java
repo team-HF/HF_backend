@@ -1,12 +1,8 @@
 package com.hf.healthfriend.domain.notification.controller;
 
-import com.hf.healthfriend.domain.member.constant.FitnessLevel;
-import com.hf.healthfriend.domain.notification.constant.NotificationGetType;
 import com.hf.healthfriend.domain.notification.constant.NotificationType;
 import com.hf.healthfriend.domain.notification.dto.NotificationResponse;
 import com.hf.healthfriend.domain.notification.service.NotificationService;
-import com.hf.healthfriend.domain.post.constant.PostCategory;
-import com.hf.healthfriend.domain.post.dto.response.PostListObject;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -37,8 +33,8 @@ public class NotificationController {
     public ResponseEntity<ApiBasicResponse<List<NotificationResponse>>> getList(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam int size,
-            @RequestParam @Nullable NotificationGetType notificationGetType) {
-        return ResponseEntity.ok(ApiBasicResponse.of(notificationService.getList(page,size,notificationGetType),
+            @RequestParam @Nullable NotificationType notificationType) {
+        return ResponseEntity.ok(ApiBasicResponse.of(notificationService.getList(page,size,notificationType),
                 HttpStatus.OK));
     }
 }
