@@ -1,6 +1,7 @@
 package com.hf.healthfriend.domain.notification.controller;
 
 import com.hf.healthfriend.domain.notification.constant.NotificationType;
+import com.hf.healthfriend.domain.notification.dto.NotificationListResponse;
 import com.hf.healthfriend.domain.notification.dto.NotificationResponse;
 import com.hf.healthfriend.domain.notification.service.NotificationService;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
@@ -30,7 +31,7 @@ public class NotificationController {
             @ApiResponse(responseCode = "400", description = "알람 목록 조회 실패")
     })
     @GetMapping("/notification/list")
-    public ResponseEntity<ApiBasicResponse<List<NotificationResponse>>> getList(
+    public ResponseEntity<ApiBasicResponse<NotificationListResponse>> getList(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam int size,
             @RequestParam @Nullable NotificationType notificationType) {

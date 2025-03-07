@@ -2,6 +2,7 @@ package com.hf.healthfriend.domain.notification.service;
 
 import com.hf.healthfriend.domain.notification.constant.NotificationGetType;
 import com.hf.healthfriend.domain.notification.constant.NotificationType;
+import com.hf.healthfriend.domain.notification.dto.NotificationListResponse;
 import com.hf.healthfriend.domain.notification.dto.NotificationResponse;
 import com.hf.healthfriend.domain.notification.repository.NotificationCustomRepository;
 import jakarta.transaction.Transactional;
@@ -20,7 +21,7 @@ public class NotificationService {
 
     private final NotificationCustomRepository notificationCustomRepository;
 
-    public List<NotificationResponse> getList(int page, int size, NotificationType notificationType) {
+    public NotificationListResponse getList(int page, int size, NotificationType notificationType) {
         Pageable pageable = PageRequest.of(page - 1, size);
         return notificationCustomRepository.getList(notificationType,pageable);
     }
