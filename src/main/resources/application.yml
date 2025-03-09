@@ -11,6 +11,7 @@ spring:
       file-size-threshold: 2KB
       max-file-size: 5MB
       max-request-size: 7MB
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -31,6 +32,14 @@ spring:
     # 배포 환경에서는 application-secret.yml 파일에 저장
     username: root
     password: 1111
+
+  cloud:
+    aws:
+      sqs:
+        listener:
+          max-concurrent-messages: 5
+          max-messages-per-poll: 3
+          poll-timeout: 10s
 
 
 logging:

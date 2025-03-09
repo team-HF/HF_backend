@@ -1,6 +1,7 @@
 package com.hf.healthfriend.domain.wish.controller;
 
 
+import com.hf.healthfriend.domain.wish.dto.request.WishRequestDto;
 import com.hf.healthfriend.domain.wish.dto.response.WishResponse;
 import com.hf.healthfriend.domain.wish.entity.Wish;
 import com.hf.healthfriend.domain.wish.service.WishService;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,8 +33,8 @@ public class WishController {
             @ApiResponse(responseCode = "400", description = "찜하기 실패")
     })
     @PostMapping("/wish")
-    public ResponseEntity<ApiBasicResponse<Long>> create(Long wisherId, Long wishedId) {
-        Long wishId = wishService.save(wisherId,wishedId);
+    public ResponseEntity<ApiBasicResponse<Long>> create(@RequestBody WishRequestDto wishRequestDto) {
+        Long wishId = wishService.save(wishRequestDto);
         return ResponseEntity.ok(ApiBasicResponse.of(wishId, HttpStatus.OK));
     }
 
