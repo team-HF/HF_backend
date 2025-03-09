@@ -37,13 +37,13 @@ public class CommentAccessController {
     }
 
     private boolean controlAccessToCommentResourceByCommentId(BearerTokenAuthentication authentication, HttpServletRequest request, CommentErrorCode errorCode) {
-        String memberName = authentication.getName();
+        Long memberId = Long.parseLong(authentication.getName());
         String path = request.getRequestURI();
         Long commentId = Long.parseLong(path.substring(path.lastIndexOf('/') + 1));
 
         return commentJpaRepository.findByCommentIdAndIsDeletedFalse(commentId)
                 .map(comment -> {
-                    if (!comment.getWriter().getName().equals(memberName)) {
+                    if (!comment.getWriter().getId().equals(memberId)) {
                         throw new CommentException(errorCode);
                     }
                     return true;

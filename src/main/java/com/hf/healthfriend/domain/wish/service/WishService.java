@@ -2,6 +2,7 @@ package com.hf.healthfriend.domain.wish.service;
 
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
+import com.hf.healthfriend.domain.wish.dto.request.WishRequestDto;
 import com.hf.healthfriend.domain.wish.dto.response.WishResponse;
 import com.hf.healthfriend.domain.wish.entity.Wish;
 import com.hf.healthfriend.domain.wish.exception.WishErrorCode;
@@ -25,7 +26,10 @@ public class WishService {
     private final WishRepository wishRepository;
     private final MemberRepository memberRepository;
 
-    public Long save(Long wisherId, Long wishedId){
+    public Long save(WishRequestDto wishRequestDto) {
+
+        Long wisherId = wishRequestDto.getWisherId();
+        Long wishedId = wishRequestDto.getWishedId();
 
         if (wishRepository.existsByWishedIdAndWisherIdAndIsDeletedFalse(wishedId,wisherId))
             throw new WishException(WishErrorCode.DUPLICATE_WISH,HttpStatus.BAD_REQUEST,
