@@ -29,13 +29,8 @@ public class SearchService {
                                  List<String> fitnessLevels,List<String> companionStyles,List<String> fitnessEagernesses,
                                  List<String> fitnessKinds,List<String> fitnessObjectives,
                                  String memberSortType,String keyword, Long memberId) {
-        List<PostListObject> postList = new ArrayList<>();
-        List<MemberSearchResponse> profileList;
-
-        if (keyword !=null) {
-            postList = postService.getList(page, size, null, null, keyword);
-        }
-        profileList = memberService.searchMembers(cd1,cd2,cd3,fitnessLevels,companionStyles,fitnessEagernesses,fitnessKinds,fitnessObjectives,memberSortType,keyword,page,size);
+        List<PostListObject> postList =  postService.getList(page, size, null, null, keyword);
+        List<MemberSearchResponse> profileList = memberService.searchMembers(cd1,cd2,cd3,fitnessLevels,companionStyles,fitnessEagernesses,fitnessKinds,fitnessObjectives,memberSortType,keyword,page,size);
 
         List<String> recentSearchList = getRecentSearchAndSave(memberId,keyword);
 
