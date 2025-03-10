@@ -18,7 +18,7 @@ public class CommentDto {
     private Long writerId;
     private String writerNickname;
     private Tier writerTier;
-    private String writerProfileUrl;
+    private String writerProfileImageUrl;
     private String content;
     private LocalDateTime creationTime;
     private Long parentId;
@@ -32,7 +32,7 @@ public class CommentDto {
                 .writerId(comment.getWriter().getId())
                 .writerNickname(comment.getWriter().getNickname())
                 .writerTier(comment.getWriter().getTier())
-                .writerProfileUrl(writerProfileUrl)
+                .writerProfileImageUrl(writerProfileUrl)
                 .content(comment.getContent())
                 .creationTime(comment.getCreationTime())
                 .parentId(parentId)
