@@ -216,6 +216,7 @@ public class MemberController {
                             schema = @Schema(implementation = MemberUpdateRequestDto.class),
                             examples = @ExampleObject("""
                                     {
+                                        "nickname": "new-nickname",
                                         "cd1": "10",
                                         "cd2": "111",
                                         "cd3": "123",
