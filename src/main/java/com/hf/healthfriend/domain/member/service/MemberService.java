@@ -195,4 +195,21 @@ public class MemberService {
     public boolean checkDuplicateOfNickname(String nickname) {
         return this.memberRepository.existsByNickname(nickname);
     }
+
+    public Long getSearchedMembersSize(String cd1, String cd2, String cd3, List<String> fitnessLevels, List<String> companionStyles, List<String> fitnessEagernesses, List<String> fitnessKinds, List<String> fitnessObjectives,
+                                       String memberSortType, String keyword, int page, int size) {
+        MembersSearchRequest request = MembersSearchRequest.builder()
+                .cd1(cd1)
+                .cd2(cd2)
+                .cd3(cd3)
+                .fitnessLevels(fitnessLevels)
+                .companionStyles(companionStyles)
+                .fitnessEagernesses(fitnessEagernesses)
+                .fitnessKinds(fitnessKinds)
+                .fitnessObjectives(fitnessObjectives)
+                .memberSortType(memberSortType != null ? MemberSortType.valueOf(memberSortType) : null)
+                .build();
+        Pageable pageable = PageRequest.of(page - 1, size);
+        return memberRepository.getSearchedMembersSize(keyword,request,pageable);
+    }
 }

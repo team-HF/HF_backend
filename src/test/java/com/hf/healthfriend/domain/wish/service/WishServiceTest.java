@@ -2,6 +2,7 @@ package com.hf.healthfriend.domain.wish.service;
 
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
+import com.hf.healthfriend.domain.wish.dto.request.WishRequestDto;
 import com.hf.healthfriend.domain.wish.dto.response.WishResponse;
 import com.hf.healthfriend.domain.wish.entity.Wish;
 import com.hf.healthfriend.domain.wish.exception.WishException;
@@ -45,14 +46,15 @@ class WishServiceTest {
         long wisherId = 1L;
         long wishedId = 2L;
 
-        when(wishRepository.existsByWishedIdAndWisherId(wishedId, wisherId)).thenReturn(false);
+        when(wishRepository.existsByWishedIdAndWisherIdAndIsDeletedFalse(wishedId, wisherId)).thenReturn(false);
         when(memberRepository.existsById(wisherId)).thenReturn(true);
         when(memberRepository.existsById(wishedId)).thenReturn(true);
 
         Wish savedWish = new Wish(new Member(wisherId), new Member(wishedId));
         when(wishRepository.save(any(Wish.class))).thenReturn(savedWish);
+        WishRequestDto wishRequestDto = new WishRequestDto(1L,2L);
 
-        Long wishId = wishService.save(wisherId, wishedId);
+        Long wishId = wishService.save(wishRequestDto);
 
         verify(wishRepository, times(1)).save(any(Wish.class));
     }
@@ -63,10 +65,12 @@ class WishServiceTest {
         long wisherId = 1L;
         long wishedId = 2L;
 
-        when(wishRepository.existsByWishedIdAndWisherId(wishedId, wisherId)).thenReturn(true);
+        when(wishRepository.existsByWishedIdAndWisherIdAndIsDeletedFalse(wishedId, wisherId)).thenReturn(true);
+
+        WishRequestDto wishRequestDto = new WishRequestDto(1L,2L);
 
         WishException exception = assertThrows(WishException.class, () -> {
-            wishService.save(wisherId, wishedId);
+            wishService.save(wishRequestDto);
         });
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getHttpStatus());
@@ -79,11 +83,13 @@ class WishServiceTest {
         long wisherId = 1L;
         long wishedId = 2L;
 
-        when(wishRepository.existsByWishedIdAndWisherId(wishedId, wisherId)).thenReturn(false);
+        when(wishRepository.existsByWishedIdAndWisherIdAndIsDeletedFalse(wishedId, wisherId)).thenReturn(false);
         when(memberRepository.existsById(wisherId)).thenReturn(false);
 
+        WishRequestDto wishRequestDto = new WishRequestDto(1L,2L);
+
         WishException exception = assertThrows(WishException.class, () -> {
-            wishService.save(wisherId, wishedId);
+            wishService.save(wishRequestDto);
         });
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getHttpStatus());

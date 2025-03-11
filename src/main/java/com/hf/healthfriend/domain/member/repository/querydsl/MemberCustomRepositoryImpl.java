@@ -67,6 +67,16 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                 .fetch();
     }
 
+    @Override
+    public Long getSearchedMembersSize(String keyword, MembersSearchRequest request, Pageable pageable) {
+        BooleanBuilder builder = filter(keyword, request);
+        return queryFactory
+                .select(member.count())
+                .from(member)
+                .where(builder)
+                .fetchOne();
+    }
+
     public OrderSpecifier<?>[] getSortType(MembersSearchRequest request) {
         MemberSortType sortType = request.getMemberSortType();
         if (sortType == null) {
