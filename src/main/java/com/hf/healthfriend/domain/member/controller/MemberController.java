@@ -4,9 +4,8 @@ import com.hf.healthfriend.domain.member.controller.schema.ProfileResponseSchema
 import com.hf.healthfriend.domain.member.dto.MemberDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
-import com.hf.healthfriend.domain.member.dto.request.MembersSearchRequest;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
-import com.hf.healthfriend.domain.member.dto.response.MemberRecommendResponse;
+import com.hf.healthfriend.domain.member.dto.response.MemberListResponse;
 import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
 import com.hf.healthfriend.domain.member.dto.response.MemberUpdateResponseDto;
 import com.hf.healthfriend.domain.member.dto.response.ProfileResponseDto;
@@ -400,18 +399,18 @@ public class MemberController {
             @ApiResponse(responseCode = "400", description = "프로필 검색 목록 조회 실패")
     })
     @GetMapping("/search")
-    public ResponseEntity<ApiBasicResponse<List<MemberSearchResponse>>> getSearchedMembers(@RequestParam(value = "page", defaultValue = "1") int page,
-                                                                                           @RequestParam int size,
-                                                                                           @RequestParam(required = false) String cd1,
-                                                                                           @RequestParam(required = false) String cd2,
-                                                                                           @RequestParam(required = false) String cd3,
-                                                                                           @RequestParam(required = false) List<String> fitnessLevels,
-                                                                                           @RequestParam(required = false) List<String> companionStyles,
-                                                                                           @RequestParam(required = false) List<String> fitnessEagernesses,
-                                                                                           @RequestParam(required = false) List<String> fitnessKinds,
-                                                                                           @RequestParam(required = false) List<String> fitnessObjectives,
-                                                                                           @RequestParam(required = false) String memberSortType,
-                                                                                           @RequestParam @Nullable String keyword) {
+    public ResponseEntity<ApiBasicResponse<MemberSearchResponse>> getSearchedMembers(@RequestParam(value = "page", defaultValue = "1") int page,
+                                                                                     @RequestParam int size,
+                                                                                     @RequestParam(required = false) String cd1,
+                                                                                     @RequestParam(required = false) String cd2,
+                                                                                     @RequestParam(required = false) String cd3,
+                                                                                     @RequestParam(required = false) List<String> fitnessLevels,
+                                                                                     @RequestParam(required = false) List<String> companionStyles,
+                                                                                     @RequestParam(required = false) List<String> fitnessEagernesses,
+                                                                                     @RequestParam(required = false) List<String> fitnessKinds,
+                                                                                     @RequestParam(required = false) List<String> fitnessObjectives,
+                                                                                     @RequestParam(required = false) String memberSortType,
+                                                                                     @RequestParam @Nullable String keyword) {
         return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.searchMembers(cd1,cd2,cd3,fitnessLevels,companionStyles,fitnessEagernesses,fitnessKinds,fitnessObjectives,memberSortType,keyword,page,size), HttpStatus.OK));
     }
 

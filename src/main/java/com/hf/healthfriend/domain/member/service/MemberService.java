@@ -146,10 +146,10 @@ public class MemberService {
     }
 
 
-    public List<MemberSearchResponse> searchMembers(String cd1, String cd2, String cd3,
-                                                    List<String> fitnessLevels,List<String> companionStyles,List<String> fitnessEagernesses,
-                                                    List<String> fitnessKinds,List<String> fitnessObjectives,
-                                                    String memberSortType,String keyword, int pageNumber, int size) {
+    public MemberSearchResponse searchMembers(String cd1, String cd2, String cd3,
+                                                  List<String> fitnessLevels, List<String> companionStyles, List<String> fitnessEagernesses,
+                                                  List<String> fitnessKinds, List<String> fitnessObjectives,
+                                                  String memberSortType, String keyword, int pageNumber, int size) {
         MembersSearchRequest request = MembersSearchRequest.builder()
                 .cd1(cd1)
                 .cd2(cd2)
@@ -162,7 +162,12 @@ public class MemberService {
                 .memberSortType(memberSortType != null ? MemberSortType.valueOf(memberSortType) : null)
                 .build();
         Pageable pageable = PageRequest.of(pageNumber - 1, size);
-        return memberRepository.searchMembers(keyword, request,pageable);
+        List<MemberListResponse> searchResponseList = memberRepository.searchMembers(keyword, request,pageable);
+        Long totalPageSize = memberRepository.getTotalPageSize(size);
+        return MemberSearchResponse.builder()
+                .memberList(searchResponseList)
+                .totalPageSize(totalPageSize)
+                .build();
     }
 
     /**

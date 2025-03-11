@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.search.service;
 
+import com.hf.healthfriend.domain.member.dto.response.MemberListResponse;
 import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
 import com.hf.healthfriend.domain.member.service.MemberService;
 import com.hf.healthfriend.domain.post.dto.response.PostListObject;
@@ -31,7 +32,7 @@ public class SearchService {
                                  String memberSortType,String keyword, Long memberId) {
 
         List<PostListObject> postList =  postService.getList(page, size, null, null, keyword);
-        List<MemberSearchResponse> profileList = memberService.searchMembers(cd1,cd2,cd3,fitnessLevels,companionStyles,fitnessEagernesses,fitnessKinds,fitnessObjectives,memberSortType,keyword,page,size);
+        MemberSearchResponse profileList = memberService.searchMembers(cd1,cd2,cd3,fitnessLevels,companionStyles,fitnessEagernesses,fitnessKinds,fitnessObjectives,memberSortType,keyword,page,size);
         Long postListSize = postRepository.getSearchedPostListSize(null,null,keyword);
         Long memberListSize = memberService.getSearchedMembersSize(cd1,cd2,cd3,fitnessLevels,companionStyles,fitnessEagernesses,fitnessKinds,fitnessObjectives,memberSortType,keyword,page,size);
         List<String> recentSearchList = getRecentSearchAndSave(memberId,keyword);
