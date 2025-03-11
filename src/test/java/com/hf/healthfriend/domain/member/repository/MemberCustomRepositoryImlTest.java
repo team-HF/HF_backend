@@ -2,7 +2,7 @@ package com.hf.healthfriend.domain.member.repository;
 
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.dto.request.MembersSearchRequest;
-import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
+import com.hf.healthfriend.domain.member.dto.response.MemberListResponse;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.repository.dto.ProfileQueryResultDto;
 import com.hf.healthfriend.domain.member.repository.querydsl.MemberCustomRepositoryImpl;
@@ -117,7 +117,7 @@ public class MemberCustomRepositoryImlTest {
                 .build();
 
         //When
-        List<MemberSearchResponse> searchedProfileList = memberCustomRepository.searchMembers(keyword,new_request, pageable);
+        List<MemberListResponse> searchedProfileList = memberCustomRepository.searchMembers(keyword,new_request, pageable);
 
         //Then
         assertEquals(1, searchedProfileList.size());
