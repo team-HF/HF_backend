@@ -19,7 +19,7 @@ public record PostListObject(
         String fitnessLevel,
         // TODO : dto에서 빼기, 프로필 추가
         long totalPageSize,
-        String memberProfileUrl
+        String writerProfileImageUrl
 ) {
     public static PostListObject of(Post post, String content, long totalPageSize, FileUrlResolver fileUrlResolver) {
         return PostListObject.builder()
@@ -33,7 +33,7 @@ public record PostListObject(
                 .likeCount(post.getLikesCount())
                 .commentCount(post.getCommentsCount())
                 .totalPageSize(totalPageSize)
-                .memberProfileUrl(fileUrlResolver.resolveFileUrl(post.getMember().getProfileImageUrl()))
+                .writerProfileImageUrl(fileUrlResolver.resolveFileUrl(post.getMember().getProfileImageUrl()))
                 .build();
     }
 }

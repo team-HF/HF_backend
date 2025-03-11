@@ -2,6 +2,7 @@ package com.hf.healthfriend.domain.wish.service;
 
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
+import com.hf.healthfriend.domain.wish.dto.request.WishRequestDto;
 import com.hf.healthfriend.domain.wish.dto.response.WishResponse;
 import com.hf.healthfriend.domain.wish.entity.Wish;
 import com.hf.healthfriend.domain.wish.exception.WishErrorCode;
@@ -12,6 +13,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Description;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -25,7 +27,10 @@ public class WishService {
     private final WishRepository wishRepository;
     private final MemberRepository memberRepository;
 
-    public Long save(Long wisherId, Long wishedId){
+    public Long save(WishRequestDto wishRequestDto) {
+
+        Long wisherId = wishRequestDto.getWisherId();
+        Long wishedId = wishRequestDto.getWishedId();
 
         if (wishRepository.existsByWishedIdAndWisherIdAndIsDeletedFalse(wishedId,wisherId))
             throw new WishException(WishErrorCode.DUPLICATE_WISH,HttpStatus.BAD_REQUEST,
@@ -84,5 +89,11 @@ public class WishService {
             wishResponseList.add(wishResponse);
         }
         return wishResponseList;
+    }
+
+    @Description("찜 눌렀는지 확인 기능")
+    public Boolean isWished(Long wishedId, String wisherLoginId) {
+        Long wisherId = memberRepository.findMemberIdByLoginIdAndIsDeletedFalse(wisherLoginId);
+        return wishRepository.existsByWishedIdAndWisherIdAndIsDeletedFalse(wishedId,wisherId);
     }
 }

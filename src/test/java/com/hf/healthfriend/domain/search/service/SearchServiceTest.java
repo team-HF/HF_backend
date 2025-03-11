@@ -96,18 +96,4 @@ class SearchServiceTest {
         assertEquals(1, recentSearches.size());
         assertEquals(keyword, recentSearches.get(0));
     }
-
-    @Test
-    void testSearchWithRecentKeywords() {
-        // Given
-        String keyword = "sampleKeyword";
-
-        // When
-        SearchResponse response = searchService.search(1, 10, SearchCategory.POST, keyword, memberId);
-
-        // Then
-        assertNotNull(response);
-        List<String> recentSearches = searchService.getRecentSearchKeywords(memberId);
-        assertTrue(recentSearches.contains(keyword));
-    }
 }

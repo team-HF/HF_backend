@@ -1,17 +1,11 @@
 package com.hf.healthfriend.domain.member.repository.querydsl;
 
-
-import com.hf.healthfriend.domain.member.constant.CompanionStyle;
-import com.hf.healthfriend.domain.member.constant.FitnessEagerness;
-import com.hf.healthfriend.domain.member.constant.FitnessKind;
-import com.hf.healthfriend.domain.member.constant.FitnessLevel;
-import com.hf.healthfriend.domain.member.constant.FitnessObjective;
 import com.hf.healthfriend.domain.member.constant.MemberSortType;
 import com.hf.healthfriend.domain.member.dto.request.MembersSearchRequest;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.entity.QMember;
 import com.hf.healthfriend.domain.spec.entity.QSpec;
-import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
+import com.hf.healthfriend.domain.member.dto.response.MemberListResponse;
 import com.hf.healthfriend.domain.member.exception.MemberNotFoundException;
 import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
 import com.hf.healthfriend.domain.member.repository.dto.ProfileQueryResultDto;
@@ -42,11 +36,11 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     private final BeanMapper beanMapper;
 
     @Override
-    public List<MemberSearchResponse> searchMembers (String keyword, MembersSearchRequest request, Pageable pageable) {
+    public List<MemberListResponse> searchMembers (String keyword, MembersSearchRequest request, Pageable pageable) {
         BooleanBuilder builder = filter(keyword, request);
         OrderSpecifier<?>[] orderSpecifier = getSortType(request);
         return queryFactory
-                .select(Projections.constructor(MemberSearchResponse.class,
+                .select(Projections.constructor(MemberListResponse.class,
                         member.id,
                         member.profileImageUrl,
                         member.introduction,
@@ -67,6 +61,16 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
                 .fetch();
     }
 
+    @Override
+    public Long getSearchedMembersSize(String keyword, MembersSearchRequest request, Pageable pageable) {
+        BooleanBuilder builder = filter(keyword, request);
+        return queryFactory
+                .select(member.count())
+                .from(member)
+                .where(builder)
+                .fetchOne();
+    }
+
     public OrderSpecifier<?>[] getSortType(MembersSearchRequest request) {
         MemberSortType sortType = request.getMemberSortType();
         if (sortType == null) {
@@ -83,6 +87,8 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
     public BooleanBuilder filter(String keyword, MembersSearchRequest request) {
         // TODO : 필터링 요소가 너무 많아지므로 ENUM 에 인덱스를 거는 것을 고려해야 한다.
         BooleanBuilder builder = new BooleanBuilder();
+        builder.and(member.isDeleted.eq(false));
+
         if (request.getFitnessLevels() != null && !request.getFitnessLevels().isEmpty()) {
             builder.and(member.fitnessLevel.stringValue().in(request.getFitnessLevels()));
         }
@@ -182,5 +188,15 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
             }
         }
         return dto;
+    }
+
+    public Long getTotalPageSize(int size){
+        Long totalPageSize = queryFactory
+                .select(member.count())
+                .from(member)
+                .where(member.isDeleted.eq(false))
+                .fetchOne();
+        if (totalPageSize == null) return 0L;
+        return (long) Math.ceil((double) totalPageSize / size);
     }
 }

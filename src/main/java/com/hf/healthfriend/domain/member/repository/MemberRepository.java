@@ -37,4 +37,7 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberCus
             WHERE m.member_id = :memberId
                 AND m.wished_count > 0""", nativeQuery = true)
     void decrementWishedCountByMemberId(@Param("memberId") Long memberId);
+
+    Long findMemberIdByLoginIdAndIsDeletedFalse(String loginId);
+
 }

@@ -73,6 +73,16 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
                 }).toList();
     }
 
+    @Override
+    public Long getSearchedPostListSize(FitnessLevel fitnessLevel, PostCategory postCategory, String keyword) {
+        BooleanBuilder builder = filter(fitnessLevel, postCategory, keyword);
+        return queryFactory
+                .select(post.count())
+                .from(post)
+                .where(builder)
+                .fetchOne();
+    }
+
     public BooleanBuilder filter(FitnessLevel fitnessLevel, PostCategory postCategory, String keyword) {
         // 조건을 동적으로 추가하기 위한 BooleanBuilder 생성
         BooleanBuilder builder = new BooleanBuilder();
