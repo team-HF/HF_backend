@@ -13,11 +13,13 @@ import java.util.Optional;
 
 public interface MemberCustomRepository {
 
-    public Optional<Member> findByMemberId(Long memberId);
+    Optional<Member> findByMemberId(Long memberId);
 
-    public List<MemberSearchResponse> searchMembers(String keyword, MembersSearchRequest request, Pageable pageable);
+    List<MemberSearchResponse> searchMembers(String keyword, MembersSearchRequest request, Pageable pageable);
 
-    public Member update(Long memberId, MemberUpdateDto updateDto);
+    Long getSearchedMembersSize(String keyword, MembersSearchRequest request, Pageable pageable);
 
-    public Optional<ProfileQueryResultDto> findProfileByMemberId(Long memberId);
+    Member update(Long memberId, MemberUpdateDto updateDto);
+
+    Optional<ProfileQueryResultDto> findProfileByMemberId(Long memberId);
 }

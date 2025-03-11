@@ -2,6 +2,7 @@ package com.hf.healthfriend.domain.search.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import com.hf.healthfriend.domain.post.repository.PostRepository;
 import java.time.Duration;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,8 @@ import org.redisson.api.RedissonClient;
 public class RecentSearchTest {
     @Mock
     private RedissonClient redissonClient;
+    @Mock
+    private PostRepository postRepository;
 
     @Mock
     private RList<String> mockRList;
@@ -26,7 +29,7 @@ public class RecentSearchTest {
 
     @BeforeEach
     void setUp() {
-        searchService = new SearchService(null, null, redissonClient);
+        searchService = new SearchService(null, null, postRepository,redissonClient);
     }
 
     @Test

@@ -10,4 +10,5 @@ import java.util.List;
 public interface PostCustomRepository {
     List<PostListObject> getList(FitnessLevel fitnessLevel, PostCategory postCategory, String keyword, Pageable pageable);
     List<PostListObject> getPopularList(List<Long> postIdList, FitnessLevel fitnessLevel, String keyword, Pageable pageable);
+    Long getSearchedPostListSize(FitnessLevel fitnessLevel, PostCategory postCategory, String keyword);
 }
