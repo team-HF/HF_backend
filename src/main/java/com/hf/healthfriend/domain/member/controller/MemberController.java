@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.member.controller;
 
+import com.hf.healthfriend.auth.constant.CookieConstants;
 import com.hf.healthfriend.domain.member.controller.schema.ProfileResponseSchema;
 import com.hf.healthfriend.domain.member.dto.MemberDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
@@ -15,6 +16,7 @@ import com.hf.healthfriend.global.spec.ApiErrorResponse;
 import com.hf.healthfriend.global.spec.schema.BooleanTypeSchema;
 import com.hf.healthfriend.global.spec.schema.MemberCreationResponseSchema;
 import com.hf.healthfriend.global.spec.schema.MemberResponseSchema;
+import com.hf.healthfriend.global.util.HttpCookieUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -28,9 +30,7 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -44,6 +44,7 @@ import java.util.List;
 public class MemberController {
 
     private final MemberService memberService;
+    private final HttpCookieUtils httpCookieUtils;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
@@ -174,7 +175,11 @@ public class MemberController {
         log.info("Request Body:\n{}", requestBody);
 
         MemberCreationResponseDto result = this.memberService.createMember(requestBody);
+        ResponseCookie existsMember =
+                this.httpCookieUtils.buildJavaScriptAccessibleResponseCookie(CookieConstants.COOKIE_NAME_IS_NEW_MEMBER.getString(),
+                        String.valueOf(false));
         return ResponseEntity.created(new URI("/hr/members/" + result.getMemberId()))
+                .header(HttpHeaders.SET_COOKIE, existsMember.toString())
                 .body(ApiBasicResponse.of(result, HttpStatus.CREATED));
     }
 
