@@ -13,6 +13,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Description;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -88,5 +89,11 @@ public class WishService {
             wishResponseList.add(wishResponse);
         }
         return wishResponseList;
+    }
+
+    @Description("찜 눌렀는지 확인 기능")
+    public Boolean isWished(Long wishedId, String wisherLoginId) {
+        Long wisherId = memberRepository.findMemberIdByLoginIdAndIsDeletedFalse(wisherLoginId);
+        return wishRepository.existsByWishedIdAndWisherIdAndIsDeletedFalse(wishedId,wisherId);
     }
 }

@@ -19,6 +19,7 @@ import com.hf.healthfriend.domain.review.dto.response.RevieweeResponseDto;
 import com.hf.healthfriend.domain.review.dto.response.SimpleReviewResponseDto;
 import com.hf.healthfriend.domain.review.service.ReviewService;
 import com.hf.healthfriend.domain.spec.service.SpecService;
+import com.hf.healthfriend.domain.wish.service.WishService;
 import com.hf.healthfriend.global.file.FileUrlResolver;
 import com.hf.healthfriend.global.util.mapping.BeanMapper;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +45,7 @@ public class MemberService {
     private final FileUrlResolver fileUrlResolver;
     private final BeanMapper beanMapper;
     private final ReviewService reviewService;
+    private final WishService wishService;
 
     /**
      * MemberCreationRequestDto에 있는 데이터를 가지고 새로운 Member를 생성한다.
@@ -76,9 +81,6 @@ public class MemberService {
         return MemberCreationResponseDto.of(saved, this.fileUrlResolver.generateUploadUrl(profileImagePath), generatedSpecIds);
     }
 
-    public boolean isMemberExists(Long memberId) {
-        return this.memberRepository.existsById(memberId);
-    }
 
     public boolean isMemberOfEmailExists(String email) {
         return this.memberRepository.existsByEmail(email);
@@ -176,6 +178,12 @@ public class MemberService {
         ProfileQueryResultDto profileResult = this.memberRepository.findProfileByMemberId(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
         RevieweeResponseDto reviewDto = this.reviewService.getRevieweeInfo(memberId);
+        // 조회하는 사람의 로그인 아이디
+        String findMemberLoginId = getMemberIdFromToken();
+        boolean isWished = false;
+        if (findMemberLoginId != null) {
+            isWished = wishService.isWished(memberId, findMemberLoginId);
+        }
 
         return ProfileResponseDto.builder()
                 .memberId(profileResult.memberId())
@@ -189,6 +197,7 @@ public class MemberService {
                 .reviewCount(reviewDto.good().totalCountPerEvaluationType()
                         + reviewDto.notGood().totalCountPerEvaluationType())
                 .wishedCount(profileResult.wishedCount())
+                .is_wished(isWished)
                 .build();
     }
 
@@ -211,5 +220,16 @@ public class MemberService {
                 .build();
         Pageable pageable = PageRequest.of(page - 1, size);
         return memberRepository.getSearchedMembersSize(keyword,request,pageable);
+    }
+
+    private String getMemberIdFromToken() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof BearerTokenAuthentication)) {
+            log.info("로그인되지 않았습니다.");
+            return null;
+        }
+        log.info("로그인한 사용자입니다. memberLoginId = {}",authentication.getName());
+        return authentication.getName();
     }
 }
