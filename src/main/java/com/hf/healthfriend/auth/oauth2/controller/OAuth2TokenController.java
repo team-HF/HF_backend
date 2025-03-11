@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -157,5 +158,14 @@ public class OAuth2TokenController {
                         "당신이 누군지 알겠습니다"
                 )
         );
+    }
+
+    @DeleteMapping("/refresh-token")
+    public ResponseEntity<Void> deleteRefreshToken() {
+        ResponseCookie invalidatorCookie =
+                this.httpCookieUtils.buildCookieInvalidator(CookieConstants.COOKIE_NAME_REFRESH_TOKEN.getString());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, invalidatorCookie.toString())
+                .build();
     }
 }
