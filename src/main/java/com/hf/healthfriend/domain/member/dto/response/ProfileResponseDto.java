@@ -15,6 +15,7 @@ public record ProfileResponseDto(
         Double averageReviewScore,
         long matchingCount,
         long reviewCount,
-        Long wishedCount
+        Long wishedCount,
+        boolean is_wished
 ) {
 }
