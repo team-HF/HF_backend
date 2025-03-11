@@ -21,12 +21,12 @@ public record PostListObject(
         long totalPageSize,
         String writerProfileImageUrl
 ) {
-    public static PostListObject of(Post post, String content, long totalPageSize, FileUrlResolver fileUrlResolver) {
+    public static PostListObject of(Post post, String content, long totalPageSize, FileUrlResolver fileUrlResolver, long viewCountFromRedis) {
         return PostListObject.builder()
                 .postId(post.getPostId())
                 .title(post.getTitle())
                 .category(post.getCategory().name())
-                .viewCount(post.getViewCount())
+                .viewCount(viewCountFromRedis)
                 .creationTime(post.getCreationTime())
                 .content(content)
                 .fitnessLevel(post.getMember().getFitnessLevel().name())

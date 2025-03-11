@@ -77,8 +77,8 @@ public class Post extends BaseTimeEntity {
         this.category = category;
     }
 
-    public void updateViewCount() {
-        this.viewCount++;
+    public void updateViewCount(long newViewCount) {
+        this.viewCount = newViewCount;
     }
 
 
