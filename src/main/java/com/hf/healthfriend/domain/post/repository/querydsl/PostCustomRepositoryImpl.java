@@ -118,11 +118,13 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
 
     private Map<Long, Long> getViewCountsFromRedis(List<Post> posts) {
         Map<Long, Long> viewCountsFromRedis = new HashMap<>();
+        // getBuckets()로 키를 한 번에 조회해와 네트워크 I/O를 줄임
+        Map<String, Long> redisValues = redissonClient.getBuckets().get(posts.stream()
+                .map(post -> "post:viewCount:" + post.getPostId())
+                .toArray(String[]::new));
 
         for (Post post : posts) {
-            String redisKey = "post:viewCount:" + post.getPostId();
-            Long viewCountFromRedis = redissonClient.getAtomicLong(redisKey).get();
-            viewCountsFromRedis.put(post.getPostId(), viewCountFromRedis);
+            viewCountsFromRedis.put(post.getPostId(), redisValues.getOrDefault("post:viewCount:" + post.getPostId(), 0L));
         }
 
         return viewCountsFromRedis;

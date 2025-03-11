@@ -17,9 +17,7 @@ import com.hf.healthfriend.domain.post.exception.PostErrorCode;
 import com.hf.healthfriend.domain.post.exception.PostException;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
 import com.hf.healthfriend.global.file.FileUrlResolver;
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RScoredSortedSet;
@@ -115,8 +113,4 @@ public class PostService {
 
         return viewCount;
     }
-
-
 }
-
-
