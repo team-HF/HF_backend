@@ -102,7 +102,10 @@ public class MemberController {
             @ApiResponse(
                     description = "회원 생성 성공",
                     responseCode = "201",
-                    headers = @Header(name = "Location", description = "생성된 회원의 리소스 경로"),
+                    headers = {
+                            @Header(name = "Location", description = "생성된 회원의 리소스 경로"),
+                            @Header(name = HttpHeaders.SET_COOKIE, description = "is_new_member 쿠키를 false로 설정")
+                    },
                     content = @Content(
                             schema = @Schema(implementation = MemberCreationResponseSchema.class),
                             examples = @ExampleObject("""
