@@ -49,6 +49,14 @@ public class SecurityConfig {
             "/hf/current-state",
             "/hf/comments/**",
             "/hf/connect/sse",
+            "/hf/posts/*/comments",
+            "/hf/members/*",
+            "/hf/members/*/profile",
+            "/hf/members/search",
+            "/hf/posts/*",
+            "/hf/popularList",
+            "/hf/list",
+            "/hf/search",
 
             // TODO: 해당 endpoint 확인 후 삭제할 수 있음
             "/login",
