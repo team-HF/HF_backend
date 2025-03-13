@@ -89,7 +89,14 @@ public class MemberService {
     public MemberDto findMember(Long memberId) throws MemberNotFoundException {
         Member findMember = this.memberRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
-        return MemberDto.of(findMember, this.fileUrlResolver.resolveFileUrl(findMember.getProfileImageUrl()));
+
+        String findMemberLoginId = getMemberIdFromToken();
+        boolean isWished = false;
+        if (findMemberLoginId != null) {
+            isWished = wishService.isWished(memberId, findMemberLoginId);
+        }
+
+        return MemberDto.of(findMember, this.fileUrlResolver.resolveFileUrl(findMember.getProfileImageUrl()),isWished);
     }
 
     public MemberDto findMemberByLoginId(String loginId) throws MemberNotFoundException {
@@ -100,7 +107,7 @@ public class MemberService {
     public MemberDto findMemberByEmail(String email) throws MemberNotFoundException {
         Member findMember = this.memberRepository.findByEmail(email)
                 .orElseThrow(() -> new MemberNotFoundException(email));
-        return MemberDto.of(findMember, this.fileUrlResolver.resolveFileUrl(findMember.getProfileImageUrl()));
+        return MemberDto.of(findMember, this.fileUrlResolver.resolveFileUrl(findMember.getProfileImageUrl()), null);
     }
 
     public MemberUpdateResponseDto updateMember(Long memberId, MemberUpdateRequestDto requestDto) throws MemberNotFoundException {
@@ -183,12 +190,6 @@ public class MemberService {
         ProfileQueryResultDto profileResult = this.memberRepository.findProfileByMemberId(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
         RevieweeResponseDto reviewDto = this.reviewService.getRevieweeInfo(memberId);
-        // 조회하는 사람의 로그인 아이디
-        String findMemberLoginId = getMemberIdFromToken();
-        boolean isWished = false;
-        if (findMemberLoginId != null) {
-            isWished = wishService.isWished(memberId, findMemberLoginId);
-        }
 
         return ProfileResponseDto.builder()
                 .memberId(profileResult.memberId())
@@ -202,7 +203,6 @@ public class MemberService {
                 .reviewCount(reviewDto.good().totalCountPerEvaluationType()
                         + reviewDto.notGood().totalCountPerEvaluationType())
                 .wishedCount(profileResult.wishedCount())
-                .is_wished(isWished)
                 .build();
     }
 
