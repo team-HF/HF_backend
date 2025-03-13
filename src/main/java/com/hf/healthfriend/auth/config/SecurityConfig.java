@@ -47,6 +47,7 @@ public class SecurityConfig {
             "/hf/files/**",
             "/files/**",
             "/hf/current-state",
+            "/hf/portfolio",
             "/hf/comments/**",
             "/hf/connect/sse",
             "/hf/posts/*/comments",
@@ -135,8 +136,8 @@ public class SecurityConfig {
         config.setAllowedOrigins(Collections.singletonList(this.clientOrigin));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowCredentials(true);
-        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "Cookie"));
-        config.setExposedHeaders(Arrays.asList("Authorization"));
+        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "Cookie", "Upgrade"));
+        config.setExposedHeaders(Arrays.asList("Authorization", "Upgrade", "Set-Cookie"));
         config.setMaxAge(3600L); // 1시간
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

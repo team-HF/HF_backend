@@ -6,13 +6,13 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 
 @Builder
-public record ChatMessageSendResponseDto(
+public record ChatMessageResponseDto(
         Long chatMessageId,
-        Long chatroomId,
         Long senderId,
         LocalDateTime creationTime,
         LocalDateTime lastModified,
         ChatMessageType chatMessageType,
-        Object content
+        Object content,
+        boolean read
 ) {
 }

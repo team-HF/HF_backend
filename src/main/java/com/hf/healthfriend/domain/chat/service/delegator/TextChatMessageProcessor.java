@@ -38,6 +38,7 @@ public class TextChatMessageProcessor extends AbstractChatMessageProcessorDelega
                 .senderId(dto.getSenderId())
                 .creationTime(savedMessage.getCreationTime())
                 .lastModified(savedMessage.getLastModified())
+                .chatMessageType(dto.getChatMessageType())
                 .content(Map.of("text", dto.getContent().getText()))
                 .build();
     }
