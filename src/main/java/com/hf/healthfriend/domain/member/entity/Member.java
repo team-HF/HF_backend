@@ -143,6 +143,9 @@ public class Member implements UserDetails {
     @Column(name = "matched_count")
     private Long matchedCount = 0L;
 
+    @Column(name = "wished_count")
+    private Long wishedCount = 0L;
+
     public Member(long memberId) {
         this.id = memberId;
     }
@@ -189,6 +192,10 @@ public class Member implements UserDetails {
     public void incrementMatchedCount() {
         this.matchedCount++;
     }
+
+    public void incrementWishedCount() { this.wishedCount++;}
+
+    public void decrementWishedCount() {this.wishedCount--;}
 
     public Tier getTier() {
         return Tier.create(this.fitnessLevel, this.matchedCount);

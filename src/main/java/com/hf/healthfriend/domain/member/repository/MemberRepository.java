@@ -24,8 +24,20 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberCus
 
     @Transactional
     @Modifying // 조회가 아닌 변경성 작업에는 해당 어노테이션을 붙여줘야 함
-    @Query(value = "UPDATE Members m SET m.review_score=:reviewScore WHERE m.member_id=:memberId ", nativeQuery = true)
-    void updateMemberReviewScore(@Param("memberId")long memberId, @Param("reviewScore")double reviewScore);
+    @Query(value = "UPDATE members m SET m.review_score=:reviewScore WHERE m.member_id=:memberId ", nativeQuery = true)
+    void updateMemberReviewScore(@Param("memberId") long memberId, @Param("reviewScore") double reviewScore);
 
+    @Modifying
+    @Query(value = "UPDATE members m SET m.wished_count = m.wished_count + 1 WHERE m.member_id = :memberId", nativeQuery = true)
+    void incrementWishedCountByMemberId(@Param("memberId") Long memberId);
+
+    @Modifying
+    @Query(value = """
+            UPDATE members m SET m.wished_count = m.wished_count - 1
+            WHERE m.member_id = :memberId
+                AND m.wished_count > 0""", nativeQuery = true)
+    void decrementWishedCountByMemberId(@Param("memberId") Long memberId);
+
+    Long findMemberIdByLoginIdAndIsDeletedFalse(String loginId);
 
 }
