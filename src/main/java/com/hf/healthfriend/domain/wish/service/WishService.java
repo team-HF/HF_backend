@@ -3,7 +3,8 @@ package com.hf.healthfriend.domain.wish.service;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
 import com.hf.healthfriend.domain.wish.dto.request.WishRequestDto;
-import com.hf.healthfriend.domain.wish.dto.response.WishResponse;
+import com.hf.healthfriend.domain.wish.dto.response.WishedListResponse;
+import com.hf.healthfriend.domain.wish.dto.response.WisherListResponse;
 import com.hf.healthfriend.domain.wish.entity.Wish;
 import com.hf.healthfriend.domain.wish.exception.WishErrorCode;
 import com.hf.healthfriend.domain.wish.exception.WishException;
@@ -69,30 +70,46 @@ public class WishService {
         member.decrementWishedCount();
     }
 
-    public List<WishResponse> getWishedList(int page, int size, Long memberId){
+    public List<WishedListResponse> getWishedList(int page, int size, Long memberId){
         Pageable pageable = PageRequest.of(page - 1, size);
         List<Wish> wishedList = wishRepository.findAllByWisherIdAndIsDeletedFalse(memberId, pageable);
-        return getWishResponses(wishedList);
+        return getWishedResponses(wishedList);
     }
 
-    public List<WishResponse> getWisherList(int page, int size, Long memberId){
+    public List<WisherListResponse> getWisherList(int page, int size, Long memberId){
         Pageable pageable = PageRequest.of(page - 1, size);
         List<Wish> wisherList = wishRepository.findAllByWishedIdAndIsDeletedFalse(memberId, pageable);
-        return getWishResponses(wisherList);
+        return getWisherResponses(wisherList);
     }
 
     @NotNull
-    private List<WishResponse> getWishResponses(List<Wish> wishedList) {
-        List<WishResponse> wishResponseList = new ArrayList<>();
+    private List<WishedListResponse> getWishedResponses(List<Wish> wishedList) {
+        List<WishedListResponse> wishedListResponseList = new ArrayList<>();
         for(Wish wish : wishedList){
-            WishResponse wishResponse = WishResponse.builder()
+            WishedListResponse wishedListResponse = WishedListResponse.builder()
                     .wishedId(wish.getWished().getId())
-                    .wisherId(wish.getWisher().getId())
+                    .imageUrl(wish.getWisher().getProfileImageUrl())
+                    .wishedNickname(wish.getWisher().getNickname())
                     .build();
-            wishResponseList.add(wishResponse);
+            wishedListResponseList.add(wishedListResponse);
         }
-        return wishResponseList;
+        return wishedListResponseList;
     }
+
+    @NotNull
+    private List<WisherListResponse> getWisherResponses(List<Wish> wishedList) {
+        List<WisherListResponse> wisherListResponseList = new ArrayList<>();
+        for(Wish wish : wishedList){
+            WisherListResponse wisherListResponse = WisherListResponse.builder()
+                    .wisherId(wish.getWisher().getId())
+                    .imageUrl(wish.getWisher().getProfileImageUrl())
+                    .wisherNickname(wish.getWisher().getNickname())
+                    .build();
+            wisherListResponseList.add(wisherListResponse);
+        }
+        return wisherListResponseList;
+    }
+
 
     @Description("찜 눌렀는지 확인 기능")
     public Boolean isWished(Long wishedId, String wisherLoginId) {
