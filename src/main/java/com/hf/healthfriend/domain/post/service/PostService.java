@@ -12,7 +12,6 @@ import com.hf.healthfriend.domain.post.constant.PostCategory;
 import com.hf.healthfriend.domain.post.dto.request.PostWriteRequest;
 import com.hf.healthfriend.domain.post.dto.response.PostGetResponse;
 import com.hf.healthfriend.domain.post.dto.response.PostListObject;
-import com.hf.healthfriend.domain.post.dto.response.PostSearchResponse;
 import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.exception.PostErrorCode;
 import com.hf.healthfriend.domain.post.exception.PostException;
@@ -79,26 +78,16 @@ public class PostService {
         likeRepository.deleteLikeByPostId(postId);
     }
 
-    public PostSearchResponse getList(int pageNumber, int size, FitnessLevel fitnessLevel, PostCategory postCategory, String keyword) {
+    public List<PostListObject> getList(int pageNumber, int size, FitnessLevel fitnessLevel, PostCategory postCategory, String keyword) {
         Pageable pageable = PageRequest.of(pageNumber - 1, size);
-        Long totalPageSize = postRepository.getTotalPageSize(size);
-        List<PostListObject> postList = postRepository.getList(fitnessLevel, postCategory, keyword, pageable);
-        return PostSearchResponse.builder()
-                .postList(postList)
-                .totalPageSize(totalPageSize)
-                .build();
+        return postRepository.getList(fitnessLevel, postCategory, keyword, pageable);
     }
 
-    public PostSearchResponse getPopularList(int pageNumber, int size, FitnessLevel fitnessLevel, String keyword) {
+    public List<PostListObject> getPopularList(int pageNumber, int size, FitnessLevel fitnessLevel, String keyword) {
         Pageable pageable = PageRequest.of(pageNumber - 1, size);
         RScoredSortedSet<Long> sortedSet = redissonClient.getScoredSortedSet("popular_posts");
         List<Long> postIdList = new ArrayList<>( sortedSet.readAll().stream().toList());
-        Long totalPageSize = (long) (postIdList.size() / size);
-        List<PostListObject> popularPostList = postRepository.getPopularList(postIdList,fitnessLevel,keyword,pageable);
-        return PostSearchResponse.builder()
-                .postList(popularPostList)
-                .totalPageSize(totalPageSize)
-                .build();
+        return postRepository.getPopularList(postIdList,fitnessLevel,keyword,pageable);
     }
 
 
