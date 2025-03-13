@@ -62,4 +62,6 @@ public abstract class ChatMessage extends BaseTimeEntity {
     public void readIfOpponent(Member reader) {
         readIfOpponent(reader.getId());
     }
+
+    public abstract String getMessageAsText();
 }
