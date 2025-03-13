@@ -42,10 +42,10 @@ public class WishController {
             @ApiResponse(responseCode = "200", description = "찜 삭제 성공"),
             @ApiResponse(responseCode = "400", description = "찜 삭제 실패")
     })
-    @DeleteMapping("/wish/{wishId}")
-    public ResponseEntity<ApiBasicResponse<Void>> delete(@PathVariable Long wishId) {
-        wishService.delete(wishId);
-        return ResponseEntity.ok(ApiBasicResponse.of(HttpStatus.OK));
+    @DeleteMapping("/wish")
+    public ResponseEntity<ApiBasicResponse<Void>> delete(@RequestBody WishRequestDto wishRequestDto) {
+        wishService.delete(wishRequestDto);
+        return ResponseEntity.ok(ApiBasicResponse.of(HttpStatus.OK,"찜이 삭제되었습니다."));
     }
 
     @Operation(summary = "내가 찜한 목록 조회", responses = {
