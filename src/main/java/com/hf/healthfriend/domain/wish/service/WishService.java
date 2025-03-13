@@ -57,10 +57,13 @@ public class WishService {
         }
     }
 
-    public void delete(Long wishId){
-        Wish wish = wishRepository.findByWishIdAndIsDeletedFalse(wishId)
+    public void delete(WishRequestDto wishRequestDto){
+        long wisherId = wishRequestDto.getWisherId();
+        long wishedId = wishRequestDto.getWishedId();
+
+        Wish wish = wishRepository.findByWisherIdAndWishedIdAndIsDeletedFalse(wisherId,wishedId)
                 .orElseThrow(() -> new WishException(WishErrorCode.WISH_NOT_FOUND, HttpStatus.BAD_REQUEST,
-                        "wishId: "+wishId));
+                        "wisherId: "+wisherId+", wishedId: "+wishedId));
         wish.delete();
         Member member = wish.getWished();
         member.decrementWishedCount();
