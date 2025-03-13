@@ -95,8 +95,7 @@ public class WishService {
     }
 
     @Description("찜 눌렀는지 확인 기능")
-    public Boolean isWished(Long wishedId, String wisherLoginId) {
-        Long wisherId = memberRepository.findMemberIdByLoginIdAndIsDeletedFalse(wisherLoginId);
+    public Boolean isWished(Long wishedId, Long wisherId) {
         return wishRepository.existsByWishedIdAndWisherIdAndIsDeletedFalse(wishedId,wisherId);
     }
 }

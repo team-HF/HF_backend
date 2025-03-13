@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
@@ -90,10 +91,10 @@ public class MemberService {
         Member findMember = this.memberRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
 
-        String findMemberLoginId = getMemberIdFromToken();
+        Long loginMemberId = getMemberIdFromToken();
         boolean isWished = false;
-        if (findMemberLoginId != null) {
-            isWished = wishService.isWished(memberId, findMemberLoginId);
+        if (loginMemberId != null) {
+            isWished = wishService.isWished(memberId, loginMemberId);
         }
 
         return MemberDto.of(findMember, this.fileUrlResolver.resolveFileUrl(findMember.getProfileImageUrl()),isWished);
@@ -222,14 +223,16 @@ public class MemberService {
         return memberRepository.getSearchedMembersSize(keyword,request,pageable);
     }
 
-    private String getMemberIdFromToken() {
+    private Long getMemberIdFromToken() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(authentication instanceof BearerTokenAuthentication)) {
-            log.info("로그인되지 않았습니다.");
+        if (authentication == null || authentication.getName() == null) {
             return null;
         }
-        log.info("로그인한 사용자입니다. memberLoginId = {}",authentication.getName());
-        return authentication.getName();
+
+        try {
+            return Long.parseLong(authentication.getName());
+        } catch (NumberFormatException e) {
+            throw new AccessDeniedException("Member Not allowed", e);
+        }
     }
 }
