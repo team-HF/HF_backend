@@ -189,14 +189,4 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
         }
         return dto;
     }
-
-    public Long getTotalPageSize(int size){
-        Long totalPageSize = queryFactory
-                .select(member.count())
-                .from(member)
-                .where(member.isDeleted.eq(false))
-                .fetchOne();
-        if (totalPageSize == null) return 0L;
-        return (long) Math.ceil((double) totalPageSize / size);
-    }
 }

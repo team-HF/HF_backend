@@ -22,5 +22,4 @@ public interface MemberCustomRepository {
 
     Optional<ProfileQueryResultDto> findProfileByMemberId(Long memberId);
 
-    Long getTotalPageSize(int size);
 }

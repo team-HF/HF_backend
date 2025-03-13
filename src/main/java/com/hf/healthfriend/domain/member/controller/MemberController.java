@@ -7,7 +7,6 @@ import com.hf.healthfriend.domain.member.dto.request.MemberCreationRequestDto;
 import com.hf.healthfriend.domain.member.dto.request.MemberUpdateRequestDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberCreationResponseDto;
 import com.hf.healthfriend.domain.member.dto.response.MemberListResponse;
-import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
 import com.hf.healthfriend.domain.member.dto.response.MemberUpdateResponseDto;
 import com.hf.healthfriend.domain.member.dto.response.ProfileResponseDto;
 import com.hf.healthfriend.domain.member.service.MemberService;
@@ -407,7 +406,7 @@ public class MemberController {
             @ApiResponse(responseCode = "400", description = "프로필 검색 목록 조회 실패")
     })
     @GetMapping("/search")
-    public ResponseEntity<ApiBasicResponse<MemberSearchResponse>> getSearchedMembers(@RequestParam(value = "page", defaultValue = "1") int page,
+    public ResponseEntity<ApiBasicResponse<List<MemberListResponse>>> getSearchedMembers(@RequestParam(value = "page", defaultValue = "1") int page,
                                                                                      @RequestParam int size,
                                                                                      @RequestParam(required = false) String cd1,
                                                                                      @RequestParam(required = false) String cd2,
