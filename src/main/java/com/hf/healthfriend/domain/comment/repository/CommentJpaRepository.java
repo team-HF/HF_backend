@@ -31,6 +31,21 @@ public interface CommentJpaRepository extends JpaRepository<Comment, Long>, Comm
 
     boolean existsByCommentIdAndIsDeletedFalse(Long id);
 
+    @Query(value = """
+            WITH RECURSIVE CommentHierarchy AS (
+                SELECT comment_id
+                FROM comment
+                WHERE comment_id = :parentId
+                UNION ALL
+                SELECT c.comment_id
+                FROM comment c
+                INNER JOIN CommentHierarchy ch ON c.parent_comment_id = ch.comment_id
+            )
+            SELECT COUNT(*)
+            FROM CommentHierarchy
+            """, nativeQuery = true)
+    int countReplies(@Param("parentId") Long parentId);
+
     @Modifying
     @Query(value = "WITH RECURSIVE CommentHierarchy AS (" +
             "  SELECT comment_id " +

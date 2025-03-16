@@ -86,11 +86,14 @@ public class CommentService {
             throw new CommentException(CommentErrorCode.COMMENT_NOT_FOUND, HttpStatus.NOT_FOUND,
                     commentId+"번 댓글은 존재하지 않습니다.");
         }
+
+        int replyCount = this.commentJpaRepository.countReplies(commentId);
+
         // CTE 쿼리로 하위 댓글 모두 soft delete
         commentJpaRepository.deleteAllReplies(commentId);
         // 부모 댓글 soft delete
         commentJpaRepository.softDeleteById(commentId);
-        postRepository.decrementCommentsCountByCommentId(commentId);
+        postRepository.decrementCommentsCountByCommentId(commentId, replyCount + 1);
     }
 
     public List<CommentDto> getCommentsOfPost(Long postId, CommentSortType sortType) {

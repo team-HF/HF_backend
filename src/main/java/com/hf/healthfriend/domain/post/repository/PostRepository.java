@@ -30,7 +30,7 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostCustomRep
     void incrementCommentsCount(@Param("postId") Long postId);
 
     @Modifying
-    @Query("UPDATE Post p SET p.commentsCount = p.commentsCount - 1 WHERE p.postId = " +
+    @Query("UPDATE Post p SET p.commentsCount = p.commentsCount - :decrCount WHERE p.postId = " +
             "(SELECT c.post.postId FROM Comment c WHERE c.commentId = :commentId)")
-    void decrementCommentsCountByCommentId(@Param("commentId") Long commentId);
+    void decrementCommentsCountByCommentId(@Param("commentId") Long commentId, @Param("decrCount") int decrCount);
 }
