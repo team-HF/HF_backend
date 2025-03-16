@@ -93,7 +93,7 @@ public class CommentService {
         commentJpaRepository.deleteAllReplies(commentId);
         // 부모 댓글 soft delete
         commentJpaRepository.softDeleteById(commentId);
-        postRepository.decrementCommentsCountByCommentId(commentId, replyCount + 1);
+        postRepository.decrementCommentsCountByCommentId(commentId, replyCount);
     }
 
     public List<CommentDto> getCommentsOfPost(Long postId, CommentSortType sortType) {
