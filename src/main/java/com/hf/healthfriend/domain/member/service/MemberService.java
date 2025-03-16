@@ -232,7 +232,8 @@ public class MemberService {
         try {
             return Long.parseLong(authentication.getName());
         } catch (NumberFormatException e) {
-            throw new AccessDeniedException("Member Not allowed", e);
+//            throw new AccessDeniedException("Member Not allowed", e);
+            return null;
         }
     }
 }
