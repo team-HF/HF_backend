@@ -5,7 +5,7 @@ import com.hf.healthfriend.domain.member.constant.FitnessLevel;
 import com.hf.healthfriend.domain.post.constant.PostCategory;
 import com.hf.healthfriend.domain.post.dto.request.PostWriteRequest;
 import com.hf.healthfriend.domain.post.dto.response.PostGetResponse;
-import com.hf.healthfriend.domain.post.dto.response.PostListObject;
+import com.hf.healthfriend.domain.post.dto.response.PostSearchResponse;
 import com.hf.healthfriend.domain.post.service.PostService;
 import com.hf.healthfriend.domain.post.service.ViewService;
 import com.hf.healthfriend.global.spec.ApiBasicResponse;
@@ -17,7 +17,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -99,7 +98,7 @@ public class PostController {
             @ApiResponse(responseCode = "400", description = "커뮤니티 목록 조회 실패")
     })
     @GetMapping("/list")
-    public ResponseEntity<ApiBasicResponse<List<PostListObject>>> getList(
+    public ResponseEntity<ApiBasicResponse<PostSearchResponse>> getList(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam int size,
             @RequestParam @Nullable FitnessLevel fitnessLevel,
@@ -113,7 +112,7 @@ public class PostController {
             @ApiResponse(responseCode = "400", description = "인기글 목록 조회 실패")
     })
     @GetMapping("/popularList")
-    public ResponseEntity<ApiBasicResponse<List<PostListObject>>> getPopularList(
+    public ResponseEntity<ApiBasicResponse<PostSearchResponse>> getPopularList(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam int size,
             @RequestParam @Nullable FitnessLevel fitnessLevel,

@@ -1,8 +1,10 @@
 package com.hf.healthfriend.domain.search.service;
 
 import com.hf.healthfriend.domain.member.dto.response.MemberListResponse;
+import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
 import com.hf.healthfriend.domain.member.service.MemberService;
 import com.hf.healthfriend.domain.post.dto.response.PostListObject;
+import com.hf.healthfriend.domain.post.dto.response.PostSearchResponse;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
 import com.hf.healthfriend.domain.post.service.PostService;
 import com.hf.healthfriend.domain.search.dto.SearchResponse;
@@ -30,16 +32,16 @@ public class SearchService {
                                  List<String> fitnessKinds,List<String> fitnessObjectives,
                                  String memberSortType,String keyword, Long memberId) {
 
-        List<PostListObject> postList =  postService.getList(page, size, null, null, keyword);
-        List<MemberListResponse> profileList = memberService.searchMembers(cd1,cd2,cd3,fitnessLevels,companionStyles,fitnessEagernesses,fitnessKinds,fitnessObjectives,memberSortType,keyword,page,size);
+        PostSearchResponse postSearchResponse =  postService.getList(page, size, null, null, keyword);
+        MemberSearchResponse memberSearchResponse = memberService.searchMembers(cd1,cd2,cd3,fitnessLevels,companionStyles,fitnessEagernesses,fitnessKinds,fitnessObjectives,memberSortType,keyword,page,size);
         Long postListSize = postRepository.getSearchedPostListSize(null,null,keyword);
         Long memberListSize = memberService.getSearchedMembersSize(cd1,cd2,cd3,fitnessLevels,companionStyles,fitnessEagernesses,fitnessKinds,fitnessObjectives,memberSortType,keyword,page,size);
         List<String> recentSearchList = getRecentSearchAndSave(memberId,keyword);
 
         return SearchResponse.builder()
-                .postList(postList)
+                .postList(postSearchResponse.postList())
                 .postListSize(postListSize)
-                .profileList(profileList)
+                .profileList(memberSearchResponse.memberList())
                 .profileListSize(memberListSize)
                 .recentSearchList(recentSearchList)
                 .build();
