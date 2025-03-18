@@ -57,7 +57,8 @@ public class SecurityConfig {
             "/hf/posts/*",
             "/hf/popularList",
             "/hf/list",
-            "/hf/search"
+            "/hf/search",
+            "/v3/**"
     };
 
     private final ObjectMapper objectMapper;
