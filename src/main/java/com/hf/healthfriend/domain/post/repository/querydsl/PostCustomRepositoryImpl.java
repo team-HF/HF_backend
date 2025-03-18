@@ -113,4 +113,15 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
         }
         return null;
     }
+
+    @Override
+    public Long getTotalPageSize(int size){
+        Long totalPageSize = queryFactory
+                .select(post.count())
+                .from(post)
+                .where(post.isDeleted.eq(false))
+                .fetchOne();
+        if (totalPageSize == null) return 0L;
+        return (long) Math.ceil((double) totalPageSize / size);
+    }
 }
