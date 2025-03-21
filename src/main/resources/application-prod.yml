@@ -13,5 +13,8 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
 
 client:
-  domain: www.healthfriend.site
+  domain: healthfriend.site
   origin: https://www.healthfriend.site
+
+backend:
+  origin: https://api.healthfriend.site

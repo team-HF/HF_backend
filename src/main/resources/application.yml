@@ -90,6 +90,9 @@ client:
 server:
   port: 8080
 
+backend:
+  origin: http://localhost:8080
+
 file:
   upload-dir: C:/hf/upload/
 
