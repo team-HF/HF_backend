@@ -1,5 +1,6 @@
 package com.hf.healthfriend.global.config;
 
+import io.awspring.cloud.sqs.config.SqsMessageListenerContainerFactory;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +11,7 @@ import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 
 import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 import software.amazon.awssdk.services.sqs.SqsClient;
 
 @Configuration
@@ -35,10 +37,22 @@ public class AWSConfig {
     }
 
     @Bean
-    public SqsClient sqsClient() {
-        return SqsClient.builder()
+    public SqsAsyncClient sqsClient() {
+        return SqsAsyncClient.builder()
                 .region(Region.of(region))
                 .credentialsProvider(DefaultCredentialsProvider.create())
+                .build();
+    }
+
+    @Bean
+    public SqsMessageListenerContainerFactory<Object> defaultSqsListenerContainerFactory(SqsAsyncClient sqsAsyncClient) {
+        return SqsMessageListenerContainerFactory
+                .builder()
+                .sqsAsyncClient(sqsAsyncClient)  // ✅ 필수 설정
+                .configure(options -> options
+                        .maxConcurrentMessages(5) // 기본값 설정 (조정 가능)
+                        .maxMessagesPerPoll(5)    // 기본값 설정 (조정 가능)
+                )
                 .build();
     }
 }
