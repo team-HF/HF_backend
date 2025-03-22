@@ -22,8 +22,7 @@ pipeline {
 
         stage('Dockerize') {
             steps {
-                sh "sudo docker image build -t hf/backend:${env.BUILD_ID} ."
-                sh "sudo docker tag hf/backend:${env.BUILD_ID} rudeh1253/hf-backend:${env.BUILD_ID}"
+                sh "sudo docker image build -t rudeh1253/hf-backend:latest ."
             }
         }
 
@@ -31,18 +30,23 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'docker_hub_access_token', variable: 'dockerHubAccesstoken')]) {
                     sh "echo ${dockerHubAccesstoken} | sudo docker login --username rudeh1253 --password-stdin"
-                    sh "sudo docker push rudeh1253/hf-backend:${env.BUILD_ID}"
+                    sh "sudo docker push rudeh1253/hf-backend:latest"
                 }
             }
         }
 
         stage('Deploy') {
             steps {
-                withCredentials([file(credentialsId: 'node_credential', variable: 'nodeInfo'),
-                        file(credentialsId: 'docker_shell_script', variable: 'deployShellFile')]) {
-                    sh "sudo chown jenkins ${deployShellFile}"
-                    sh "sudo chown jenkins ${nodeInfo}"
-                    sh "sh ${deployShellFile} \$(cat ${nodeInfo}) ${env.BUILD_ID}"
+                withCredentials([string(credentialsId: 'workernode_url', variable: 'workernodeUrl'),
+                        string(credentialsId: 'docker_hub_access_token', variable: 'dockerHubAccesstoken')]) {
+                    sh "ssh ubuntu@${workernodeUrl} \"rm -rf ~/docker-compose.yml\""
+                    sh "ssh ubuntu@${workernodeUrl} \"rm -rf ~/nginx\""
+                    sh "scp docker-compose.yml ubuntu@${workernodeUrl}:~"
+                    sh "scp -r nginx ubuntu@${workernodeUrl}:~"
+                    sh "ssh ubuntu@${workernodeUrl} \"echo ${dockerHubAccesstoken} | sudo docker login --username rudeh1253 --password-stdin\""
+                    sh "ssh ubuntu@${workernodeUrl} \"sudo docker pull rudeh1253/hf-backend:latest\""
+                    sh "ssh ubuntu@${workernodeUrl} \"sudo docker-compose -f docker-compose.yml --profile blue --env-file envs down\""
+                    sh "ssh ubuntu@${workernodeUrl} \"sudo docker-compose -f docker-compose.yml --profile blue --env-file envs up -d\""
                 }
             }
         }
