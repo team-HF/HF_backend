@@ -68,6 +68,7 @@ services:
       - JDBC_URL=${JDBC_URL}
       - JDBC_USERNAME=${JDBC_USERNAME}
       - JDBC_PASSWORD=${JDBC_PASSWORD}
+      - S3_BUCKET=${S3_BUCKET}
     networks:
       - app-network
       - hf-net
