@@ -67,6 +67,7 @@ CREATE TABLE members
     fitness_kind      ENUM ('HIGH_STRESS', 'FUNCTIONAL'), -- 추후 ENUM 값 수정
     review_score      DOUBLE                             DEFAULT 0.0,
     matched_count     BIGINT                             DEFAULT 0,
+    wished_count      BIGINT                             DEFAULT 0,
     is_deleted        BOOLEAN                            DEFAULT FALSE
 );
 
@@ -246,8 +247,8 @@ CREATE TABLE coupon (
 CREATE TABLE wish (
     wish_id    BIGINT PRIMARY KEY AUTO_INCREMENT,
     wisher_id  BIGINT NOT NULL,
-    wished     BIGINT NOT NULL,
+    wished_id     BIGINT NOT NULL,
     is_deleted BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (wisher_id) REFERENCES members (member_id),
-    FOREIGN KEY (wished) REFERENCES members (member_id)
+    FOREIGN KEY (wished_id) REFERENCES members (member_id)
 );

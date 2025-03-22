@@ -12,6 +12,11 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
 
+  cloud:
+    aws:
+      s3:
+        bucket: ${S3_BUCKET}
+
 client:
   domain: healthfriend.site
   origin: https://www.healthfriend.site

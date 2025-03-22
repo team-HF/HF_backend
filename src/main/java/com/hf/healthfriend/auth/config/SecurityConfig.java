@@ -58,7 +58,8 @@ public class SecurityConfig {
             "/hf/popularList",
             "/hf/list",
             "/hf/search",
-            "/v3/**"
+            "/v3/**",
+            "/test/**"
     };
 
     private final ObjectMapper objectMapper;
@@ -91,13 +92,16 @@ public class SecurityConfig {
     public SecurityFilterChain domainSecurityFilterChain(HttpSecurity http, OpaqueTokenIntrospector opaqueTokenIntrospector) throws Exception {
         return
                 http
-                        .cors(corsCustomizer ->corsCustomizer.configurationSource(corsConfigurationSource()))
+                        .cors(corsCustomizer -> corsCustomizer.configurationSource(corsConfigurationSource()))
                         .csrf(AbstractHttpConfigurer::disable) // TODO: 추후 보안 정책에 따라 CSRF 방지 활용 가능
                         .formLogin(AbstractHttpConfigurer::disable)
                         .httpBasic(AbstractHttpConfigurer::disable)
                         .authorizeHttpRequests((auth) -> auth
                                 .requestMatchers(WHITE_LIST).permitAll()
                                 .requestMatchers(HttpMethod.POST, "/hf/members").hasAnyRole(
+                                        Role.ROLE_NON_MEMBER.roleName(), Role.ROLE_MEMBER.roleName()
+                                )
+                                .requestMatchers(HttpMethod.GET, "/hf/members/is-duplicate-nickname").hasAnyRole(
                                         Role.ROLE_NON_MEMBER.roleName(), Role.ROLE_MEMBER.roleName()
                                 )
                                 .anyRequest().hasAnyRole(Role.ROLE_ADMIN.roleName(), Role.ROLE_MEMBER.roleName())
@@ -115,7 +119,7 @@ public class SecurityConfig {
     @Bean
     @Profile("no-auth")
     public SecurityFilterChain noAuthCheckSecurityFilterChain(HttpSecurity http, JsonParserFilter jsonParserFilter) throws Exception {
-        return http.cors(corsCustomizer ->corsCustomizer.configurationSource(corsConfigurationSource()))
+        return http.cors(corsCustomizer -> corsCustomizer.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
