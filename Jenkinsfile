@@ -70,4 +70,20 @@ pipeline {
             }
         }
     }
+    post {
+        success {
+            slackSend (
+                channel: '#jenkins-알림', 
+                color: '#00FF00', 
+                message: "빌드 SUCCESS: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}]"
+            )
+        }
+        failure {
+            slackSend (
+                channel: '#jenkins-알림', 
+                color: '#FF0000', 
+                message: "빌드 FAIL: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}]"
+            )
+        }
+    }
 }
