@@ -2,16 +2,15 @@ pipeline {
     agent any
 
     stages {
-        stage('Prepare secret file') {
+        stage('Start') {
             steps {
-                withCredentials([file(credentialsId: 'application-secret', variable: 'prodCredentials')]) {
-                    script {
-                        sh 'sudo cp $prodCredentials ./src/main/resources/application-secret.yml'
-                    }
-                }
+                slackSend (
+                    channel: '#jenkins-알림', 
+                    color: '#1c7ed6', 
+                    message: "빌드 Start: Job ${env.JOB_NAME} [${env.BUILD_NUMBER}]"
+                )
             }
         }
-        
 
         stage('Build Jar') {
             steps {
