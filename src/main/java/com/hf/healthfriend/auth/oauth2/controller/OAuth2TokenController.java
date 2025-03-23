@@ -163,24 +163,44 @@ public class OAuth2TokenController {
 
     @DeleteMapping("/refresh-token")
     @Operation(
-            summary = "Refresh Token 삭제",
-            description = "Refresh Token을 저장하고 있는 쿠키를 삭제함으로써 Refresh Token 삭제",
+            summary = "로그아웃",
+            description = "Refresh Token을 저장하고 있는 쿠키를 삭제함으로써 로그아웃 + 그외 로그인 시 생성된 쿠키 삭제",
             responses = {
                     @ApiResponse(
                             headers = {
                                     @Header(
                                             name = HttpHeaders.SET_COOKIE,
                                             description = "Refresh Token을 담고 있는 쿠키를 삭제하기 위한 헤더"
+                                    ),
+                                    @Header(
+                                            name = HttpHeaders.SET_COOKIE,
+                                            description = "Access Token을 담고 있는 쿠키를 삭제하기 위한 헤더"
+                                    ),
+                                    @Header(
+                                            name = HttpHeaders.SET_COOKIE,
+                                            description = "email을 담고 있는 쿠키를 삭제하기 위한 헤더"
+                                    ),
+                                    @Header(
+                                            name = HttpHeaders.SET_COOKIE,
+                                            description = "is_new_member을 담고 있는 쿠키를 삭제하기 위한 헤더"
+                                    ),
+                                    @Header(
+                                            name = HttpHeaders.SET_COOKIE,
+                                            description = "name을 담고 있는 쿠키를 삭제하기 위한 헤더"
                                     )
                             }
                     )
             }
     )
     public ResponseEntity<Void> deleteRefreshToken() {
-        ResponseCookie invalidatorCookie =
-                this.httpCookieUtils.buildCookieInvalidator(CookieConstants.COOKIE_NAME_REFRESH_TOKEN.getString());
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.SET_COOKIE, this.httpCookieUtils.buildCookieInvalidator(CookieConstants.COOKIE_NAME_REFRESH_TOKEN.getString()).toString());
+        headers.add(HttpHeaders.SET_COOKIE, this.httpCookieUtils.buildCookieInvalidator(CookieConstants.COOKIE_NAME_ACCESS_TOKEN.getString()).toString());
+        headers.add(HttpHeaders.SET_COOKIE, this.httpCookieUtils.buildCookieInvalidator(CookieConstants.COOKIE_NAME_EMAIL.getString()).toString());
+        headers.add(HttpHeaders.SET_COOKIE, this.httpCookieUtils.buildCookieInvalidator(CookieConstants.COOKIE_NAME_IS_NEW_MEMBER.getString()).toString());
+        headers.add(HttpHeaders.SET_COOKIE, this.httpCookieUtils.buildCookieInvalidator(CookieConstants.COOKIE_NAME_NAME.getString()).toString());
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, invalidatorCookie.toString())
+                .headers(headers)
                 .build();
     }
 }
