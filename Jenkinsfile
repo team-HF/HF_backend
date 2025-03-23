@@ -44,7 +44,7 @@ pipeline {
                     sh "scp -r nginx ubuntu@${workernodeUrl}:~"
                     sh "ssh ubuntu@${workernodeUrl} \"echo ${dockerHubAccesstoken} | sudo docker login --username rudeh1253 --password-stdin\""
                     sh "ssh ubuntu@${workernodeUrl} \"sudo docker pull rudeh1253/hf-backend:latest\""
-                    sh "ssh ubuntu@${workernodeUrl} \"sudo docker-compose -f docker-compose.yml --profile blue --env-file envs down\""
+                    sh "ssh ubuntu@${workernodeUrl} \"sudo docker-compose -f docker-compose.yml --profile blue --env-file envs down --rmi all\""
                     sh "ssh ubuntu@${workernodeUrl} \"sudo docker-compose -f docker-compose.yml --profile blue --env-file envs up -d\""
                 }
             }

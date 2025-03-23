@@ -98,7 +98,7 @@ services:
       - REDIS_HOST=redis://redis-container:6379
       - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
     networks:
       - app-network
       - hf-net
