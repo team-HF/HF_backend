@@ -126,7 +126,7 @@ CREATE TABLE spec
 CREATE TABLE post
 (
     post_id       BIGINT AUTO_INCREMENT PRIMARY KEY,
-    category      ENUM ('GYM_RECOMMENDATION', 'WORKOUT_CERTIFICATION', 'COUNSELING') NOT NULL,
+    category      ENUM ('FREE_COMMUNITY', 'COUNSELING') NOT NULL,
     writer_id     BIGINT                                                             NOT NULL,
     title         VARCHAR(50)                                                        NOT NULL,
     content       TEXT                                                               NOT NULL,
@@ -225,9 +225,11 @@ CREATE TABLE notification
 (
     notification_id   BIGINT PRIMARY KEY AUTO_INCREMENT,
     member_id       BIGINT       NOT NULL,
-    notification_type VARCHAR(20) NOT NULL,
+    type VARCHAR(20) NOT NULL,
     target_id       BIGINT       NOT NULL,
     message         VARCHAR(255) NOT NULL,
+    creation_time   DATETIME DEFAULT NOW(),
+    last_modified   DATETIME DEFAULT NOW(),
     is_read         BOOLEAN      DEFAULT FALSE,
     FOREIGN KEY (member_id) REFERENCES members (member_id)
 );
