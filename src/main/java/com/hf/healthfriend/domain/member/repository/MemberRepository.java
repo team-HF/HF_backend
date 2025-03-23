@@ -12,6 +12,13 @@ import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long>, MemberCustomRepository {
 
+    @Query("""
+            SELECT m
+            FROM members m
+            WHERE m.id = :memberId AND m.isDeleted = false
+            """)
+    Optional<Member> findNotDeletedMemberById(Long memberId);
+
     Optional<Member> findByEmail(String email);
 
     Optional<Member> findByLoginId(String loginId);
@@ -39,5 +46,4 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberCus
     void decrementWishedCountByMemberId(@Param("memberId") Long memberId);
 
     Long findMemberIdByLoginIdAndIsDeletedFalse(String loginId);
-
 }

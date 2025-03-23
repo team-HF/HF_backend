@@ -459,4 +459,14 @@ public class MemberController {
     public ResponseEntity<ApiBasicResponse<Boolean>> checkNicknameDuplicate(@RequestParam("nickname") String nickname) {
         return ResponseEntity.ok(ApiBasicResponse.of(this.memberService.checkDuplicateOfNickname(nickname), HttpStatus.OK));
     }
+
+    @DeleteMapping("/{memberId}")
+    @Operation(summary = "회원 탈퇴", responses = {
+            @ApiResponse(description = "회원 탈퇴 성공", responseCode = "200"),
+            @ApiResponse(description = "해당 회원이 없음", responseCode = "404")
+    })
+    public ResponseEntity<ApiBasicResponse<Void>> deleteMember(@PathVariable("memberId") Long memberId) {
+        this.memberService.deleteMember(memberId);
+        return ResponseEntity.ok(ApiBasicResponse.of(HttpStatus.OK, "회원 탈퇴 성공"));
+    }
 }
