@@ -69,6 +69,9 @@ services:
       - JDBC_USERNAME=${JDBC_USERNAME}
       - JDBC_PASSWORD=${JDBC_PASSWORD}
       - S3_BUCKET=${S3_BUCKET}
+      - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
     networks:
       - app-network
       - hf-net
@@ -93,6 +96,9 @@ services:
       - AWS_SQS_ALARM_QUEUE_URL=${AWS_SQS_ALARM_QUEUE_URL}
       - AWS_SQS_DB_QUEUE_URL=${AWS_SQS_DB_QUEUE_URL}
       - REDIS_HOST=redis://redis-container:6379
+      - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET
     networks:
       - app-network
       - hf-net
@@ -117,6 +123,9 @@ services:
       - AWS_SQS_ALARM_QUEUE_URL=${AWS_SQS_ALARM_QUEUE_URL}
       - AWS_SQS_DB_QUEUE_URL=${AWS_SQS_DB_QUEUE_URL}
       - REDIS_HOST=redis://redis-container:6379
+      - KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET
     networks:
       - app-network
     depends_on:
