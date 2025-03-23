@@ -27,10 +27,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -145,7 +143,7 @@ public class MemberService {
         }
 
         if (requestDto.getFitnessLevel() == FitnessLevel.ADVANCED) {
-            Member member = this.memberRepository.findById(memberId)
+            Member member = this.memberRepository.findNotDeletedMemberById(memberId)
                     .orElseThrow(() -> new MemberNotFoundException(memberId));
             Tier tier = member.getTier();
             if (tier.getFitnessLevel() != FitnessLevel.BEGINNER
@@ -240,5 +238,12 @@ public class MemberService {
 //            throw new AccessDeniedException("Member Not allowed", e);
             return null;
         }
+    }
+
+    public void deleteMember(Long memberId) {
+        Member member = this.memberRepository.findNotDeletedMemberById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException(memberId));
+
+        member.delete();
     }
 }
