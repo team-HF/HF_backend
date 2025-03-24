@@ -34,7 +34,7 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberCus
     Optional<Member> findNotDeletedMemberByLoginId(String loginId);
 
     @Query(value = """
-            SELECT 1
+            SELECT COUNT(1) > 0
             FROM members m
             WHERE m.email = :email AND m.is_deleted = false
             LIMIT 1
@@ -42,14 +42,19 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberCus
     boolean existsNotDeletedMemberByEmail(String email);
 
     @Query(value = """
-            SELECT 1
+            SELECT COUNT(1) > 0
             FROM members m
             WHERE m.login_id = :loginId AND m.is_deleted = false
             LIMIT 1
             """, nativeQuery = true)
     boolean existsNotDeletedMemberByLoginId(String loginId);
 
-
+    @Query(value = """
+            SELECT COUNT(1) > 0
+            FROM members m
+            WHERE m.nickname = :nickname AND m.is_deleted = false
+            LIMIT 1
+            """, nativeQuery = true)
     boolean existsNotDeletedMemberByNickname(String nickname);
 
     @Transactional
