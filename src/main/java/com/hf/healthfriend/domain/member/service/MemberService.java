@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -60,7 +61,10 @@ public class MemberService {
             throw new DuplicateMemberCreationException(dto.getId());
         }
 
-        Member newMember = new Member(dto.getId());
+        Optional<Member> byLoginId = this.memberRepository.findByLoginId(dto.getId());
+        byLoginId.ifPresent(Member::undelete);
+
+        Member newMember = byLoginId.orElse(new Member(dto.getId()));
         BeanUtils.copyProperties(dto, newMember);
         if (log.isDebugEnabled()) {
             log.debug("newMember={}", newMember);
