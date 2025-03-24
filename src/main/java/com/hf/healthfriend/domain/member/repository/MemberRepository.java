@@ -14,20 +14,43 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberCus
 
     @Query("""
             SELECT m
-            FROM members m
+            FROM Member m
             WHERE m.id = :memberId AND m.isDeleted = false
             """)
     Optional<Member> findNotDeletedMemberById(Long memberId);
 
-    Optional<Member> findByEmail(String email);
+    @Query("""
+            SELECT m
+            FROM Member m
+            WHERE m.id = :email AND m.isDeleted = false
+            """)
+    Optional<Member> findNotDeletedMemberByEmail(String email);
 
-    Optional<Member> findByLoginId(String loginId);
+    @Query(value = """
+            SELECT m
+            FROM Member m
+            WHERE m.loginId = :loginId AND m.isDeleted = false
+            """)
+    Optional<Member> findNotDeletedMemberByLoginId(String loginId);
 
-    boolean existsByEmail(String email);
+    @Query(value = """
+            SELECT 1
+            FROM members m
+            WHERE m.email = :email AND m.is_deleted = false
+            LIMIT 1
+            """, nativeQuery = true)
+    boolean existsNotDeletedMemberByEmail(String email);
 
-    boolean existsByLoginId(String loginId);
+    @Query(value = """
+            SELECT 1
+            FROM members m
+            WHERE m.login_id = :loginId AND m.is_deleted = false
+            LIMIT 1
+            """, nativeQuery = true)
+    boolean existsNotDeletedMemberByLoginId(String loginId);
 
-    boolean existsByNickname(String nickname);
+
+    boolean existsNotDeletedMemberByNickname(String nickname);
 
     @Transactional
     @Modifying // 조회가 아닌 변경성 작업에는 해당 어노테이션을 붙여줘야 함

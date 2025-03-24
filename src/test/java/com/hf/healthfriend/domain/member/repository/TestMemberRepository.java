@@ -61,7 +61,7 @@ class TestMemberRepository {
         Member member = SampleEntityGenerator.generateSampleMember(loginId);
         this.memberRepository.save(member);
 
-        Member findMember = this.memberRepository.findByLoginId(loginId).orElseThrow(NoSuchElementException::new);
+        Member findMember = this.memberRepository.findNotDeletedMemberByLoginId(loginId).orElseThrow(NoSuchElementException::new);
 
         log.info("findMember={}", findMember);
 
@@ -78,7 +78,7 @@ class TestMemberRepository {
         Member member = SampleEntityGenerator.generateSampleMember(loginId);
         this.memberRepository.save(member);
 
-        Optional<Member> findMemberOp = this.memberRepository.findByLoginId(loginId + "SUFFIX");
+        Optional<Member> findMemberOp = this.memberRepository.findNotDeletedMemberByLoginId(loginId + "SUFFIX");
 
         assertThat(findMemberOp).isEmpty();
     }
@@ -123,24 +123,24 @@ class TestMemberRepository {
 
     @DisplayName("existsByNickname - return true")
     @Test
-    void existsByNickname_returnTrue() {
+    void existsNotDeletedMemberByNickname_returnTrue() {
         final String nickname = "nickname";
         Member member = SampleEntityGenerator.generateSampleMember("sample1@gmail.com", nickname);
         this.memberRepository.save(member);
 
-        boolean result = this.memberRepository.existsByNickname(nickname);
+        boolean result = this.memberRepository.existsNotDeletedMemberByNickname(nickname);
 
         assertThat(result).isTrue();
     }
 
     @DisplayName("existsByNickname - return false")
     @Test
-    void existsByNickname_returnFalse() {
+    void existsNotDeletedMemberByNickname_returnFalse() {
         final String nickname = "nickname";
         Member member = SampleEntityGenerator.generateSampleMember("sample1@gmail.com", nickname);
         this.memberRepository.save(member);
 
-        boolean result = this.memberRepository.existsByNickname(nickname + "2");
+        boolean result = this.memberRepository.existsNotDeletedMemberByNickname(nickname + "2");
 
         assertThat(result).isFalse();
     }
