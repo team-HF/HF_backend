@@ -21,14 +21,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@Entity(name = "members")
+@Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Builder
 @Setter // TODO: Setter를 없애고 엔티티 수정 코드는 udpate~ 메소드로 대체해야 함
 @Getter
 @ToString
-@Table(indexes = {
+@Table(name = "members", indexes = {
         @Index(name = "member_fitness_level_idx", columnList = "fitnessLevel")
 })
 public class Member implements UserDetails {
@@ -193,9 +193,13 @@ public class Member implements UserDetails {
         this.matchedCount++;
     }
 
-    public void incrementWishedCount() { this.wishedCount++;}
+    public void incrementWishedCount() {
+        this.wishedCount++;
+    }
 
-    public void decrementWishedCount() {this.wishedCount--;}
+    public void decrementWishedCount() {
+        this.wishedCount--;
+    }
 
     public Tier getTier() {
         return Tier.create(this.fitnessLevel, this.matchedCount);
