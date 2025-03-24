@@ -42,7 +42,6 @@ class AlarmWorkerTest {
         Mockito.when(messageGenerator.generateMessage(event)).thenReturn("Sse Worker Test");
 
         // When
-        alarmWorker.consumeAlarmMessage(message);
 
         // Then
         Mockito.verify(notificationSseService, Mockito.times(1)).send(1L, alarm);

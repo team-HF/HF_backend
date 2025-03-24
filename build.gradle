@@ -93,3 +93,7 @@ tasks.named('test') {
 repositories {
     mavenCentral()  // TestContainers 라이브러리를 가져올 수 있도록 mavenCentral() 추가
 }
+
+bootRun {
+    jvmArgs = ["-Xms128m", "-Xmx512m"]
+}
