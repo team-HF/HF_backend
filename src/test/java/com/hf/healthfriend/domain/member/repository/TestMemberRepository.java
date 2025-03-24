@@ -123,24 +123,49 @@ class TestMemberRepository {
 
     @DisplayName("existsByNickname - return true")
     @Test
-    void existsNotDeletedMemberByNickname_returnTrue() {
+    void existsByNickname_AndIsDeletedFalse_returnTrue() {
         final String nickname = "nickname";
         Member member = SampleEntityGenerator.generateSampleMember("sample1@gmail.com", nickname);
         this.memberRepository.save(member);
 
-        boolean result = this.memberRepository.existsNotDeletedMemberByNickname(nickname);
+        boolean result = this.memberRepository.existsByNicknameAndIsDeletedFalse(nickname);
 
         assertThat(result).isTrue();
     }
 
+    @DisplayName("existsByEmail - return true")
+    @Test
+    void existsByEmail_AndIsDeletedFalse_returnTrue() {
+        final String email = "sample@gmail.com";
+        Member member = SampleEntityGenerator.generateSampleMember(email, "nickname");
+        this.memberRepository.save(member);
+
+        boolean result = this.memberRepository.existsByEmailAndIsDeletedFalse(email);
+
+        assertThat(result).isTrue();
+    }
+
+    @DisplayName("existsByEmail - return false")
+    @Test
+    void existsByEmail_AndIsDeletedFalse_returnFalse() {
+        final String email = "sample@gmail.com";
+        Member member = SampleEntityGenerator.generateSampleMember(email, "nickname");
+        member.delete();
+        this.memberRepository.save(member);
+
+        boolean result = this.memberRepository.existsByEmailAndIsDeletedFalse(email);
+
+        assertThat(result).isFalse();
+    }
+
     @DisplayName("existsByNickname - return false")
     @Test
-    void existsNotDeletedMemberByNickname_returnFalse() {
+    void existsByNickname_AndIsDeletedFalse_returnFalse() {
         final String nickname = "nickname";
         Member member = SampleEntityGenerator.generateSampleMember("sample1@gmail.com", nickname);
         this.memberRepository.save(member);
 
-        boolean result = this.memberRepository.existsNotDeletedMemberByNickname(nickname + "2");
+        boolean result = this.memberRepository.existsByNicknameAndIsDeletedFalse(nickname + "2");
 
         assertThat(result).isFalse();
     }

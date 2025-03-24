@@ -56,7 +56,7 @@ public class MemberService {
      */
     public MemberCreationResponseDto createMember(MemberCreationRequestDto dto)
             throws DuplicateMemberCreationException {
-        if (this.memberRepository.existsNotDeletedMemberByLoginId(dto.getId())) {
+        if (this.memberRepository.existsByLoginIdAndIsDeletedFalse(dto.getId())) {
             throw new DuplicateMemberCreationException(dto.getId());
         }
 
@@ -82,7 +82,7 @@ public class MemberService {
 
 
     public boolean isMemberOfEmailExists(String email) {
-        return this.memberRepository.existsNotDeletedMemberByEmail(email);
+        return this.memberRepository.existsByEmailAndIsDeletedFalse(email);
     }
 
     public MemberDto findMember(Long memberId) throws MemberNotFoundException {
@@ -206,7 +206,7 @@ public class MemberService {
     }
 
     public boolean checkDuplicateOfNickname(String nickname) {
-        return this.memberRepository.existsNotDeletedMemberByNickname(nickname);
+        return this.memberRepository.existsByNicknameAndIsDeletedFalse(nickname);
     }
 
     public Long getSearchedMembersSize(String cd1, String cd2, String cd3, List<String> fitnessLevels, List<String> companionStyles, List<String> fitnessEagernesses, List<String> fitnessKinds, List<String> fitnessObjectives,
