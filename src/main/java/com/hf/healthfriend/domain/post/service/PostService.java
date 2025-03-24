@@ -18,8 +18,11 @@ import com.hf.healthfriend.domain.post.exception.PostException;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
 import com.hf.healthfriend.global.file.FileUrlResolver;
 import jakarta.transaction.Transactional;
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RAtomicLong;
 import org.redisson.api.RScoredSortedSet;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Pageable;
@@ -96,18 +99,22 @@ public class PostService {
 
     private Long increaseViewCount(Long postId, Post post, boolean canUpdateViewCount) {
         String redisKey = "post:viewCount:" + postId;
-        long viewCount = redissonClient.getAtomicLong(redisKey).get();
+        RAtomicLong counter = redissonClient.getAtomicLong(redisKey);
 
-        // AtomicLong 은 기본 값이 0이므로 post 저장 시 레디스에 저장할 필요 없음
-        if (viewCount == 0) { // 값이 존재하지 않는 경우
-            viewCount = post.getViewCount(); // DB의 조회수 값 사용
-            redissonClient.getAtomicLong(redisKey).set(viewCount); // Redis 에 초기화
-            log.info("Redis 에 조회수 초기화: postId={}, newViewCount={}", postId, viewCount);
+        long viewCount = counter.get();
+
+        // 값이 없으면 DB 값으로 초기화 + TTL 6시간
+        if (viewCount == 0) {
+            viewCount = post.getViewCount();
+            counter.set(viewCount);
+            counter.expire(Duration.ofHours(6));
+            log.info("Redis에 조회수 초기화: postId={}, newViewCount={}", postId, viewCount);
         }
 
-        // 조회수 증가
+        // 조회수 증가 + TTL 연장
         if (canUpdateViewCount) {
-            viewCount = redissonClient.getAtomicLong(redisKey).incrementAndGet(); // INCR 과 동일한 동작
+            viewCount = counter.incrementAndGet();
+            counter.expire(Duration.ofHours(6));  // 연장
             log.info("조회수 증가: postId={}, newViewCount={}", postId, viewCount);
         }
 
