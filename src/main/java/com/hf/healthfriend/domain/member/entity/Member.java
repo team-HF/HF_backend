@@ -189,6 +189,10 @@ public class Member implements UserDetails {
         this.isDeleted = true;
     }
 
+    public void undelete() {
+        this.isDeleted = false;
+    }
+
     public void incrementMatchedCount() {
         this.matchedCount++;
     }

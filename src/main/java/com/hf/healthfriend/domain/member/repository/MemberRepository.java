@@ -26,6 +26,8 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberCus
             """)
     Optional<Member> findNotDeletedMemberByEmail(String email);
 
+    Optional<Member> findByLoginId(String loginId);
+
     @Query(value = """
             SELECT m
             FROM Member m
