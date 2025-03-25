@@ -65,17 +65,6 @@ public class AwsS3FileUrlResolver implements FileUrlResolver {
 
     @Override
     public String generateUploadUrl(String filename, String... paths) {
-        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(this.bucketName)
-                .key(generateFilePath(filename, paths))
-                .build();
-
-        PutObjectPresignRequest putObjectPresignRequest = PutObjectPresignRequest.builder()
-                .signatureDuration(Duration.ofSeconds(100))
-                .putObjectRequest(putObjectRequest)
-                .build();
-
-        PresignedPutObjectRequest presignedPutObjectRequest = this.s3Presigner.presignPutObject(putObjectPresignRequest);
-        return presignedPutObjectRequest.url().toString();
+        return "https://api.healthfriend.site/hf/files/" + generateFilePath(filename, paths);
     }
 }

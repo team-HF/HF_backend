@@ -78,7 +78,7 @@ CREATE TABLE matching
     request_target_id BIGINT   NOT NULL,
     status            ENUM ('PENDING', 'ACCEPTED', 'REJECTED', 'FINISHED') DEFAULT 'PENDING',
     meeting_place     VARCHAR(255) NOT NULL,
-    meeting_place_address VARCHAR(255) NOT NULL,
+    meeting_place_addr VARCHAR(255) NOT NULL,
     meeting_time      DATETIME NOT NULL,
     creation_time     DATETIME                                             DEFAULT NOW(),
     finish_time       DATETIME,

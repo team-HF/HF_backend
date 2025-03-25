@@ -7,14 +7,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import java.util.Arrays;
 
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-public class S3FileUploaderController {
+public class S3FileUploaderTestController {
     private final FileUrlResolver fileUrlResolver;
+    private final S3Client s3Client;
 
     @GetMapping("/test/presigned-url")
     public String testPresignedUrl(@RequestParam String extension, @RequestParam("file-path") String[] path) {
@@ -27,4 +29,9 @@ public class S3FileUploaderController {
     public String testReadObjectUrl(@RequestParam("file-path") String filePath) {
         return this.fileUrlResolver.resolveFileUrl(filePath);
     }
+//
+//    @GetMapping("/test/sig-version")
+//    public String testSignVersion() {
+//        return this.s3Client.serviceClientConfiguration();
+//    }
 }
