@@ -1,12 +1,17 @@
 package com.hf.healthfriend.global.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.awspring.cloud.sqs.config.SqsMessageListenerContainerFactory;
 import jakarta.annotation.PostConstruct;
+import java.time.Duration;
+import java.util.concurrent.Executor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 
@@ -45,14 +50,15 @@ public class AWSConfig {
     }
 
     @Bean
-    public SqsMessageListenerContainerFactory<Object> defaultSqsListenerContainerFactory(SqsAsyncClient sqsAsyncClient) {
+    public SqsMessageListenerContainerFactory<Object> defaultSqsListenerContainerFactory() {
         return SqsMessageListenerContainerFactory
                 .builder()
-                .sqsAsyncClient(sqsAsyncClient)  // ✅ 필수 설정
-                .configure(options -> options
-                        .maxConcurrentMessages(5) // 기본값 설정 (조정 가능)
-                        .maxMessagesPerPoll(5)    // 기본값 설정 (조정 가능)
+                .configure(sqsContainerOptionsBuilder ->
+                        sqsContainerOptionsBuilder
+                                .maxConcurrentMessages(10) // 컨테이너의 스레드 풀 크기
+                                .maxMessagesPerPoll(10) // 한 번의 폴링 요청으로 수신할 수 있는 최대 메시지 수를 지정
                 )
+                .sqsAsyncClient(sqsClient())
                 .build();
     }
 }
