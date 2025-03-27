@@ -175,6 +175,8 @@ public class MemberService {
                 .build();
         Pageable pageable = PageRequest.of(pageNumber - 1, size);
         List<MemberListResponse> searchResponseList = memberRepository.searchMembers(keyword, request,pageable);
+        searchResponseList.forEach((item) ->
+                this.fileUrlResolver.resolveFileUrl(item.getProfileImageUrl()));
         Long totalPageSize = memberRepository.getTotalPageSize(size);
         return MemberSearchResponse.builder()
                 .memberList(searchResponseList)
