@@ -40,6 +40,7 @@ pipeline {
                         string(credentialsId: 'docker_hub_access_token', variable: 'dockerHubAccesstoken')]) {
                     sh "ssh ubuntu@${workernodeUrl} \"rm -rf ~/docker-compose.yml\""
                     sh "ssh ubuntu@${workernodeUrl} \"rm -rf ~/nginx\""
+                    sh "ssh ubuntu@${workernodeUrl} \"sudo rm -rf ~/nginx-log/*\""
                     sh "scp docker-compose.yml ubuntu@${workernodeUrl}:~"
                     sh "scp -r nginx ubuntu@${workernodeUrl}:~"
                     sh "ssh ubuntu@${workernodeUrl} \"echo ${dockerHubAccesstoken} | sudo docker login --username rudeh1253 --password-stdin\""
