@@ -55,6 +55,7 @@ public class MatchingCustomRepositoryImpl implements MatchingCustomRepository {
                                         this.member.companionStyle,
                                         this.member.fitnessEagerness,
                                         this.member.fitnessKind,
+                                        this.member.fitnessObjective,
                                         this.member.cd1,
                                         this.member.cd2,
                                         this.member.cd3,
