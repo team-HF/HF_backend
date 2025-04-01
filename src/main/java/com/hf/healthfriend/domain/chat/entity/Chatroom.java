@@ -62,4 +62,11 @@ public class Chatroom extends BaseTimeEntity {
     public void updateUnreadMessageCount(Integer count) {
         this.unreadMessageCount = count;
     }
+
+    public String getLastChatMessageAsText() {
+        if (this.lastChatMessage == null) {
+            return "";
+        }
+        return this.lastChatMessage.getMessageAsText();
+    }
 }
