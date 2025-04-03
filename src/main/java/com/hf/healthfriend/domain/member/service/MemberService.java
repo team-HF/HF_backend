@@ -128,7 +128,7 @@ public class MemberService {
         Member updatedMember = this.memberRepository.update(memberId, updateDto);
         this.specService.updateSpecsOfMember(memberId, requestDto.getSpecUpdate());
         return MemberUpdateResponseDto.builder()
-                .profileImageUploadUrl(this.fileUrlResolver.generateUploadUrl(profileImagePath))
+                .profileImageUploadUrl(requestDto.getProfileImageFileExtension() != null ? this.fileUrlResolver.generateUploadUrl(profileImagePath) : null)
                 .cd1(updatedMember.getCd1())
                 .cd2(updatedMember.getCd2())
                 .cd3(updatedMember.getCd3())
