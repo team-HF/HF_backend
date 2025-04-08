@@ -88,8 +88,8 @@ public class WishService {
         for(Wish wish : wishedList){
             WishedListResponse wishedListResponse = WishedListResponse.builder()
                     .wishedId(wish.getWished().getId())
-                    .imageUrl(wish.getWisher().getProfileImageUrl())
-                    .wishedNickname(wish.getWisher().getNickname())
+                    .imageUrl(wish.getWished().getProfileImageUrl())
+                    .wishedNickname(wish.getWished().getNickname())
                     .build();
             wishedListResponseList.add(wishedListResponse);
         }
