@@ -11,4 +11,6 @@ public interface WishRepository extends JpaRepository<Wish, Long> {
     Optional<Wish> findByWishIdAndIsDeletedFalse(Long id);
     List<Wish> findAllByWisherIdAndIsDeletedFalse(Long memberId, Pageable pageable);
     List<Wish> findAllByWishedIdAndIsDeletedFalse(Long memberId, Pageable pageable);
+
+    Optional<Wish> findByWisherIdAndWishedIdAndIsDeletedFalse(long wisherId, long wishedId);
 }

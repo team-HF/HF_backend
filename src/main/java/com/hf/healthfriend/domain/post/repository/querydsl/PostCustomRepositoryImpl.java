@@ -106,14 +106,15 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
         return null;
     }
 
-    public long getTotalPageSize(){
+    @Override
+    public Long getTotalPageSize(int size){
         Long totalPageSize = queryFactory
                 .select(post.count())
                 .from(post)
                 .where(post.isDeleted.eq(false))
                 .fetchOne();
-        if (totalPageSize == null) return 0;
-        return (long) Math.ceil((double) totalPageSize / 5);
+        if (totalPageSize == null) return 0L;
+        return (long) Math.ceil((double) totalPageSize / size);
     }
 
     private Map<Long, Long> getViewCountsFromRedis(List<Post> posts) {
@@ -139,7 +140,7 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
                 String sentence = getSentenceContainKeyword(keyword, post.getContent());
                 content = (sentence != null) ? sentence : content;
             }
-            return PostListObject.of(post, content, getTotalPageSize(), fileUrlResolver, viewCounts.getOrDefault(post.getPostId(), 0L));
+            return PostListObject.of(post, content, fileUrlResolver, viewCounts.getOrDefault(post.getPostId(), 0L));
         }).toList();
     }
 }

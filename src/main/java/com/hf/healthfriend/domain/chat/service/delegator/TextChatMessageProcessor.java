@@ -30,6 +30,7 @@ public class TextChatMessageProcessor extends AbstractChatMessageProcessorDelega
     @Override
     protected ChatMessageSendResponseDto processSendingMessage(Long chatroomId, ChatMessageSendRequestDto<TextChatMessageSendRequestContent> dto) {
         TextChatMessage savedMessage = this.chatMessageRepository.saveMessageWithChatroomId(chatroomId, dto);
+        savedMessage.getChatroom().updateLastChatMessage(savedMessage);
 
         return ChatMessageSendResponseDto.builder()
                 .chatMessageId(savedMessage.getChatMessageId())
@@ -37,6 +38,7 @@ public class TextChatMessageProcessor extends AbstractChatMessageProcessorDelega
                 .senderId(dto.getSenderId())
                 .creationTime(savedMessage.getCreationTime())
                 .lastModified(savedMessage.getLastModified())
+                .chatMessageType(dto.getChatMessageType())
                 .content(Map.of("text", dto.getContent().getText()))
                 .build();
     }

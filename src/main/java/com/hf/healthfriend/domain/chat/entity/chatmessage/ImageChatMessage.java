@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.chat.entity.chatmessage;
 
+import com.hf.healthfriend.domain.chat.constant.ChatMessageType;
 import com.hf.healthfriend.domain.chat.entity.ChatParticipation;
 import com.hf.healthfriend.domain.chat.entity.Chatroom;
 import com.hf.healthfriend.domain.member.entity.Member;
@@ -23,5 +24,15 @@ public class ImageChatMessage extends ChatMessage {
     public ImageChatMessage(Chatroom chatroom, Member sender, String imageUrl) {
         super(chatroom, sender);
         this.imageUrl = imageUrl;
+    }
+
+    @Override
+    public String getMessageAsText() {
+        return "이미지";
+    }
+
+    @Override
+    public ChatMessageType getChatMessageType() {
+        return ChatMessageType.IMAGE;
     }
 }

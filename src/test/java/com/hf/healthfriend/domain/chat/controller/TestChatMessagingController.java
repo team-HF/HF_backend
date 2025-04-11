@@ -24,17 +24,16 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.*;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
-import org.springframework.web.socket.sockjs.client.SockJsClient;
-import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
 import java.lang.reflect.Type;
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -42,10 +41,18 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import({MysqlTestcontainerConfig.class, RedisTestConfig.class})
 @Slf4j
+@ActiveProfiles({
+        "mock-notification",
+        "no-auth",
+        "secret",
+        "constants",
+        "priv"
+})
 class TestChatMessagingController {
 
     @Autowired
@@ -110,9 +117,7 @@ class TestChatMessagingController {
 
     private WebSocketStompClient generateStompClient() {
         // SockJS 기반 웹 소켓 클라이언트 생성
-        WebSocketClient webSocketClient = new SockJsClient(List.of(
-                new WebSocketTransport(new StandardWebSocketClient())
-        ));
+        WebSocketClient webSocketClient = new StandardWebSocketClient();
         WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
         stompClient.setMessageConverter(new MappingJackson2MessageConverter(this.objectMapper));
         return stompClient;
@@ -127,7 +132,8 @@ class TestChatMessagingController {
     }
 
     // 채팅 신청에 대한 응답, 채팅 메시지 전송에 대한 응답이 제대로 도착했는지 확인하기 위한 카운트다운
-    CountDownLatch latch = new CountDownLatch(3);
+    CountDownLatch latch = new CountDownLatch(4);
+    LocalDateTime now;
 
     /**
      * <p>채팅 신청 및 채팅 메시지 전송 테스트
@@ -151,6 +157,8 @@ class TestChatMessagingController {
     @Test
     @DisplayName("채팅 신청 후 메시지 보내기 테스트 - 성공")
     void chatRequestAndThenSendMessage() throws InterruptedException {
+        now = LocalDateTime.now();
+
         // 새로운 트랜잭션에서 생성
         TransactionStatus txStatus = this.txManager.getTransaction(new DefaultTransactionAttribute());
 
@@ -203,26 +211,53 @@ class TestChatMessagingController {
         assertThat(chatParticipationResponseDto.participantIds()).containsExactlyInAnyOrder(sender.getId(), receiver.getId());
 
         // 채팅 메시지 전송 검증
-        assertThat(this.chatMessageRepository.findAll()).size().isEqualTo(1);
+        assertThat(this.chatMessageRepository.findAll()).size().isEqualTo(2);
 
         Long chatroomId = (Long) resultMap.get("chatroomId");
         String chatMessage = (String) resultMap.get("expectedChatMessage");
 
-        ChatMessageSendResponseDto chatMessageSendResponseToSender =
-                (ChatMessageSendResponseDto) resultMap.get(this.sender.getId() + "ChatMessageSendResponseDto");
-        assertThat(chatMessageSendResponseToSender.chatMessageId()).isNotNull();
-        assertThat(chatMessageSendResponseToSender.chatroomId()).isEqualTo(chatroomId);
-        assertThat(chatMessageSendResponseToSender.senderId()).isEqualTo(this.sender.getId());
-        assertThat(chatMessageSendResponseToSender.content()).isEqualTo(Map.of("text", chatMessage));
+        validatePerChatMessageType(
+                (ChatMessageSendResponseDto) resultMap.get(this.sender.getId() + "ChatMessageSendResponseDto" + ChatMessageType.TEXT),
+                chatroomId, sender.getId(), chatMessage
+        );
+        validatePerChatMessageType(
+                (ChatMessageSendResponseDto) resultMap.get(this.sender.getId() + "ChatMessageSendResponseDto" + ChatMessageType.MATCHING_REQUEST),
+                chatroomId, sender.getId(), chatMessage
+        );
 
-        ChatMessageSendResponseDto chatMessageSendResponseToReceiver =
-                (ChatMessageSendResponseDto) resultMap.get(this.receiver.getId() + "ChatMessageSendResponseDto");
-        assertThat(chatMessageSendResponseToReceiver.chatMessageId()).isNotNull();
-        assertThat(chatMessageSendResponseToReceiver.chatroomId()).isEqualTo(chatroomId);
-        assertThat(chatMessageSendResponseToReceiver.senderId()).isEqualTo(this.sender.getId());
-        assertThat(chatMessageSendResponseToReceiver.content()).isEqualTo(Map.of("text", chatMessage));
+        validatePerChatMessageType(
+                (ChatMessageSendResponseDto) resultMap.get(this.receiver.getId() + "ChatMessageSendResponseDto" + ChatMessageType.TEXT),
+                chatroomId, sender.getId(), chatMessage
+        );
+        validatePerChatMessageType(
+                (ChatMessageSendResponseDto) resultMap.get(this.receiver.getId() + "ChatMessageSendResponseDto" + ChatMessageType.MATCHING_REQUEST),
+                chatroomId, sender.getId(), chatMessage
+        );
 
         this.txManager.rollback(txStatus);
+    }
+
+    private void validatePerChatMessageType(ChatMessageSendResponseDto result, Long chatroomId, Long senderId, String chatMessage) {
+        assertThat(result.chatMessageId()).isNotNull();
+        assertThat(result.chatroomId()).isEqualTo(chatroomId);
+        assertThat(result.senderId()).isEqualTo(senderId);
+        switch (result.chatMessageType()) {
+            case TEXT -> assertThat(result.content()).isEqualTo(Map.of("text", chatMessage));
+            case MATCHING_REQUEST -> {
+                Map<String, Object> content = (Map<String, Object>) result.content();
+                assertThat(content.get("matchingId")).isNotNull();
+                assertThat(content.get("meetingPlace")).isEqualTo("MEETINGPLACE");
+                assertThat(content.get("meetingPlaceAddress")).isEqualTo("someAddress");
+                LocalDateTime actualMeetingTime = LocalDateTime.parse((String) content.get("meetingTime"));
+                LocalDateTime expectedMeetingTime = this.now.plusDays(2);
+
+                assertThat(actualMeetingTime.getDayOfYear()).isEqualTo(expectedMeetingTime.getDayOfYear());
+                assertThat(actualMeetingTime.getHour()).isEqualTo(expectedMeetingTime.getHour());
+                assertThat(actualMeetingTime.getMinute()).isEqualTo(expectedMeetingTime.getMinute());
+                assertThat(actualMeetingTime.getSecond()).isEqualTo(expectedMeetingTime.getSecond());
+            }
+            default -> fail("Something wrong: " + result);
+        }
     }
 
     // 위에서는 채팅 신청 테스트, 여기서는 메시지 전송 테스트
@@ -245,6 +280,17 @@ class TestChatMessagingController {
                         "text", chatMessage
                 )
         ));
+
+        this.senderSession.send("/hf/app/chat/messages/" + chatroomId, Map.of(
+                "senderId", this.sender.getId(),
+                "chatMessageType", ChatMessageType.MATCHING_REQUEST,
+                "content", Map.of(
+                        "matchingTargetId", this.receiver.getId(),
+                        "meetingTime", now.plusDays(2),
+                        "meetingPlace", "MEETINGPLACE",
+                        "meetingPlaceAddress", "someAddress"
+                )
+        ));
     }
 
     private void subscribeEach(StompSession session,
@@ -263,7 +309,7 @@ class TestChatMessagingController {
                 log.info("payload={}", payload);
                 log.info("payload type: {}", payload.getClass());
                 ChatMessageSendResponseDto result = (ChatMessageSendResponseDto) payload;
-                resultMap.put(member.getId() + "ChatMessageSendResponseDto", result);
+                resultMap.put(member.getId() + "ChatMessageSendResponseDto" + result.chatMessageType(), result);
                 latch.countDown();
             }
         });

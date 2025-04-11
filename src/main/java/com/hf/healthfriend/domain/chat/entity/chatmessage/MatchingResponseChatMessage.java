@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.chat.entity.chatmessage;
 
+import com.hf.healthfriend.domain.chat.constant.ChatMessageType;
 import com.hf.healthfriend.domain.chat.constant.MatchingResponseType;
 import com.hf.healthfriend.domain.chat.entity.ChatParticipation;
 import com.hf.healthfriend.domain.chat.entity.Chatroom;
@@ -48,5 +49,15 @@ public class MatchingResponseChatMessage extends ChatMessage {
                 sender,
                 MatchingResponseType.REJECTED,
                 cancelMessage);
+    }
+
+    @Override
+    public String getMessageAsText() {
+        return "매칭 신청에 대한 응답이 도착했습니다";
+    }
+
+    @Override
+    public ChatMessageType getChatMessageType() {
+        return ChatMessageType.MATCHING_RESPONSE;
     }
 }
