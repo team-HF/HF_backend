@@ -37,6 +37,7 @@ public class MatchingResponseChatMessageProcessor
     @Override
     protected ChatMessageSendResponseDto processSendingMessage(Long chatroomId, ChatMessageSendRequestDto<MatchingResponseChatMessageSendRequestContent> dto) {
         MatchingResponseChatMessage saved = this.chatMessageRepository.saveMessageWithChatroomId(chatroomId, dto);
+//        saved.getChatroom().updateLastChatMessage(saved); // TODO: 데드락이 발생해서 일단 텍스트 메시지만 lastMessage로 세팅
 
         this.matchingService.updateMatchingStatus(dto.getContent().getMatchingId(),
                 switch (dto.getContent().getMatchingResponseType()) {
@@ -50,6 +51,7 @@ public class MatchingResponseChatMessageProcessor
                 .senderId(dto.getSenderId())
                 .creationTime(saved.getCreationTime())
                 .lastModified(saved.getLastModified())
+                .chatMessageType(dto.getChatMessageType())
                 .content(Map.of(
                         "matchingResponseType", dto.getContent().getMatchingResponseType().name(),
                         "cancelMessage", dto.getContent().getCancelMessage() == null ? "" : dto.getContent().getCancelMessage()

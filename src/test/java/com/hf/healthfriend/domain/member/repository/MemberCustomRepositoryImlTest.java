@@ -2,7 +2,7 @@ package com.hf.healthfriend.domain.member.repository;
 
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.dto.request.MembersSearchRequest;
-import com.hf.healthfriend.domain.member.dto.response.MemberSearchResponse;
+import com.hf.healthfriend.domain.member.dto.response.MemberListResponse;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.repository.dto.ProfileQueryResultDto;
 import com.hf.healthfriend.domain.member.repository.querydsl.MemberCustomRepositoryImpl;
@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
@@ -36,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Import(TestConfig.class)
 @DataJpaTest
 @Slf4j
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class MemberCustomRepositoryImlTest {
 
     @Autowired
@@ -117,7 +119,7 @@ public class MemberCustomRepositoryImlTest {
                 .build();
 
         //When
-        List<MemberSearchResponse> searchedProfileList = memberCustomRepository.searchMembers(keyword,new_request, pageable);
+        List<MemberListResponse> searchedProfileList = memberCustomRepository.searchMembers(keyword,new_request, pageable);
 
         //Then
         assertEquals(1, searchedProfileList.size());

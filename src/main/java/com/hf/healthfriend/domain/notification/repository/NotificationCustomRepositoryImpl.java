@@ -29,6 +29,7 @@ public class NotificationCustomRepositoryImpl implements NotificationCustomRepos
         List<NotificationResponse> notificationResponses = queryFactory
                 .selectFrom(notification)
                 .where(builder)
+                .orderBy(notification.creationTime.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch()

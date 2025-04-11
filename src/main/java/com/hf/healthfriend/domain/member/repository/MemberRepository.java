@@ -12,15 +12,34 @@ import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long>, MemberCustomRepository {
 
-    Optional<Member> findByEmail(String email);
+    @Query("""
+            SELECT m
+            FROM Member m
+            WHERE m.id = :memberId AND m.isDeleted = false
+            """)
+    Optional<Member> findNotDeletedMemberById(Long memberId);
+
+    @Query("""
+            SELECT m
+            FROM Member m
+            WHERE m.email = :email AND m.isDeleted = false
+            """)
+    Optional<Member> findNotDeletedMemberByEmail(String email);
 
     Optional<Member> findByLoginId(String loginId);
 
-    boolean existsByEmail(String email);
+    @Query(value = """
+            SELECT m
+            FROM Member m
+            WHERE m.loginId = :loginId AND m.isDeleted = false
+            """)
+    Optional<Member> findNotDeletedMemberByLoginId(String loginId);
 
-    boolean existsByLoginId(String loginId);
+    boolean existsByEmailAndIsDeletedFalse(String email);
 
-    boolean existsByNickname(String nickname);
+    boolean existsByLoginIdAndIsDeletedFalse(String loginId);
+
+    boolean existsByNicknameAndIsDeletedFalse(String nickname);
 
     @Transactional
     @Modifying // 조회가 아닌 변경성 작업에는 해당 어노테이션을 붙여줘야 함
@@ -37,4 +56,6 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberCus
             WHERE m.member_id = :memberId
                 AND m.wished_count > 0""", nativeQuery = true)
     void decrementWishedCountByMemberId(@Param("memberId") Long memberId);
+
+    Long findMemberIdByLoginIdAndIsDeletedFalse(String loginId);
 }

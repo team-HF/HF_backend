@@ -15,6 +15,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @EqualsAndHashCode
 @Getter
+@ToString
 public class ChatParticipationId implements Serializable {
     private Long chatroomId;
     private Long memberId;

@@ -1,13 +1,14 @@
 package com.hf.healthfriend.domain.chat.repository.custom;
 
-import com.hf.healthfriend.domain.chat.constant.MatchingResponseType;
 import com.hf.healthfriend.domain.chat.dto.request.ChatMessageSendRequestDto;
-import com.hf.healthfriend.domain.chat.dto.request.content.ImageChatMessageSendRequestContent;
 import com.hf.healthfriend.domain.chat.dto.request.content.MatchingRequestChatMessageSendRequestContent;
 import com.hf.healthfriend.domain.chat.dto.request.content.MatchingResponseChatMessageSendRequestContent;
 import com.hf.healthfriend.domain.chat.dto.request.content.TextChatMessageSendRequestContent;
 import com.hf.healthfriend.domain.chat.entity.Chatroom;
-import com.hf.healthfriend.domain.chat.entity.chatmessage.*;
+import com.hf.healthfriend.domain.chat.entity.chatmessage.ChatMessage;
+import com.hf.healthfriend.domain.chat.entity.chatmessage.MatchingRequestChatMessage;
+import com.hf.healthfriend.domain.chat.entity.chatmessage.MatchingResponseChatMessage;
+import com.hf.healthfriend.domain.chat.entity.chatmessage.TextChatMessage;
 import com.hf.healthfriend.domain.member.entity.Member;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +55,6 @@ public class ChatMessageCustomRepositoryImpl implements ChatMessageCustomReposit
             }
         };
         this.em.persist(chatMessage);
-        chatroom.updateLastChatMessage(chatMessage);
         return (D) chatMessage;
     }
 }

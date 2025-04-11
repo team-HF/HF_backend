@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.chat.dto.response;
 
+import com.hf.healthfriend.domain.chat.constant.ChatMessageType;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ public record ChatMessageSendResponseDto(
         Long senderId,
         LocalDateTime creationTime,
         LocalDateTime lastModified,
+        ChatMessageType chatMessageType,
         Object content
 ) {
 }
