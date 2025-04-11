@@ -5,6 +5,7 @@ import com.hf.healthfriend.domain.chat.entity.chatmessage.ChatMessage;
 import com.hf.healthfriend.domain.matching.entity.Matching;
 import com.hf.healthfriend.domain.member.constant.*;
 import com.hf.healthfriend.domain.member.domain.Tier;
+import com.hf.healthfriend.domain.member.repository.dto.MemberUpdateDto;
 import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.review.entity.Review;
 import com.hf.healthfriend.domain.spec.entity.Spec;
@@ -21,14 +22,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@Entity(name = "members")
+@Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @Builder
 @Setter // TODO: Setter를 없애고 엔티티 수정 코드는 udpate~ 메소드로 대체해야 함
 @Getter
 @ToString
-@Table(indexes = {
+@Table(name = "members", indexes = {
         @Index(name = "member_fitness_level_idx", columnList = "fitnessLevel")
 })
 public class Member implements UserDetails {
@@ -189,16 +190,60 @@ public class Member implements UserDetails {
         this.isDeleted = true;
     }
 
+    public void undelete() {
+        this.isDeleted = false;
+    }
+
     public void incrementMatchedCount() {
         this.matchedCount++;
     }
 
-    public void incrementWishedCount() { this.wishedCount++;}
+    public void incrementWishedCount() {
+        this.wishedCount++;
+    }
 
-    public void decrementWishedCount() {this.wishedCount--;}
+    public void decrementWishedCount() {
+        this.wishedCount--;
+    }
 
     public Tier getTier() {
         return Tier.create(this.fitnessLevel, this.matchedCount);
+    }
+
+    public void update(MemberUpdateDto updateDto) {
+        if (updateDto.getNickname() != null) {
+            this.nickname = updateDto.getNickname();
+        }
+        if (updateDto.getProfileImageUrl() != null) {
+            this.profileImageUrl = updateDto.getProfileImageUrl();
+        }
+        if (updateDto.getCd1() != null) {
+            this.cd1 = updateDto.getCd1();
+        }
+        if (updateDto.getCd2() != null) {
+            this.cd2 = updateDto.getCd2();
+        }
+        if (updateDto.getCd3() != null) {
+            this.cd3 = updateDto.getCd3();
+        }
+        if (updateDto.getIntroduction() != null) {
+            this.introduction = updateDto.getIntroduction();
+        }
+        if (updateDto.getFitnessLevel() != null) {
+            this.fitnessLevel = updateDto.getFitnessLevel();
+        }
+        if (updateDto.getCompanionStyle() != null) {
+            this.companionStyle = updateDto.getCompanionStyle();
+        }
+        if (updateDto.getFitnessEagerness() != null) {
+            this.fitnessEagerness = updateDto.getFitnessEagerness();
+        }
+        if (updateDto.getFitnessObjective() != null) {
+            this.fitnessObjective = updateDto.getFitnessObjective();
+        }
+        if (updateDto.getFitnessKind() != null) {
+            this.fitnessKind = updateDto.getFitnessKind();
+        }
     }
 
     public void addChatParticipation(ChatParticipation chatParticipation) {

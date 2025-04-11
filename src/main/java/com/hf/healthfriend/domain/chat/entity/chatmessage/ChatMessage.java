@@ -1,6 +1,7 @@
 package com.hf.healthfriend.domain.chat.entity.chatmessage;
 
 import com.hf.healthfriend.domain.BaseTimeEntity;
+import com.hf.healthfriend.domain.chat.constant.ChatMessageType;
 import com.hf.healthfriend.domain.chat.entity.Chatroom;
 import com.hf.healthfriend.domain.member.entity.Member;
 import jakarta.persistence.*;
@@ -62,4 +63,8 @@ public abstract class ChatMessage extends BaseTimeEntity {
     public void readIfOpponent(Member reader) {
         readIfOpponent(reader.getId());
     }
+
+    public abstract String getMessageAsText();
+
+    public abstract ChatMessageType getChatMessageType();
 }

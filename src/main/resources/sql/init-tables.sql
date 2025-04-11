@@ -67,6 +67,7 @@ CREATE TABLE members
     fitness_kind      ENUM ('HIGH_STRESS', 'FUNCTIONAL'), -- 추후 ENUM 값 수정
     review_score      DOUBLE                             DEFAULT 0.0,
     matched_count     BIGINT                             DEFAULT 0,
+    wished_count      BIGINT                             DEFAULT 0,
     is_deleted        BOOLEAN                            DEFAULT FALSE
 );
 
@@ -77,7 +78,7 @@ CREATE TABLE matching
     request_target_id BIGINT   NOT NULL,
     status            ENUM ('PENDING', 'ACCEPTED', 'REJECTED', 'FINISHED') DEFAULT 'PENDING',
     meeting_place     VARCHAR(255) NOT NULL,
-    meeting_place_address VARCHAR(255) NOT NULL,
+    meeting_place_addr VARCHAR(255) NOT NULL,
     meeting_time      DATETIME NOT NULL,
     creation_time     DATETIME                                             DEFAULT NOW(),
     finish_time       DATETIME,
@@ -125,7 +126,7 @@ CREATE TABLE spec
 CREATE TABLE post
 (
     post_id       BIGINT AUTO_INCREMENT PRIMARY KEY,
-    category      ENUM ('GYM_RECOMMENDATION', 'WORKOUT_CERTIFICATION', 'COUNSELING') NOT NULL,
+    category      ENUM ('FREE_COMMUNITY', 'COUNSELING') NOT NULL,
     writer_id     BIGINT                                                             NOT NULL,
     title         VARCHAR(50)                                                        NOT NULL,
     content       TEXT                                                               NOT NULL,
@@ -224,9 +225,11 @@ CREATE TABLE notification
 (
     notification_id   BIGINT PRIMARY KEY AUTO_INCREMENT,
     member_id       BIGINT       NOT NULL,
-    notification_type VARCHAR(20) NOT NULL,
+    type VARCHAR(20) NOT NULL,
     target_id       BIGINT       NOT NULL,
     message         VARCHAR(255) NOT NULL,
+    creation_time   DATETIME DEFAULT NOW(),
+    last_modified   DATETIME DEFAULT NOW(),
     is_read         BOOLEAN      DEFAULT FALSE,
     FOREIGN KEY (member_id) REFERENCES members (member_id)
 );
@@ -246,8 +249,8 @@ CREATE TABLE coupon (
 CREATE TABLE wish (
     wish_id    BIGINT PRIMARY KEY AUTO_INCREMENT,
     wisher_id  BIGINT NOT NULL,
-    wished     BIGINT NOT NULL,
+    wished_id     BIGINT NOT NULL,
     is_deleted BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (wisher_id) REFERENCES members (member_id),
-    FOREIGN KEY (wished) REFERENCES members (member_id)
+    FOREIGN KEY (wished_id) REFERENCES members (member_id)
 );

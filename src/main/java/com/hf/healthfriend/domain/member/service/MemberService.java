@@ -29,11 +29,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -57,11 +57,14 @@ public class MemberService {
      */
     public MemberCreationResponseDto createMember(MemberCreationRequestDto dto)
             throws DuplicateMemberCreationException {
-        if (this.memberRepository.existsByLoginId(dto.getId())) {
+        if (this.memberRepository.existsByLoginIdAndIsDeletedFalse(dto.getId())) {
             throw new DuplicateMemberCreationException(dto.getId());
         }
 
-        Member newMember = new Member(dto.getId());
+        Optional<Member> byLoginId = this.memberRepository.findByLoginId(dto.getId());
+        byLoginId.ifPresent(Member::undelete);
+
+        Member newMember = byLoginId.orElse(new Member(dto.getId()));
         BeanUtils.copyProperties(dto, newMember);
         if (log.isDebugEnabled()) {
             log.debug("newMember={}", newMember);
@@ -83,13 +86,20 @@ public class MemberService {
 
 
     public boolean isMemberOfEmailExists(String email) {
-        return this.memberRepository.existsByEmail(email);
+        return this.memberRepository.existsByEmailAndIsDeletedFalse(email);
     }
 
     public MemberDto findMember(Long memberId) throws MemberNotFoundException {
         Member findMember = this.memberRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
-        return MemberDto.of(findMember, this.fileUrlResolver.resolveFileUrl(findMember.getProfileImageUrl()));
+
+        Long loginMemberId = getMemberIdFromToken();
+        boolean isWished = false;
+        if (loginMemberId != null) {
+            isWished = wishService.isWished(memberId, loginMemberId);
+        }
+
+        return MemberDto.of(findMember, this.fileUrlResolver.resolveFileUrl(findMember.getProfileImageUrl()),isWished);
     }
 
     public MemberDto findMemberByLoginId(String loginId) throws MemberNotFoundException {
@@ -98,9 +108,9 @@ public class MemberService {
     }
 
     public MemberDto findMemberByEmail(String email) throws MemberNotFoundException {
-        Member findMember = this.memberRepository.findByEmail(email)
+        Member findMember = this.memberRepository.findNotDeletedMemberByEmail(email)
                 .orElseThrow(() -> new MemberNotFoundException(email));
-        return MemberDto.of(findMember, this.fileUrlResolver.resolveFileUrl(findMember.getProfileImageUrl()));
+        return MemberDto.of(findMember, this.fileUrlResolver.resolveFileUrl(findMember.getProfileImageUrl()), null);
     }
 
     public MemberUpdateResponseDto updateMember(Long memberId, MemberUpdateRequestDto requestDto) throws MemberNotFoundException {
@@ -118,7 +128,7 @@ public class MemberService {
         Member updatedMember = this.memberRepository.update(memberId, updateDto);
         this.specService.updateSpecsOfMember(memberId, requestDto.getSpecUpdate());
         return MemberUpdateResponseDto.builder()
-                .profileImageUploadUrl(this.fileUrlResolver.generateUploadUrl(profileImagePath))
+                .profileImageUploadUrl(requestDto.getProfileImageFileExtension() != null ? this.fileUrlResolver.generateUploadUrl(profileImagePath) : null)
                 .cd1(updatedMember.getCd1())
                 .cd2(updatedMember.getCd2())
                 .cd3(updatedMember.getCd3())
@@ -137,7 +147,7 @@ public class MemberService {
         }
 
         if (requestDto.getFitnessLevel() == FitnessLevel.ADVANCED) {
-            Member member = this.memberRepository.findById(memberId)
+            Member member = this.memberRepository.findNotDeletedMemberById(memberId)
                     .orElseThrow(() -> new MemberNotFoundException(memberId));
             Tier tier = member.getTier();
             if (tier.getFitnessLevel() != FitnessLevel.BEGINNER
@@ -165,6 +175,8 @@ public class MemberService {
                 .build();
         Pageable pageable = PageRequest.of(pageNumber - 1, size);
         List<MemberListResponse> searchResponseList = memberRepository.searchMembers(keyword, request,pageable);
+        searchResponseList.forEach((item) ->
+                item.setProfileImageUrl(this.fileUrlResolver.resolveFileUrl(item.getProfileImageUrl())));
         Long totalPageSize = memberRepository.getTotalPageSize(size);
         return MemberSearchResponse.builder()
                 .memberList(searchResponseList)
@@ -183,12 +195,6 @@ public class MemberService {
         ProfileQueryResultDto profileResult = this.memberRepository.findProfileByMemberId(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
         RevieweeResponseDto reviewDto = this.reviewService.getRevieweeInfo(memberId);
-        // 조회하는 사람의 로그인 아이디
-        String findMemberLoginId = getMemberIdFromToken();
-        boolean isWished = false;
-        if (findMemberLoginId != null) {
-            isWished = wishService.isWished(memberId, findMemberLoginId);
-        }
 
         return ProfileResponseDto.builder()
                 .memberId(profileResult.memberId())
@@ -202,12 +208,11 @@ public class MemberService {
                 .reviewCount(reviewDto.good().totalCountPerEvaluationType()
                         + reviewDto.notGood().totalCountPerEvaluationType())
                 .wishedCount(profileResult.wishedCount())
-                .is_wished(isWished)
                 .build();
     }
 
     public boolean checkDuplicateOfNickname(String nickname) {
-        return this.memberRepository.existsByNickname(nickname);
+        return this.memberRepository.existsByNicknameAndIsDeletedFalse(nickname);
     }
 
     public Long getSearchedMembersSize(String cd1, String cd2, String cd3, List<String> fitnessLevels, List<String> companionStyles, List<String> fitnessEagernesses, List<String> fitnessKinds, List<String> fitnessObjectives,
@@ -227,14 +232,24 @@ public class MemberService {
         return memberRepository.getSearchedMembersSize(keyword,request,pageable);
     }
 
-    private String getMemberIdFromToken() {
+    private Long getMemberIdFromToken() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (!(authentication instanceof BearerTokenAuthentication)) {
-            log.info("로그인되지 않았습니다.");
+        if (authentication == null || authentication.getName() == null) {
             return null;
         }
-        log.info("로그인한 사용자입니다. memberLoginId = {}",authentication.getName());
-        return authentication.getName();
+
+        try {
+            return Long.parseLong(authentication.getName());
+        } catch (NumberFormatException e) {
+//            throw new AccessDeniedException("Member Not allowed", e);
+            return null;
+        }
+    }
+
+    public void deleteMember(Long memberId) {
+        Member member = this.memberRepository.findNotDeletedMemberById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException(memberId));
+
+        member.delete();
     }
 }

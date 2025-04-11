@@ -106,14 +106,15 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
         return null;
     }
 
-    public long getTotalPageSize(){
+    @Override
+    public Long getTotalPageSize(int size){
         Long totalPageSize = queryFactory
                 .select(post.count())
                 .from(post)
                 .where(post.isDeleted.eq(false))
                 .fetchOne();
-        if (totalPageSize == null) return 0;
-        return (long) Math.ceil((double) totalPageSize / 5);
+        if (totalPageSize == null) return 0L;
+        return (long) Math.ceil((double) totalPageSize / size);
     }
 
     private Map<Long, Long> getViewCountsFromRedis(List<Post> posts) {

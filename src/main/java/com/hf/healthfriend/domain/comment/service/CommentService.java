@@ -19,7 +19,6 @@ import com.hf.healthfriend.domain.post.repository.PostRepository;
 import com.hf.healthfriend.global.file.FileUrlResolver;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -90,7 +89,7 @@ public class CommentService {
         commentJpaRepository.deleteAllReplies(commentId);
         // 부모 댓글 soft delete
         commentJpaRepository.softDeleteById(commentId);
-        postRepository.decrementCommentsCountByCommentId(commentId);
+        postRepository.decrementCommentsCountByParentCommentId(commentId);
     }
 
     public List<CommentDto> getCommentsOfPost(Long postId, CommentSortType sortType) {

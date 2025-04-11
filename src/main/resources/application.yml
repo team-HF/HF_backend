@@ -90,6 +90,9 @@ client:
 server:
   port: 8080
 
+backend:
+  origin: http://localhost:8080
+
 file:
   upload-dir: C:/hf/upload/
 
@@ -101,3 +104,10 @@ aws:
     alarmQueueUrl: ${AWS_SQS_ALARM_QUEUE_URL}
     dbQueueUrl: ${AWS_SQS_DB_QUEUE_URL}
 
+secret:
+  oauth2:
+    kakao:
+      client-id: ${KAKAO_CLIENT_ID}
+    google:
+      client-id: ${GOOGLE_CLIENT_ID}
+      client-secret: ${GOOGLE_CLIENT_SECRET}

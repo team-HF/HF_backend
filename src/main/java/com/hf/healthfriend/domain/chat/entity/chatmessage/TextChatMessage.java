@@ -1,5 +1,6 @@
 package com.hf.healthfriend.domain.chat.entity.chatmessage;
 
+import com.hf.healthfriend.domain.chat.constant.ChatMessageType;
 import com.hf.healthfriend.domain.chat.entity.Chatroom;
 import com.hf.healthfriend.domain.member.entity.Member;
 import jakarta.persistence.DiscriminatorValue;
@@ -18,5 +19,15 @@ public class TextChatMessage extends ChatMessage {
     public TextChatMessage(Chatroom chatroom, Member sender, String text) {
         super(chatroom, sender);
         this.text = text;
+    }
+
+    @Override
+    public String getMessageAsText() {
+        return this.text;
+    }
+
+    @Override
+    public ChatMessageType getChatMessageType() {
+        return ChatMessageType.TEXT;
     }
 }

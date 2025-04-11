@@ -138,8 +138,7 @@ public class MemberCustomRepositoryImpl implements MemberCustomRepository {
             throw new MemberNotFoundException(memberId);
         }
 
-        this.beanMapper.copyProperties(updateDto, member);
-
+        member.update(updateDto);
         return member;
     }
 
