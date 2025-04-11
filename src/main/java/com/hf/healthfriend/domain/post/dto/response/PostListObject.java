@@ -19,12 +19,12 @@ public record PostListObject(
         String fitnessLevel,
         String writerProfileImageUrl
 ) {
-    public static PostListObject of(Post post, String content, FileUrlResolver fileUrlResolver) {
+    public static PostListObject of(Post post, String content, FileUrlResolver fileUrlResolver, long viewCountFromRedis) {
         return PostListObject.builder()
                 .postId(post.getPostId())
                 .title(post.getTitle())
                 .category(post.getCategory().name())
-                .viewCount(post.getViewCount())
+                .viewCount(viewCountFromRedis)
                 .creationTime(post.getCreationTime())
                 .content(content)
                 .fitnessLevel(post.getMember().getFitnessLevel().name())
