@@ -53,5 +53,5 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ubuntu/app
-            docker-compose down || true
-            docker-compose up --build -d
+            sudo docker-compose down || true
+            sudo docker-compose up --build -d
