@@ -1,8 +1,7 @@
 services:
   spring:
-    profiles:
-      - blue
     build: .
+    image: spring:latest
     container_name: spring-container
     ports:
       - "8080:8080"
