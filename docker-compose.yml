@@ -3,7 +3,7 @@ services:
     profiles:
       - blue
     build: .
-    container_name: spring1-container
+    container_name: spring-container
     ports:
       - "8080:8080"
     environment:
