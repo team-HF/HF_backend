@@ -2,7 +2,7 @@ name: Deploy Spring with Redis via Compose
 
 on:
   push:
-    branches: [Refactor/조회수-리팩토링]
+    branches: [develop]
 
 jobs:
   deploy:
