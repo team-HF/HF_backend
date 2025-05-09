@@ -20,15 +20,6 @@ public class AWSConfig {
     @Value("${aws.region}")
     private String region;
 
-    @Autowired
-    private Environment environment;
-
-    @PostConstruct
-    public void checkEnvironmentVariables() {
-        System.out.println("AWS_ACCESS_KEY_ID: " + environment.getProperty("AWS_ACCESS_KEY_ID"));
-        System.out.println("AWS_SECRET_ACCESS_KEY: " + environment.getProperty("AWS_SECRET_ACCESS_KEY"));
-    }
-
     @Bean
     public SqsAsyncClient sqsClient() {
         return SqsAsyncClient.builder()
