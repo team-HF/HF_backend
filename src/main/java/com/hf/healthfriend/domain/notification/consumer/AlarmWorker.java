@@ -8,8 +8,12 @@ import com.hf.healthfriend.domain.notification.service.NotificationSSEService;
 import com.hf.healthfriend.domain.notification.util.JsonUtils;
 import com.hf.healthfriend.domain.notification.util.NotificationMessageGenerator;
 import io.awspring.cloud.sqs.annotation.SqsListener;
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +24,7 @@ public class AlarmWorker {
 
     private final NotificationSSEService notificationSseService;
     private final NotificationRepository notificationRepository;
+    private final RedissonClient redissonClient;
     private final NotificationMessageGenerator messageGenerator;
     private final JsonUtils jsonUtils;
 
@@ -28,6 +33,16 @@ public class AlarmWorker {
     public void consumeAlarmMessage(String message) {
         try {
             NotificationEvent event = jsonUtils.deserializeMessage(message);
+            String key = "notification:seen:" + event.notificationId();
+            RBucket<String> bucket = redissonClient.getBucket(key);
+
+            boolean isFirst = bucket.setIfAbsent("1", Duration.ofMinutes(5));
+
+            if (!isFirst) {
+                log.info("중복 알림 감지 → SSE/DB 생략: {}", event.notificationId());
+                return;
+            }
+
             String alarmMessage = messageGenerator.generateMessage(event);
             Long memberId = event.memberId();
 
@@ -41,7 +56,7 @@ public class AlarmWorker {
 
             // 2. DB 저장
             Notification notification = Notification.builder()
-                    .memberId(event.memberId())
+                    .memberId(memberId)
                     .type(event.type())
                     .targetId(event.targetId())
                     .message(alarmMessage)
@@ -52,7 +67,7 @@ public class AlarmWorker {
 
         } catch (Exception e) {
             log.error("알림 처리 실패: 메시지={}, 에러={}", message, e.getMessage(), e);
-            throw e; // SQS 자동 재시도를 위해 예외 던지기
+            throw e;
         }
     }
 }
