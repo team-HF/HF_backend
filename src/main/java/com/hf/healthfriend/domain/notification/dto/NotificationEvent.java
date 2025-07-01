@@ -9,7 +9,6 @@ public record NotificationEvent(
         Long memberId,
         NotificationType type,
         String actor,
-        Long targetId,
-        Long timeStamp
+        Long targetId
         ) {
 }

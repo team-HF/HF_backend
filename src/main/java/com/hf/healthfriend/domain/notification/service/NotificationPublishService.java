@@ -80,7 +80,6 @@ public class NotificationPublishService {
                 .type(type)
                 .actor(actor)
                 .targetId(targetId)
-                .timeStamp(System.currentTimeMillis())
                 .build();
 
         notificationPublisher.publishNotification(event);
@@ -88,10 +87,11 @@ public class NotificationPublishService {
     }
 
     public String makeNotificationId(NotificationType type, long memberId, Long targetId) {
-        return String.format("%s-actor:%d-target:%d",
+        return String.format("%s-actor:%d-target:%d-time:%s",
                 type.name(),
                 memberId,
-                targetId != null ? targetId : 0L
+                targetId != null ? targetId : 0L,
+                System.currentTimeMillis()
         );
     }
 }

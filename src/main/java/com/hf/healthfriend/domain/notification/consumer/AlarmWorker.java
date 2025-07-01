@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBucket;
 import org.redisson.api.RScript;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
@@ -27,70 +28,44 @@ public class AlarmWorker {
     private final RedissonClient redissonClient;
     private final NotificationMessageGenerator messageGenerator;
     private final JsonUtils jsonUtils;
-    private static final String DUP_CHECK_SCRIPT =
-            "local key = KEYS[1] " +
-                    "local currentTime = tonumber(ARGV[1]) " +
-                    "local ttlSeconds = tonumber(ARGV[2]) " +
-                    "local duplicationThreshold = tonumber(ARGV[3]) " + // 10ms
-
-                    "local previousTime = redis.call('GET', key) " +
-                    "if previousTime then " +
-                    "  if (currentTime - tonumber(previousTime)) <= duplicationThreshold then " +
-                    "    return 1 " + // 중복으로 판단 (true)
-                    "  end " +
-                    "end " +
-
-                    "redis.call('SETEX', key, ttlSeconds, currentTime) " +
-                    "return 0"; // 중복 아님 (false)
 
     @SqsListener("${aws.sqs.alarmQueueUrl}")
     @Transactional
     public void consumeAlarmMessage(String message) {
+        NotificationEvent event = null; // event 객체를 try 블록 외부에서 선언
         try {
-            NotificationEvent event = jsonUtils.deserializeMessage(message);
-            // 1. 이미 처리된 메세지인지 체크
-            if (isDuplication(event)) return;
+            event = jsonUtils.deserializeMessage(message);
+            String notificationId = event.notificationId(); // 이벤트의 고유 ID
+
+            // 중복 검증
+            if (isDuplication(notificationId)) {
+                log.info("이미 처리된 알림 ID 감지 (중복 스킵): {}", notificationId);
+                return;
+            }
 
             String alarmMessage = messageGenerator.generateMessage(event);
             Long memberId = event.memberId();
 
             // 2. SSE 알림 전송
-            sendAlarm(event,alarmMessage,memberId);
+            sendAlarm(event, alarmMessage, memberId);
             // 3. DB 저장
-            saveAlarm(event,alarmMessage,memberId);
+            saveAlarm(event, alarmMessage, memberId);
 
+            markNotificationAsProcessed(notificationId);
         } catch (Exception e) {
-            log.error("알림 처리 실패: 메시지={}, 에러={}", message, e.getMessage(), e);
+            log.error("알림 처리 실패: 알림 ID={}, 메시지={}, 에러={}",
+                    (event != null ? event.notificationId() : "N/A"), message, e.getMessage(), e);
             throw e;
         }
     }
 
-    private boolean isDuplication(NotificationEvent event){
-        String key = event.notificationId();
-        Long currentTime = event.timeStamp();
-        long ttlSeconds = TimeUnit.MINUTES.toSeconds(5); // 5분 TTL
-        long duplicationThreshold = 1000L; // 10ms
+    private boolean isDuplication(String notificationId) {
+        return redissonClient.getBucket("processed_notification:" + notificationId).isExists();
+    }
 
-        RScript script = redissonClient.getScript();
-        // KEYS: Redis 키 목록, ARGS: 스크립트에 전달될 인자 목록
-        // ScriptOptions.Builder.returnResult(RScript.ReturnType.INTEGER)로 반환 타입 지정
-        Long isDuplicate = script.eval(
-                RScript.Mode.READ_WRITE, // 읽기/쓰기 권한 필요
-                DUP_CHECK_SCRIPT,
-                RScript.ReturnType.INTEGER, // 실제 자바 타입은 Long
-                // Redisson 의 eval() 메서드는 List<Object> keys 로 명확하게 KEYS 배열을 요구하기 때문에
-                // 단일 값 리스트로 넘긴다.
-                Collections.singletonList(key),
-                currentTime, // ARGV[1]
-                ttlSeconds,  // ARGV[2]
-                duplicationThreshold // ARGV[3]
-        );
-
-        if (isDuplicate == 1L) {
-            log.info("중복 알림 감지 → SSE/DB 생략: {}", event.notificationId());
-            return true;
-        }
-        return false;
+    private void markNotificationAsProcessed(String notificationId) {
+        redissonClient.getBucket("processed_notification:" + notificationId)
+                .set("true", 5, TimeUnit.MINUTES);
     }
 
     private void sendAlarm(NotificationEvent event,String alarmMessage, Long memberId){
