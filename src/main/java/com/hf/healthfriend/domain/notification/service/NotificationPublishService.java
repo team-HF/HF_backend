@@ -73,26 +73,25 @@ public class NotificationPublishService {
     }
 
     private void publish(Long memberId, NotificationType type, String actor, Long targetId, String context) {
-        String notificationId = makeNotificationId(type, memberId, targetId, actor);
+        String notificationId = makeNotificationId(type, memberId, targetId);
         NotificationEvent event = NotificationEvent.builder()
                 .notificationId(notificationId)
                 .memberId(memberId)
                 .type(type)
                 .actor(actor)
                 .targetId(targetId)
+                .timeStamp(System.currentTimeMillis())
                 .build();
 
         notificationPublisher.publishNotification(event);
         log.info("{} 알림 전송 → type: {}, memberId: {}, targetId: {}, actor: {}", context, type, memberId, targetId, actor);
     }
 
-    public String makeNotificationId(NotificationType type, long memberId, Long targetId, String actorNickname) {
-        return String.format("%s-%d-%d-%s-%d",
+    public String makeNotificationId(NotificationType type, long memberId, Long targetId) {
+        return String.format("%s-actor:%d-target:%d",
                 type.name(),
                 memberId,
-                targetId != null ? targetId : 0L,
-                actorNickname != null ? actorNickname : "null",
-                System.currentTimeMillis()
+                targetId != null ? targetId : 0L
         );
     }
 }

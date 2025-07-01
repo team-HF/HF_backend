@@ -3,6 +3,7 @@ package com.hf.healthfriend.domain.notification.consumer;
 import io.awspring.cloud.sqs.operations.SqsTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.Message;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -19,9 +20,11 @@ public class DlqWorker {
     private final SqsTemplate sqsTemplate;
     private final SqsAsyncClient sqsAsyncClient;
 
-    // TODO: 큐 생성해서 URL 변경해야 됨
-    private final String dlqUrl = "";
-    private final String alarmQueueName = "";
+    @Value("${aws.sqs.alarmDlqUrl}")
+    private String dlqUrl;
+
+    @Value("${aws.sqs.alarmQueueUrl}")
+    private String alarmQueueUrl;
 
     @Scheduled(fixedDelay = 300000) // 5분마다 실행
     public void retryDlqMessages() {
@@ -37,10 +40,11 @@ public class DlqWorker {
 
         for (Message<String> message : messages) {
             String payload = message.getPayload();
+            // SQS 메시지 수신 시 함께 오는 토큰. 메시지 삭제/갱신 시 필수
             String receiptHandle = (String) message.getHeaders().get("ReceiptHandle");
             try {
                 // 1. 원래 큐로 전송
-                sqsTemplate.send(alarmQueueName, payload);
+                sqsTemplate.send(alarmQueueUrl, payload);
                 log.info("DLQ 메시지 원래 큐로 재전송 완료: {}", payload);
 
                 // 2. AWS SDK로 DLQ에서 삭제
