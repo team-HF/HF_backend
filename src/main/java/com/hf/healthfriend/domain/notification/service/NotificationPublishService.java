@@ -5,15 +5,21 @@ import com.hf.healthfriend.domain.comment.repository.CommentJpaRepository;
 import com.hf.healthfriend.domain.matching.entity.Matching;
 import com.hf.healthfriend.domain.member.entity.Member;
 import com.hf.healthfriend.domain.member.repository.MemberRepository;
+import com.hf.healthfriend.domain.notification.constant.MessageStatus;
 import com.hf.healthfriend.domain.notification.constant.NotificationType;
 import com.hf.healthfriend.domain.notification.dto.NotificationEvent;
+import com.hf.healthfriend.domain.notification.entity.Outbox;
 import com.hf.healthfriend.domain.notification.exception.NotificationErrorCode;
 import com.hf.healthfriend.domain.notification.exception.NotificationException;
 import com.hf.healthfriend.domain.notification.publisher.NotificationPublisher;
+import com.hf.healthfriend.domain.notification.repository.OutboxRepository;
+import com.hf.healthfriend.domain.notification.util.JsonUtils;
 import com.hf.healthfriend.domain.post.entity.Post;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
+import io.swagger.v3.core.util.Json;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,7 +30,10 @@ public class NotificationPublishService {
     private final PostRepository postRepository;
     private final CommentJpaRepository commentJpaRepository;
     private final MemberRepository memberRepository;
+    private final OutboxRepository outboxRepository;
     private final NotificationPublisher notificationPublisher;
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final JsonUtils jsonUtils;
 
     public void publishPostLikeNot(Long memberId, Long postId) {
         Post post = postRepository.findByPostIdAndIsDeletedFalse(postId)
@@ -81,8 +90,8 @@ public class NotificationPublishService {
                 .actor(actor)
                 .targetId(targetId)
                 .build();
-
-        notificationPublisher.publishNotification(event);
+        saveOutbox(event);
+        applicationEventPublisher.publishEvent(event);
         log.info("{} 알림 전송 → type: {}, memberId: {}, targetId: {}, actor: {}", context, type, memberId, targetId, actor);
     }
 
@@ -93,5 +102,16 @@ public class NotificationPublishService {
                 targetId != null ? targetId : 0L,
                 System.currentTimeMillis()
         );
+    }
+
+    private void saveOutbox(NotificationEvent event){
+        Outbox outbox = Outbox.builder()
+                .payload(jsonUtils.serialize(event))
+                .notificationId(event.getNotificationId())
+                .status(MessageStatus.PENDING)
+                .type(event.getType())
+                .tryCount(0)
+                .build();
+        outboxRepository.save(outbox);
     }
 }

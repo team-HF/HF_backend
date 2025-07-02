@@ -76,6 +76,7 @@ dependencies {
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs'
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-sns'
     implementation("io.awspring.cloud:spring-cloud-aws-starter-s3")
+    implementation 'software.amazon.awssdk:apache-client'
 
     // Mysql
     implementation 'mysql:mysql-connector-java:8.0.33'

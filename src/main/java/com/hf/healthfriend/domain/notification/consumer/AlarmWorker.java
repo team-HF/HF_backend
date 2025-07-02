@@ -35,7 +35,7 @@ public class AlarmWorker {
         NotificationEvent event = null; // event 객체를 try 블록 외부에서 선언
         try {
             event = jsonUtils.deserializeMessage(message);
-            String notificationId = event.notificationId(); // 이벤트의 고유 ID
+            String notificationId = event.getNotificationId(); // 이벤트의 고유 ID
 
             // 중복 검증
             if (isDuplication(notificationId)) {
@@ -44,7 +44,7 @@ public class AlarmWorker {
             }
 
             String alarmMessage = messageGenerator.generateMessage(event);
-            Long memberId = event.memberId();
+            Long memberId = event.getMemberId();
 
             // 2. SSE 알림 전송
             sendAlarm(event, alarmMessage, memberId);
@@ -54,7 +54,7 @@ public class AlarmWorker {
             markNotificationAsProcessed(notificationId);
         } catch (Exception e) {
             log.error("알림 처리 실패: 알림 ID={}, 메시지={}, 에러={}",
-                    (event != null ? event.notificationId() : "N/A"), message, e.getMessage(), e);
+                    (event != null ? event.getNotificationId() : "N/A"), message, e.getMessage(), e);
             throw e;
         }
     }
@@ -80,8 +80,8 @@ public class AlarmWorker {
     private void saveAlarm(NotificationEvent event, String alarmMessage, Long memberId){
         Notification notification = Notification.builder()
                 .memberId(memberId)
-                .type(event.type())
-                .targetId(event.targetId())
+                .type(event.getType())
+                .targetId(event.getTargetId())
                 .message(alarmMessage)
                 .isRead(false)
                 .build();

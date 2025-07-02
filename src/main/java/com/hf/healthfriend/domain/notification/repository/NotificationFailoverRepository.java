@@ -19,7 +19,7 @@ public class NotificationFailoverRepository {
     private static final String PREFIX = "notification:fail:";
 
     public void saveFail(NotificationEvent event) {
-        String key = PREFIX + event.notificationId();
+        String key = PREFIX + event.getNotificationId();
         String json = jsonUtils.serialize(event);
 
         RBucket<String> bucket = redissonClient.getBucket(key);
