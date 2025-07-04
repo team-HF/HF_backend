@@ -39,7 +39,7 @@ public class NotificationPublisher {
                 .orTimeout(3, TimeUnit.SECONDS) // 3초 타임아웃
                 .whenComplete((res, throwable) -> {
                     if (throwable != null) {
-                        notificationService.updateMessageStatus(event.getNotificationId(), MessageStatus.FAILED);
+                        notificationService.updateMessageStatusIfNotSuccess(event.getNotificationId(), MessageStatus.FAILED);
                         if (throwable instanceof SdkClientException){
                             log.warn("SQS 전송 실패(타임아웃) attempt={}", throwable.getMessage());
                         }else{

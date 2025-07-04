@@ -33,4 +33,8 @@ public class NotificationService {
         outboxRepository.updateMessageStatus(notificationId, status);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updateMessageStatusIfNotSuccess(String notificationId, MessageStatus messageStatus) {
+        outboxRepository.updateMessageStatusIfNotSuccess(notificationId, messageStatus);
+    }
 }

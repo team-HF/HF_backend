@@ -13,6 +13,9 @@ public interface OutboxRepository extends JpaRepository<Outbox, Long> {
     @Query("UPDATE Outbox o SET o.status = :messageStatus WHERE o.notificationId = :notificationId")
     void updateMessageStatus(@Param("notificationId") String notificationId, @Param("messageStatus") MessageStatus messageStatus);
 
+    @Query("UPDATE Outbox o SET o.status = :messageStatus WHERE o.notificationId = :notificationId AND o.status <> 'SUCCESS'")
+    void updateMessageStatusIfNotSuccess(@Param("notificationId") String notificationId, @Param("messageStatus") MessageStatus messageStatus);
+
     @Query("SELECT o FROM Outbox o WHERE o.status = :s1 OR o.status = :s2")
     List<Outbox> findUnSentMessages(@Param("s1") MessageStatus s1, @Param("s2") MessageStatus s2);
 }

@@ -27,7 +27,6 @@ public class OutboxScheduler {
     private String alarmQueueUrl;
 
     @Scheduled(fixedDelay = 60000) // 1분마다
-    @Transactional // 트랜잭션의 범위가 너무 커지진 않는가?
     public void retryFailedNotifications() {
         // FAILED 또는 PENDING 메세지 읽어오기
         List<Outbox> unsentMessages = outboxRepository.findUnSentMessages(MessageStatus.FAILED, MessageStatus.PENDING);
@@ -42,12 +41,12 @@ public class OutboxScheduler {
                         .queueUrl(alarmQueueUrl)
                         .messageBody(payload)
                 );
-                message.updateStatus(MessageStatus.SUCCESS);
+                outboxRepository.updateMessageStatus(message.getNotificationId(), MessageStatus.SUCCESS);
                 log.info("SQS 전송 성공: messageId={}, notificationId={}, tryCount ={}",
                         message.getId(), message.getNotificationId(), message.getTryCount());
             }
             catch (Exception e) {
-                message.updateStatus(MessageStatus.FAILED);
+                outboxRepository.updateMessageStatusIfNotSuccess(message.getNotificationId(), MessageStatus.FAILED);
                 if (e instanceof SdkClientException){
                     log.warn("SQS 전송 실패(타임아웃) attempt={}", e.getMessage());
                 }else{
