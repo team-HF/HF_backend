@@ -18,11 +18,11 @@ import com.hf.healthfriend.domain.post.exception.PostErrorCode;
 import com.hf.healthfriend.domain.post.exception.PostException;
 import com.hf.healthfriend.domain.post.repository.PostRepository;
 import com.hf.healthfriend.global.file.FileUrlResolver;
+import com.hf.healthfriend.global.util.ExecutionTime;
 import jakarta.transaction.Transactional;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +52,7 @@ public class PostService {
 
     private final FileUrlResolver fileUrlResolver;
 
+    @ExecutionTime
     public Long save(PostWriteRequest postWriteRequest){
         Long memberId = postWriteRequest.getWriterId();
         Member member = memberRepository.findById(memberId)
